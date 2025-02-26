@@ -1,0 +1,39 @@
+name: "User story template"
+description: Create a new ticket for a new feature or a change in Caronte.
+title: "<title>"
+body:
+
+- type: markdown
+  attributes:
+    value: "### ✏️ Description
+
+      ---
+
+      Provide a brief description of the user story."
+
+- type: textarea
+  id: description
+  attributes:
+    label: "Description"
+    description: "Brief description of the user story."
+    placeholder: "E.g., The app doesn’t support multiple login"
+  validations:
+    required: true
+
+- type: markdown
+  attributes:
+    value: "### 📋 Acceptance criteria
+
+      ---
+
+      Provide a detailed description of the acceptance criteria."
+
+- type: textarea
+  id: acceptance_criteria
+  attributes:
+    label: "Acceptance criteria"
+    description: "Provide instructions to understand what you want to have in the app."
+    placeholder: |
+      I'd like to be able to...
+  validations:
+    required: true

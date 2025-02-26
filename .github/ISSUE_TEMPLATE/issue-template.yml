@@ -1,0 +1,22 @@
+name: "Issue template"
+description: Create a new ticket for a new feature or a change in Caronte.
+title: "<title>"
+body:
+
+- type: markdown
+  attributes:
+    value: "### 📋 Detailed Description
+
+      ---
+
+      Provide detailed instructions to help understand"
+
+- type: textarea
+  id: description
+  attributes:
+    label: "Detailed description"
+    description: "Provide instructions to understand what you want to have in the app."
+    placeholder: |
+      I'd like to be able to...
+  validations:
+    required: true
