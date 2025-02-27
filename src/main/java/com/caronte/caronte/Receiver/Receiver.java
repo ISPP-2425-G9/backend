@@ -1,5 +1,8 @@
 package com.caronte.caronte.Receiver;
 
+import com.caronte.caronte.Message.Message;
+import com.caronte.caronte.Obituary.Obituary;
+
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -22,4 +25,13 @@ public class Receiver {
 
     @Column(nullable = false, length = 255, unique = true)
     private String email;
+
+    // Relationships
+    @ManyToOne
+    @JoinColumn(name = "obituary_id")
+    private Obituary obituary;
+
+    @ManyToOne
+    @JoinColumn(name = "message_id")
+    private Message message;
 }

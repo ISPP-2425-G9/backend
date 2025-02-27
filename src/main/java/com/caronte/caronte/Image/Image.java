@@ -1,5 +1,7 @@
 package com.caronte.caronte.Image;
 
+import com.caronte.caronte.Message.Message;
+
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -16,4 +18,9 @@ public class Image {
 
     @Column(name = "image_url", nullable = false, length = 512)
     private String imageUrl;
+
+    // Relationships
+    @ManyToOne
+    @JoinColumn(name = "message_id", nullable = false)
+    private Message message;
 }

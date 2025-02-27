@@ -1,5 +1,7 @@
 package com.caronte.caronte.EmergencyContact;
 
+import com.caronte.caronte.Customer.Customer;
+
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -22,4 +24,9 @@ public class EmergencyContact {
 
     @Column(nullable = false, length = 255, unique = true)
     private String email;
+
+    // Relationships
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false)
+    private Customer customer;
 }

@@ -1,5 +1,12 @@
 package com.caronte.caronte.Message;
 
+import java.util.List;
+
+import com.caronte.caronte.Customer.Customer;
+import com.caronte.caronte.Image.Image;
+import com.caronte.caronte.Receiver.Receiver;
+import com.caronte.caronte.Video.Video;
+
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -25,4 +32,18 @@ public class Message {
 
     @Column(name = "is_last_will", nullable = false)
     private Boolean isLastWill;
+
+    // Relationships
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false)
+    private Customer customer;
+
+    @OneToMany(mappedBy = "message", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Receiver> receivers;
+
+    @OneToMany(mappedBy = "message", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Image> images;
+
+    @OneToMany(mappedBy = "message", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Video> videos;
 }
