@@ -1,0 +1,14 @@
+{
+    "properties": [
+        {
+            "name": "caronte.app.jwt.secret",
+            "type": "java.lang.String",
+            "description": "Secret key used to sign and verify the JWT."
+        },
+        {
+            "name": "caronte.app.jwt.expirationMs",
+            "type": "java.lang.Long",
+            "description": "Expiration time of the JWT in milliseconds."
+        }
+    ]
+}
