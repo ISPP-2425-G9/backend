@@ -19,7 +19,7 @@ public class Message {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(nullable = false, updatable = false)
-    private Long id;
+    private Long messageId;
 
     @Column(nullable = false, length = 255)
     private String title;
