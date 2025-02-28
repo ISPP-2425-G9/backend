@@ -25,7 +25,7 @@ public class Customer extends User {
 
     // Relationships
     @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "plan_id", referencedColumnName = "plan_id")
+    @JoinColumn(name = "plan_id")
     private Plan plan;
 
 }
