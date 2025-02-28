@@ -11,8 +11,8 @@ INSERT INTO plan (plan_id, billing_address, expire_date, plan_type) VALUES
 (2, 'Calle El Olivo Torcido, 2', '2027-12-31', 'PREMIUM');
 
 INSERT INTO customer (user_id, email, name, password, telephone, dni, is_active, plan_id) VALUES 
-(3, 'cliente1@caronte.site', 'Cliente Uno', 'hashed_password_1', '637892263', '26745987T', 0, NULL),
-(4, 'cliente2@caronte.site', 'Cliente Dos', 'hashed_password_2', '643287465', '24072003L', 1, NULL);
+(3, 'cliente1@caronte.site', 'Cliente Uno', 'hashed_password_1', '637892263', '26745987T', 0, 1),
+(4, 'cliente2@caronte.site', 'Cliente Dos', 'hashed_password_2', '643287465', '24072003L', 1, 2);
 
 INSERT INTO emergency_contact (emergency_contact_id, email, name, telephone, user_id) VALUES 
 (1, 'contacto1@caronte.site', 'Contacto Uno', '678945638', 3),
