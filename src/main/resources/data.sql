@@ -1,17 +1,3 @@
--- Delete all data
-DELETE FROM admin WHERE TRUE;
-DELETE FROM company WHERE TRUE;
-DELETE FROM plan WHERE TRUE;
-DELETE FROM customer WHERE TRUE;
-DELETE FROM emergency_contact WHERE TRUE;
-DELETE FROM message WHERE TRUE;
-DELETE FROM image WHERE TRUE;
-DELETE FROM video WHERE TRUE;
-DELETE FROM obituary WHERE TRUE;
-DELETE FROM receiver WHERE TRUE;
-
-
--- Insert data
 INSERT INTO admin (admin_id, email, password) VALUES 
 (1, 'admin1@caronte.site', 'hashed_password_1'),
 (2, 'admin2@caronte.site', 'hashed_password_2');
