@@ -37,13 +37,4 @@ public class Message {
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     private Customer customer;
-
-    @OneToMany(mappedBy = "message", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Receiver> receivers;
-
-    @OneToMany(mappedBy = "message", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Image> images;
-
-    @OneToMany(mappedBy = "message", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Video> videos;
 }

@@ -1,9 +1,6 @@
 package com.caronte.caronte.Obituary;
 
-import java.util.List;
-
 import com.caronte.caronte.Customer.Customer;
-import com.caronte.caronte.Receiver.Receiver;
 
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -29,7 +26,4 @@ public class Obituary {
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     private Customer customer;
-
-    @OneToMany(mappedBy = "obituary", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Receiver> receivers;
 }

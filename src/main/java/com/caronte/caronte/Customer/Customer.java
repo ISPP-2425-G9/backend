@@ -28,13 +28,4 @@ public class Customer extends User {
     @JoinColumn(name = "plan_id", referencedColumnName = "plan_id")
     private Plan plan;
 
-    @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<EmergencyContact> emergencyContacts;
-
-    @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Obituary> obituaries;
-
-    @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Message> messages;
-
 }
