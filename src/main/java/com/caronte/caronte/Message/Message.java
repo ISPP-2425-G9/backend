@@ -1,13 +1,14 @@
-package com.caronte.caronte.Message;
+package com.caronte.caronte.message;
 
-import java.util.List;
+import com.caronte.caronte.customer.Customer;
 
-import com.caronte.caronte.Customer.Customer;
-import com.caronte.caronte.Image.Image;
-import com.caronte.caronte.Receiver.Receiver;
-import com.caronte.caronte.Video.Video;
-
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import lombok.Getter;
 import lombok.Setter;
 
