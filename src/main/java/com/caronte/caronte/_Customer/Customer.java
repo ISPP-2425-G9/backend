@@ -1,7 +1,6 @@
-package com.caronte.caronte.customer;
+package com.caronte.caronte._Customer;
 
-import com.caronte.caronte.plan.Plan;
-import com.caronte.caronte.user.User;
+import com.caronte.caronte._Plan.Plan;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;

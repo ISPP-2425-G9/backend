@@ -1,4 +1,4 @@
-package com.caronte.caronte.plan;
+package com.caronte.caronte._Plan;
 
 import java.time.LocalDate;
 

@@ -1,6 +1,4 @@
-package com.caronte.caronte.video;
-
-import com.caronte.caronte.message.Message;
+package com.caronte.caronte._Video;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

@@ -1,4 +1,4 @@
-package com.caronte.caronte.company;
+package com.caronte.caronte._Company;
 
 import java.util.Optional;
 

@@ -1,4 +1,4 @@
-package com.caronte.caronte.user;
+package com.caronte.caronte._User;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

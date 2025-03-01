@@ -1,6 +1,6 @@
-package com.caronte.caronte.emergencyContact;
+package com.caronte.caronte._Message;
 
-import com.caronte.caronte.customer.Customer;
+import com.caronte.caronte._Customer.Customer;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -15,21 +15,24 @@ import lombok.Setter;
 @Entity
 @Getter
 @Setter
-public class EmergencyContact {
+public class Message {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "emergency_contact_id", nullable = false, updatable = false)
-    private Long emergencyContactId;
+    @Column(nullable = false, updatable = false)
+    private Long messageId;
 
-    @Column(nullable = false, length = 100)
-    private String name;
+    @Column(nullable = false, length = 255)
+    private String title;
 
-    @Column(nullable = false, length = 15, unique = true)
-    private String telephone;
+    @Column(nullable = false, length = 2000)
+    private String body;
 
-    @Column(nullable = false, length = 255, unique = true)
-    private String email;
+    @Column(unique = true, nullable = false, length = 50)
+    private String code;
+
+    @Column(name = "is_last_will", nullable = false)
+    private Boolean isLastWill;
 
     // Relationships
     @ManyToOne

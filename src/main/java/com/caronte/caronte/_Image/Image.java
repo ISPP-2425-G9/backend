@@ -1,6 +1,4 @@
-package com.caronte.caronte.image;
-
-import com.caronte.caronte.message.Message;
+package com.caronte.caronte._Image;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
