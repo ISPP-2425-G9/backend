@@ -1,4 +1,6 @@
-package com.caronte.caronte._Image;
+package com.caronte.caronte.video;
+
+import com.caronte.caronte.message.Message;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -13,16 +15,16 @@ import lombok.Setter;
 @Entity
 @Getter
 @Setter
-public class Image {
-
+public class Video {
+    
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "image_id", nullable = false, updatable = false)
-    private Long imageId;
+    @Column(name = "video_id", nullable = false, updatable = false)
+    private Long videoId;
 
-    @Column(name = "image_url", nullable = false, length = 512)
-    private String imageUrl;
-
+    @Column(nullable = false, length = 512)
+    private String videoUrl;
+    
     // Relationships
     @ManyToOne
     @JoinColumn(name = "message_id", nullable = false)

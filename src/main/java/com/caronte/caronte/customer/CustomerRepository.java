@@ -1,4 +1,4 @@
-package com.caronte.caronte._Customer;
+package com.caronte.caronte.customer;
 
 
 import java.util.Optional;

@@ -1,6 +1,6 @@
-package com.caronte.caronte._Obituary;
+package com.caronte.caronte.obituary;
 
-import com.caronte.caronte._Customer.Customer;
+import com.caronte.caronte.customer.Customer;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

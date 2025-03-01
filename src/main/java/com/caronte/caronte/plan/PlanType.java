@@ -1,4 +1,4 @@
-package com.caronte.caronte._Plan;
+package com.caronte.caronte.plan;
 
 public enum PlanType {
     FREE,
