@@ -1,14 +1,13 @@
-package com.caronte.caronte.Customer;
+package com.caronte.caronte.customer;
 
-import java.util.List;
+import com.caronte.caronte.plan.Plan;
+import com.caronte.caronte.user.User;
 
-import com.caronte.caronte.EmergencyContact.EmergencyContact;
-import com.caronte.caronte.Message.Message;
-import com.caronte.caronte.Obituary.Obituary;
-import com.caronte.caronte.Plan.Plan;
-import com.caronte.caronte.User.User;
-
-import jakarta.persistence.*;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToOne;
 import lombok.Getter;
 import lombok.Setter;
 
