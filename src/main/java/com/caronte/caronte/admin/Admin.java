@@ -1,4 +1,6 @@
-package com.caronte.caronte.user;
+package com.caronte.caronte.admin;
+
+import com.caronte.caronte.user.User;
 
 import jakarta.persistence.Entity;
 import lombok.Getter;

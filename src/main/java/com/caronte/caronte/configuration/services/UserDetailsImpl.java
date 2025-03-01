@@ -9,11 +9,11 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import com.caronte.caronte.admin.Admin;
 import com.caronte.caronte.company.Company;
 import com.caronte.caronte.configuration.authorization.Authorization;
 import com.caronte.caronte.customer.Customer;
 import com.caronte.caronte.plan.PlanType;
-import com.caronte.caronte.user.Admin;
 import com.caronte.caronte.user.User;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 

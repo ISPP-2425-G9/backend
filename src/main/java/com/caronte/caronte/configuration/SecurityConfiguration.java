@@ -4,7 +4,6 @@ import static org.springframework.security.config.Customizer.withDefaults;
 
 import javax.sql.DataSource;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -25,14 +24,15 @@ import com.caronte.caronte.configuration.services.UserDetailsServiceImpl;
 // @EnableWebSecurity
 public class SecurityConfiguration {
     
-	@Autowired
-	UserDetailsServiceImpl userDetailsService;
+	public final UserDetailsServiceImpl userDetailsService;
+	public final AuthEntryPointJwt unauthorizedHandler;
+	public final DataSource dataSource;
 
-	@Autowired
-	AuthEntryPointJwt unauthorizedHandler;
-
-	@Autowired
-	DataSource dataSource;
+	public SecurityConfiguration(UserDetailsServiceImpl userDetailsService, AuthEntryPointJwt unauthorizedHandler,DataSource dataSource){
+		this.userDetailsService = userDetailsService;
+		this.unauthorizedHandler = unauthorizedHandler;
+		this.dataSource = dataSource;
+	}
 
     @Bean
 	SecurityFilterChain configure(HttpSecurity http) throws Exception {
