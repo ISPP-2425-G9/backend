@@ -1,5 +1,7 @@
 package com.caronte.caronte.company;
 
+import com.caronte.caronte.user.User;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import lombok.Getter;
