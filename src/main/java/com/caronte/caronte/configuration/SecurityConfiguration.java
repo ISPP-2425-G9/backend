@@ -15,6 +15,7 @@ import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import com.caronte.caronte.configuration.jwt.AuthEntryPointJwt;
 import com.caronte.caronte.configuration.jwt.AuthTokenFilter;
@@ -62,9 +63,9 @@ public class SecurityConfiguration {
     @SuppressWarnings("deprecation")
 	@Bean
     PasswordEncoder passwordEncoder() {
-		return NoOpPasswordEncoder.getInstance(); // No encripta la contraseña
+		//return NoOpPasswordEncoder.getInstance(); // No encripta la contraseña
 
-        // return new BCryptPasswordEncoder();
+    	return new BCryptPasswordEncoder();
     }
 
 }
