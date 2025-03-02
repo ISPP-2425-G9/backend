@@ -2,17 +2,21 @@ package com.caronte.caronte.auth.payload.response;
 
 import static com.caronte.caronte.util.RegexContants.REGEX_EMAIL;
 import static com.caronte.caronte.util.RegexContants.REGEX_NIF;
+import static com.caronte.caronte.util.RegexContants.REGEX_ZIP_CODE;
+
+import org.hibernate.validator.constraints.Length;
+import org.hibernate.validator.constraints.URL;
+import org.springframework.security.crypto.password.PasswordEncoder;
+
+import com.caronte.caronte.company.Company;
+import com.caronte.caronte.plan.Plan;
+import com.caronte.caronte.plan.PlanType;
 import com.fasterxml.jackson.annotation.JsonProperty;
+
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import lombok.Getter;
 import lombok.Setter;
-import com.caronte.caronte.company.Company;
-import com.caronte.caronte.plan.Plan;
-import com.caronte.caronte.plan.PlanType;
-
-import org.hibernate.validator.constraints.Length;
-import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Getter
 @Setter
@@ -46,15 +50,15 @@ public class RegisterRequestCompany {
     @NotBlank(message = "La ciudad es requerida")
     private String city;
     
-    @Length(max=10)
     @NotBlank(message = "El código postal es requerido")
+    @Pattern(regexp = REGEX_ZIP_CODE, message = "Formato de código postal invalido")
     private String zipCode;
     
-    @Length(max=20)
     @NotBlank(message = "El NIF de la compañia es requerido")
     @Pattern(regexp = REGEX_NIF, message = "Formato de NIF invalido")
     private String nif;
     
+    @URL
     @Length(max=512)
     @JsonProperty("image")
     private String imageUrl;
