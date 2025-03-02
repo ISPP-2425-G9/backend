@@ -1,5 +1,6 @@
 package com.caronte.caronte.image;
 
+import com.caronte.caronte.company.Company;
 import com.caronte.caronte.message.Message;
 
 import jakarta.persistence.Column;
@@ -27,6 +28,11 @@ public class Image {
 
     // Relationships
     @ManyToOne
-    @JoinColumn(name = "message_id", nullable = false)
+    @JoinColumn(name = "message_id", nullable = true)
     private Message message;
+
+    @ManyToOne
+    @JoinColumn(name = "company_id", nullable = true)
+    private Company company;
+
 }
