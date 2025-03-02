@@ -1,12 +1,8 @@
 package com.caronte.caronte.auth;
 
-import java.time.LocalDate;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,7 +11,6 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -27,18 +22,12 @@ import com.caronte.caronte.auth.payload.response.LoginRequest;
 import com.caronte.caronte.auth.payload.response.RegisterRequestCompany;
 import com.caronte.caronte.auth.payload.response.RegisterRequestCustomer;
 import com.caronte.caronte.company.Company;
-import com.caronte.caronte.company.CompanyRepository;
 import com.caronte.caronte.configuration.jwt.JwtUtils;
 import com.caronte.caronte.configuration.services.UserDetailsImpl;
 import com.caronte.caronte.customer.Customer;
-import com.caronte.caronte.customer.CustomerRepository;
-import com.caronte.caronte.plan.Plan;
-import com.caronte.caronte.plan.PlanType;
-import com.caronte.caronte.user.UserRepository;
-import com.caronte.caronte.user.User;
-import java.util.Objects;
-import jakarta.validation.Valid;
 import com.caronte.caronte.util.ErrorHandler;
+
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("api/auth")
@@ -46,23 +35,22 @@ public class AuthController {
     
     private final AuthenticationManager authenticationManager;
 	private final JwtUtils jwtUtils;
-    private final UserRepository userRepository;
-    private final CustomerRepository customerRepository;
-    private final CompanyRepository companyRepository;
-    private final PasswordEncoder passwordEncoder;
+    private final AuthService authService;
 
-	public AuthController(AuthenticationManager authenticationManager, JwtUtils jwtUtils, UserRepository userRepository, PasswordEncoder passwordEncoder,
-            CustomerRepository customerRepository, CompanyRepository companyRepository) {
+	public AuthController(AuthenticationManager authenticationManager, JwtUtils jwtUtils, AuthService authService) {
 		this.authenticationManager = authenticationManager;
 		this.jwtUtils = jwtUtils;
-		this.userRepository = userRepository;
-		this.passwordEncoder = passwordEncoder;
-        this.customerRepository = customerRepository;
-        this.companyRepository = companyRepository;
+		this.authService = authService;
 	}
 
     @PostMapping("/login")
-	public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
+	public ResponseEntity<?> authenticateUser(
+            @Valid @RequestBody LoginRequest loginRequest,
+            BindingResult bindingResult) {
+        ErrorHandler errors = ErrorHandler.catchError(bindingResult);
+        if(errors.hasErrors())
+            return ResponseEntity.badRequest().body(errors);
+        
 		try{
 			Authentication authentication = authenticationManager.authenticate(
 				new UsernamePasswordAuthenticationToken(loginRequest.getId(), loginRequest.getPassword()));
@@ -76,7 +64,8 @@ public class AuthController {
 			JwtResponse jwtResponse = new JwtResponse(jwt, userDetails.getId(), userDetails.getUsername(), roles);
 			return ResponseEntity.ok().body(jwtResponse);
 		}catch(BadCredentialsException exception){
-			return ResponseEntity.badRequest().body("Credenciales incorrectas");
+            errors.addError("*","Credenciales incorrectas");
+			return ResponseEntity.badRequest().body(errors);
 		}
 	}
 
@@ -85,24 +74,13 @@ public class AuthController {
             @Valid @RequestBody RegisterRequestCustomer registerRequest,
             BindingResult bindingResult) {
         ErrorHandler errors = ErrorHandler.catchError(bindingResult);
-
-        if (Objects.nonNull(registerRequest.getPassword1()) && !Objects.equals(registerRequest.getPassword1(), registerRequest.getPassword2()))
-            errors.addError("password", "Las contraseñas no coinciden");
-    
-        if (userRepository.findByEmail(registerRequest.getId()).isPresent()) 
-            errors.addError("email", "El email ya está en uso");
+        Customer customer = authService.validateAndBuildCustomer(registerRequest, errors);
         
-        if (customerRepository.findByDni(registerRequest.getDni()).isPresent())
-            errors.addError("dni", "El dni ya está en uso");
-
         if(errors.hasErrors())
             return ResponseEntity.badRequest().body(errors);
         
-    
-        Customer customer = registerRequest.parse(passwordEncoder);
-    
         try {
-            userRepository.save(customer);
+            authService.save(customer);
         } catch (DataIntegrityViolationException ex) {
             errors.addError("*", ex.getMostSpecificCause().getMessage());
             return ResponseEntity.badRequest().body(errors);
@@ -116,23 +94,13 @@ public class AuthController {
             @Valid @RequestBody RegisterRequestCompany registerRequest,
             BindingResult bindingResult) {
         ErrorHandler errors = ErrorHandler.catchError(bindingResult);
-        
-        if (Objects.nonNull(registerRequest.getPassword1()) && !Objects.equals(registerRequest.getPassword1(), registerRequest.getPassword2()))
-            errors.addError("password", "Las contraseñas no coinciden");
-    
-        if (userRepository.findByEmail(registerRequest.getEmail()).isPresent())
-            errors.addError("email", "El email ya está en uso");
-
-        if (companyRepository.findByNif(registerRequest.getNif()).isPresent())
-            errors.addError("nif", "El NIF ya está en uso");
+        Company company = authService.validateAndBuildCompany(registerRequest, errors);
         
         if(errors.hasErrors())
             return ResponseEntity.badRequest().body(errors);
     
-        Company company = registerRequest.parse(passwordEncoder);
-    
         try {
-            userRepository.save(company);
+            authService.save(company);
         } catch (DataIntegrityViolationException ex) {
             errors.addError("*", ex.getMostSpecificCause().getMessage());
             return ResponseEntity.badRequest().body(errors);
