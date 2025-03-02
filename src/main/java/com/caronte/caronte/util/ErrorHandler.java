@@ -1,11 +1,14 @@
 package com.caronte.caronte.util;
 
-import java.util.List;
 import java.util.ArrayList;
-import java.util.Map;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 public class ErrorHandler {
 
@@ -30,6 +33,7 @@ public class ErrorHandler {
         errors.computeIfAbsent(field, _ -> new ArrayList<>()).add(message);
     }
 
+    @JsonIgnore
     public boolean isEmpty(){
         return this.errors.isEmpty();
     }
