@@ -1,6 +1,7 @@
 package com.caronte.caronte.obituary;
 
 import com.caronte.caronte.customer.Customer;
+import com.caronte.caronte.imageTemplate.ImageTemplate;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -32,4 +33,8 @@ public class Obituary {
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     private Customer customer;
+
+    @ManyToOne
+    @JoinColumn(name = "imageTemplate_id", nullable = false)
+    private ImageTemplate imageTemplate;
 }
