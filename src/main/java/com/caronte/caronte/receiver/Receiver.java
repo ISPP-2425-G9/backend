@@ -1,5 +1,6 @@
 package com.caronte.caronte.receiver;
 
+import com.caronte.caronte.message.Message;
 import com.caronte.caronte.obituary.Obituary;
 
 import jakarta.persistence.Column;
