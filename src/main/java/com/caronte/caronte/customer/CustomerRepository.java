@@ -10,4 +10,5 @@ import com.caronte.caronte.util.LongRepository;
 @Repository
 public interface CustomerRepository extends LongRepository<Customer>{
     Optional<Customer> findByDni(String dni);
+    boolean existsByDni(String dni);
 }
