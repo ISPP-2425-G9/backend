@@ -34,19 +34,19 @@ import jakarta.validation.Valid;
 public class AuthController {
     
     private final AuthenticationManager authenticationManager;
-	private final JwtUtils jwtUtils;
     private final AuthService authService;
+    private final JwtUtils jwtUtils;
 
-	public AuthController(AuthenticationManager authenticationManager, JwtUtils jwtUtils, AuthService authService) {
+	public AuthController(AuthenticationManager authenticationManager, AuthService authService, JwtUtils jwtUtils) {
 		this.authenticationManager = authenticationManager;
-		this.jwtUtils = jwtUtils;
 		this.authService = authService;
-	}
+        this.jwtUtils = jwtUtils;
+    }
 
     @PostMapping("/login")
 	public ResponseEntity<?> authenticateUser(
             @Valid @RequestBody LoginRequest loginRequest,
-            BindingResult bindingResult) {
+            BindingResult bindingResult, Authentication authentication2) {
         ErrorHandler errors = ErrorHandler.catchError(bindingResult);
         if(errors.hasErrors())
             return ResponseEntity.badRequest().body(errors);
@@ -54,10 +54,8 @@ public class AuthController {
 		try{
 			Authentication authentication = authenticationManager.authenticate(
 				new UsernamePasswordAuthenticationToken(loginRequest.getId(), loginRequest.getPassword()));
-
 			SecurityContextHolder.getContext().setAuthentication(authentication);
 			String jwt = jwtUtils.generateJwtToken(authentication);
-
 			UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
 			List<String> roles = userDetails.getAuthorities().stream().map(item -> item.getAuthority())
 				.collect(Collectors.toList());
