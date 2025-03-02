@@ -1,11 +1,15 @@
 package com.caronte.caronte.company;
 
+import com.caronte.caronte.plan.Plan;
 import com.caronte.caronte.user.User;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.JoinColumn;
 import lombok.Getter;
 import lombok.Setter;
+import jakarta.persistence.OneToOne;
 
 @Entity
 @Getter
@@ -29,4 +33,8 @@ public class Company extends User {
 
     @Column(unique = true, nullable = false, length = 20)
     private String nif;
+
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "plan_id")
+    private Plan plan;
 }
