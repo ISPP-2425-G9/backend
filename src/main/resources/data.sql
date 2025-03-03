@@ -46,6 +46,7 @@ INSERT INTO obituary (obituary_id, name, birth_date, death_date, custom_image_ur
 
 INSERT INTO receiver (receiver_id, message_id, obituary_id, telephone, name, email) VALUES 
 (1, 1, NULL, '678945638', 'Reciver Uno', 'reciver1@caronte.site'),
+(3, 2, NULL, '678945638', 'Reciver Uno', 'reciver1@caronte.site'),
 (2, NULL, 1, '643767999', 'Reciver Dos', 'reciver2@caronte.site');
 
 
