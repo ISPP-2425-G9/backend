@@ -33,8 +33,11 @@ public class AuthController {
 		this.jwtUtils = jwtUtils;
 	}
 
+	'TODO: El metodo a priori funciona bien, ya que recibe la peticion, pero es necesario que a partir del dni, se obtenga la id'
     @PostMapping("/login")
 	public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
+		System.out.println("Recibida solicitud de login, pero el campo id, contiene el DNI");
+        System.out.println(loginRequest); 
 		try{
 			Authentication authentication = authenticationManager.authenticate(
 				new UsernamePasswordAuthenticationToken(loginRequest.getId(), loginRequest.getPassword()));
