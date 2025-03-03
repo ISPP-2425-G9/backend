@@ -4,20 +4,25 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.caronte.caronte.auth.payload.response.JwtResponse;
 import com.caronte.caronte.auth.payload.response.LoginRequest;
 import com.caronte.caronte.configuration.jwt.JwtUtils;
 import com.caronte.caronte.configuration.services.UserDetailsImpl;
+import com.caronte.caronte.user.UserService;
 
 import jakarta.validation.Valid;
 
@@ -27,8 +32,10 @@ public class AuthController {
     
     private final AuthenticationManager authenticationManager;
 	private final JwtUtils jwtUtils;
+	private final UserService UserService;
 
-	public AuthController(AuthenticationManager authenticationManager, JwtUtils jwtUtils) {
+	public AuthController(AuthenticationManager authenticationManager, JwtUtils jwtUtils, UserService UserService) {
+		this.UserService = UserService;
 		this.authenticationManager = authenticationManager;
 		this.jwtUtils = jwtUtils;
 	}
@@ -50,6 +57,13 @@ public class AuthController {
 		}catch(BadCredentialsException exception){
 			return ResponseEntity.badRequest().body("Bad Credentials!");
 		}
+	}
+
+	@DeleteMapping("/{userId}")
+	@ResponseStatus(HttpStatus.NO_CONTENT)
+	public void deleteUser(@PathVariable Long userId) {
+		// TODO: Add logic to delete user that is the owner of the token
+		UserService.delete(userId);
 	}
 
 }
