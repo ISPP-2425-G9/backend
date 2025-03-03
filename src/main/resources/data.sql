@@ -38,9 +38,11 @@ INSERT INTO video (video_id, video_url, message_id) VALUES
 (1, 'https://www.youtube.com/watch?v=9bZkp7q19f0', 1),
 (2, 'https://www.youtube.com/watch?v=9bZkp7q19f0', 2);
 
-INSERT INTO obituary (obituary_id, is_mine, structure, user_id) VALUES 
-(1, 1, 'Estructura del obituario 1', 5),
-(2, 0, 'Estructura del obituario 2', 6);
+INSERT INTO image_template (image_template_id , image_url) VALUES (1 ,'https://static.nationalgeographicla.com/files/styles/image_3200/public/comedy-wildlife-awards-squirel-stop.jpg');
+
+INSERT INTO obituary (obituary_id, name, birth_date, death_date, custom_image_url, farewell_message, farewell_phrase, is_mine, user_id, image_template_id) VALUES 
+(1, 'Nombre Ejemplo 1', '1980-01-01', '2023-01-01', 'https://static.nationalgeographicla.com/files/styles/image_3200/public/comedy-wildlife-awards-squirel-stop.jpg', 'Mensaje de despedida 1', 'Frase de despedida 1', 1, 5, 1),
+(2, 'Nombre Ejemplo 2', '1975-05-15', '2022-12-20', 'https://static.nationalgeographicla.com/files/styles/image_3200/public/comedy-wildlife-awards-squirel-stop.jpg', 'Mensaje de despedida 2', 'Frase de despedida 2', 0, 6, 1);
 
 INSERT INTO receiver (receiver_id, message_id, obituary_id, telephone, name, email) VALUES 
 (1, 1, NULL, '678945638', 'Reciver Uno', 'reciver1@caronte.site'),
