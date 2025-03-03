@@ -16,14 +16,15 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-
+import com.caronte.caronte.auth.payload.response.CompanyUpdateRequest;
 import com.caronte.caronte.auth.payload.response.CustomerUpdateRequest;
 import com.caronte.caronte.auth.payload.response.JwtResponse;
 import com.caronte.caronte.auth.payload.response.LoginRequest;
+import com.caronte.caronte.company.Company;
+import com.caronte.caronte.company.CompanyService;
 import com.caronte.caronte.configuration.jwt.JwtUtils;
 import com.caronte.caronte.configuration.services.UserDetailsImpl;
 import com.caronte.caronte.customer.Customer;
@@ -34,32 +35,35 @@ import jakarta.validation.Valid;
 @RestController
 @RequestMapping("api/auth")
 public class AuthController {
-    
-    private final AuthenticationManager authenticationManager;
+
+	private final AuthenticationManager authenticationManager;
 	private final JwtUtils jwtUtils;
 	private CustomerService customerService;
+	private CompanyService companyService;
 
-	public AuthController(AuthenticationManager authenticationManager, JwtUtils jwtUtils, CustomerService customerService) {
+	public AuthController(AuthenticationManager authenticationManager, JwtUtils jwtUtils,
+			CustomerService customerService, CompanyService companyService) {
 		this.authenticationManager = authenticationManager;
 		this.jwtUtils = jwtUtils;
 		this.customerService = customerService;
+		this.companyService = companyService;
 	}
 
 	@PostMapping("/login")
 	public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
-		try{
+		try {
 			Authentication authentication = authenticationManager.authenticate(
-				new UsernamePasswordAuthenticationToken(loginRequest.getId(), loginRequest.getPassword()));
+					new UsernamePasswordAuthenticationToken(loginRequest.getId(), loginRequest.getPassword()));
 
 			SecurityContextHolder.getContext().setAuthentication(authentication);
 			String jwt = jwtUtils.generateJwtToken(authentication);
 
 			UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
 			List<String> roles = userDetails.getAuthorities().stream().map(item -> item.getAuthority())
-				.collect(Collectors.toList());
+					.collect(Collectors.toList());
 			JwtResponse jwtResponse = new JwtResponse(jwt, userDetails.getId(), userDetails.getUsername(), roles);
 			return ResponseEntity.ok().body(jwtResponse);
-		}catch(BadCredentialsException exception){
+		} catch (BadCredentialsException exception) {
 			return ResponseEntity.badRequest().body("Bad Credentials!");
 		}
 	}
@@ -67,10 +71,10 @@ public class AuthController {
 	@GetMapping("/customers/{customerId}")
 	@ResponseStatus(HttpStatus.OK)
 	public ResponseEntity<?> getCustomer(@PathVariable Long customerId) {
-		try{
+		try {
 			Customer customer = customerService.findById(customerId);
 			return ResponseEntity.ok().body(customer);
-		}catch(IllegalArgumentException exception){
+		} catch (IllegalArgumentException exception) {
 			return ResponseEntity.badRequest().body("Customer not found");
 		}
 	}
@@ -78,10 +82,29 @@ public class AuthController {
 	@PutMapping("/customers/{customerId}")
 	@ResponseStatus(HttpStatus.OK)
 	public Customer updateCustomer(
-		@PathVariable Long customerId,
-		@RequestBody @Valid CustomerUpdateRequest request) {
+			@PathVariable Long customerId,
+			@RequestBody @Valid CustomerUpdateRequest request) {
 
 		return customerService.update(customerId, request);
 	}
 
+	@GetMapping("/companies/{companyId}")
+	@ResponseStatus(HttpStatus.OK)
+	public ResponseEntity<?> getCompany(@PathVariable Long companyId) {
+		try {
+			Company company = companyService.findById(companyId);
+			return ResponseEntity.ok().body(company);
+		} catch (IllegalArgumentException exception) {
+			return ResponseEntity.badRequest().body("Company not found");
+		}
+	}
+
+	@PutMapping("/companies/{companyId}")
+	@ResponseStatus(HttpStatus.OK)
+	public Company updateCompany(
+			@PathVariable Long companyId,
+			@RequestBody @Valid CompanyUpdateRequest request) {
+
+		return companyService.update(companyId, request);
+	}
 }
