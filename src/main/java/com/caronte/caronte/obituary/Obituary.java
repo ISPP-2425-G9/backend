@@ -25,8 +25,8 @@ public class Obituary {
     @Column(name = "obituary_id", nullable = false, updatable = false)
     private Long obituaryId;
 
-    @Column(name = "name", nullable = false, length = 80)
-    private String name = "";
+    @Column(name = "name", length = 80)
+    private String name;
 
     @Column(name = "birth_date", nullable = false)
     private Date birthDate;
@@ -34,14 +34,14 @@ public class Obituary {
     @Column(name = "death_date")
     private Date deathDate;
 
-    @Column(name = "custom_image_url", nullable = false, length = 512)
-    private String customImageUrl = "";
+    @Column(name = "custom_image_url", length = 512)
+    private String customImageUrl;
 
-    @Column(name = "farewell_message", nullable = false, length = 450)
-    private String farewellMessage = "";
+    @Column(name = "farewell_message", length = 450)
+    private String farewellMessage;
 
-    @Column(name = "farewell_phrase", nullable = false, length = 120)
-    private String farewellPhrase = "";
+    @Column(name = "farewell_phrase", length = 120)
+    private String farewellPhrase;
 
     @Column(name = "is_mine", nullable = false)
     private Boolean isMine;
