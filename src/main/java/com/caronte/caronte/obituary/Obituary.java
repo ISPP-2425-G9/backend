@@ -1,7 +1,6 @@
 package com.caronte.caronte.obituary;
 
-import java.util.Date;
-
+import java.time.LocalDate;
 import com.caronte.caronte.customer.Customer;
 import com.caronte.caronte.imageTemplate.ImageTemplate;
 
@@ -25,22 +24,22 @@ public class Obituary {
     @Column(name = "obituary_id", nullable = false, updatable = false)
     private Long obituaryId;
 
-    @Column(name = "name", length = 80)
+    @Column(name = "name", length = 37)
     private String name;
 
     @Column(name = "birth_date", nullable = false)
-    private Date birthDate;
+    private LocalDate birthDate;
 
     @Column(name = "death_date")
-    private Date deathDate;
+    private LocalDate deathDate;
 
     @Column(name = "custom_image_url", length = 512)
     private String customImageUrl;
 
-    @Column(name = "farewell_message", length = 450)
+    @Column(name = "farewell_message", length = 624)
     private String farewellMessage;
 
-    @Column(name = "farewell_phrase", length = 120)
+    @Column(name = "farewell_phrase", length = 90)
     private String farewellPhrase;
 
     @Column(name = "is_mine", nullable = false)
