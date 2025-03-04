@@ -65,6 +65,7 @@ public class SecurityConfiguration {
     PasswordEncoder passwordEncoder() {
 		return NoOpPasswordEncoder.getInstance(); // No encripta la contraseña
 
+		
         // return new BCryptPasswordEncoder();
     }
 
