@@ -1,7 +1,6 @@
 package com.caronte.caronte.obituary;
 
-import java.util.Date;
-
+import java.time.LocalDate;
 import org.springframework.stereotype.Service;
 
 import com.caronte.caronte.customer.Customer;
@@ -16,7 +15,7 @@ public class ObituaryService {
         this.obituaryRepository = obituaryRepository;
     }
 
-    public Obituary saveObituary(String name, Date birth_date, Date death_date, String custom_image_url, String farewell_message, String farewell_phrase, Boolean is_mine, Customer customer, ImageTemplate imageTemplate) {
+    public Obituary saveObituary(String name, LocalDate birth_date, LocalDate death_date, String custom_image_url, String farewell_message, String farewell_phrase, Boolean is_mine, Customer customer, ImageTemplate imageTemplate) {
         Obituary obituary = new Obituary();
 
         obituary.setName(name);

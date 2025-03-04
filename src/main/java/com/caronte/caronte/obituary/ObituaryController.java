@@ -14,10 +14,9 @@ import com.caronte.caronte.customer.Customer;
 import com.caronte.caronte.customer.CustomerRepository;
 import com.caronte.caronte.imageTemplate.ImageTemplate;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.Map;
 
 import org.springframework.security.core.Authentication;
 
@@ -44,9 +43,9 @@ public class ObituaryController {
             UserDetailsImpl userPrincipal = (UserDetailsImpl) authentication.getPrincipal();
             Long customerId = userPrincipal.getId();
             String name = request.getName();
-            SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
-            Date birthDate = dateFormat.parse(request.getBirthDate());
-            Date deathDate = dateFormat.parse(request.getDeathDate());
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+            LocalDate birthDate = LocalDate.parse(request.getBirthDate(), formatter);
+            LocalDate deathDate = LocalDate.parse(request.getDeathDate(), formatter);
             String customImageUrl = request.getCustomImage();
             String farewellMessage = request.getFarewellMessage();
             String farewellPhrase = request.getFarewellPhrase();
