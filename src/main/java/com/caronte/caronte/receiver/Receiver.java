@@ -1,5 +1,8 @@
 package com.caronte.caronte.receiver;
 
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+
 import com.caronte.caronte.message.Message;
 import com.caronte.caronte.obituary.Obituary;
 
@@ -38,9 +41,11 @@ public class Receiver {
     // Relationships
     @ManyToOne
     @JoinColumn(name = "obituary_id")
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private Obituary obituary;
 
     @ManyToOne
     @JoinColumn(name = "message_id")
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private Message message;
 }
