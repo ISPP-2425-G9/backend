@@ -37,7 +37,7 @@ public class ObituaryController {
     }
 
     @PostMapping("/create")
-    public ResponseEntity<Obituary> createObituary(@RequestBody @Valid ObituraryRequestDto request, Authentication authentication) {
+    public ResponseEntity<String> createObituary(@RequestBody @Valid ObituraryRequestDto request, Authentication authentication) {
         Obituary obituary = null;
         try{
             
@@ -83,7 +83,7 @@ public class ObituaryController {
         }catch(Exception e){
             System.out.println(e);
         } 
-        return ResponseEntity.ok(obituary);
+        return ResponseEntity.ok("Obituary created successfully");
     }
 }
 
