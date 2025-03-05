@@ -1,7 +1,6 @@
 package com.caronte.caronte.auth.payload.response;
 
 import static com.caronte.caronte.util.RegexContants.REGEX_EMAIL;
-import static com.caronte.caronte.util.RegexContants.REGEX_NIF;
 import static com.caronte.caronte.util.RegexContants.REGEX_TELEPHONE;
 import static com.caronte.caronte.util.RegexContants.REGEX_ZIPCODE;
 

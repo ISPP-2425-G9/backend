@@ -30,7 +30,6 @@ import com.caronte.caronte.configuration.jwt.JwtUtils;
 import com.caronte.caronte.configuration.services.UserDetailsImpl;
 import com.caronte.caronte.customer.Customer;
 import com.caronte.caronte.customer.CustomerService;
-import com.caronte.caronte.user.User;
 import com.caronte.caronte.user.UserService;
 
 import jakarta.validation.Valid;
