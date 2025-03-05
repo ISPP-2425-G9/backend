@@ -1,5 +1,8 @@
 package com.caronte.caronte.emergencyContact;
 
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+
 import com.caronte.caronte.customer.Customer;
 
 import jakarta.persistence.Column;
@@ -34,5 +37,6 @@ public class EmergencyContact {
     // Relationships
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private Customer customer;
 }
