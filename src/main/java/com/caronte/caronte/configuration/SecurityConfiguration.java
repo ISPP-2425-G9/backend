@@ -44,6 +44,7 @@ public class SecurityConfiguration {
 			.headers((headers) -> headers.frameOptions((frameOptions) -> frameOptions.disable()))
 			.exceptionHandling((exepciontHandling) -> exepciontHandling.authenticationEntryPoint(unauthorizedHandler))			
 			.authorizeHttpRequests(authorizeRequests ->	authorizeRequests
+				.requestMatchers("/api/auth/customers/**").hasAnyAuthority("ADMIN", "CUSTOMER")
 			.anyRequest().permitAll())
 			.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);		
 		return http.build();
@@ -64,6 +65,7 @@ public class SecurityConfiguration {
     PasswordEncoder passwordEncoder() {
 		return NoOpPasswordEncoder.getInstance(); // No encripta la contraseña
 
+		
         // return new BCryptPasswordEncoder();
     }
 
