@@ -70,7 +70,7 @@ public class UserDetailsImpl implements UserDetails {
 		}
 
 		List<GrantedAuthority> authorities = Arrays.asList(Authorization.CUSTOMER.getAuthority(), customer_authorization);
-		return new UserDetailsImpl(customer.getId(), customer.getName(),
+		return new UserDetailsImpl(customer.getId(), customer.getDni(),
 				customer.getPassword(),
 				authorities);
 	}

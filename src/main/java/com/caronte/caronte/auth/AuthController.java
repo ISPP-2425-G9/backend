@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.caronte.caronte.auth.payload.response.JwtResponse;
 import com.caronte.caronte.auth.payload.response.LoginRequest;
@@ -62,7 +63,9 @@ public class AuthController {
 	@DeleteMapping("/{userId}")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	public void deleteUser(@PathVariable Long userId) {
-		// TODO: Add logic to delete user that is the owner of the token
+		if (UserService.findCurrentUser().getId() != userId) {
+			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You can only delete your own account");
+		}
 		UserService.delete(userId);
 	}
 
