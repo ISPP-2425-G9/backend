@@ -40,12 +40,17 @@ public class ObituaryController {
     public ResponseEntity<Obituary> createObituary(@RequestBody @Valid ObituraryRequestDto request, Authentication authentication) {
         Obituary obituary = null;
         try{
+            
             UserDetailsImpl userPrincipal = (UserDetailsImpl) authentication.getPrincipal();
             Long customerId = userPrincipal.getId();
             String name = request.getName();
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-            LocalDate birthDate = LocalDate.parse(request.getBirthDate(), formatter);
-            LocalDate deathDate = LocalDate.parse(request.getDeathDate(), formatter);
+            LocalDate birthDate = null;
+            LocalDate deathDate = null;
+            if( request.getDeathDate() != ""){
+                deathDate = LocalDate.parse(request.getDeathDate(), formatter);
+                birthDate = LocalDate.parse(request.getBirthDate(), formatter);
+            }
             String customImageUrl = request.getCustomImage();
             String farewellMessage = request.getFarewellMessage();
             String farewellPhrase = request.getFarewellPhrase();

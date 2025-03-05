@@ -30,7 +30,7 @@ public class Obituary {
     @Column(name = "name", length = 37)
     private String name;
 
-    @Column(name = "birth_date", nullable = false)
+    @Column(name = "birth_date")
     private LocalDate birthDate;
 
     @Column(name = "death_date")

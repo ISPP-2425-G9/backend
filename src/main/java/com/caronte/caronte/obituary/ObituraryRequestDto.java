@@ -11,7 +11,6 @@ public class ObituraryRequestDto {
 
     private String name;
 
-    @NotNull(message = "La fecha de nacimiento no puede ser nula")
     private String birthDate; 
 
     private String deathDate;
