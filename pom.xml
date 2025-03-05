@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>com.caronte</groupId>
 	<artifactId>caronte</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>0.0.2-SNAPSHOT</version>
 	<name>caronte</name>
 	<description>Caronte Web Application</description>
 	<url/>
