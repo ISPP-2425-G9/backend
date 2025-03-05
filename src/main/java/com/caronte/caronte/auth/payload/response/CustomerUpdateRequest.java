@@ -21,8 +21,7 @@ public class CustomerUpdateRequest {
     private String email;
 
 	@NotBlank
-	@Pattern(regexp = REGEX_DNI, message = "The dni is not valid")
-	private String dni;
+	private String password;
 
 	@NotBlank
 	private String fullName;

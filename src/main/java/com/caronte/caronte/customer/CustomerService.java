@@ -27,9 +27,9 @@ public class CustomerService {
         Customer customerToUpdate = customerRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Customer not found"));
         
         customerToUpdate.setEmail(request.getEmail());
-        customerToUpdate.setDni(request.getDni());
         customerToUpdate.setName(request.getFullName());
         customerToUpdate.setTelephone(request.getTelephone());
+        customerToUpdate.setPassword(request.getPassword());
         
         return customerRepository.save(customerToUpdate);
     }

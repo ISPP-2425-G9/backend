@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.caronte.caronte.auth.payload.response.CompanyUpdateRequest;
 import com.caronte.caronte.auth.payload.response.CustomerUpdateRequest;
@@ -29,6 +30,8 @@ import com.caronte.caronte.configuration.jwt.JwtUtils;
 import com.caronte.caronte.configuration.services.UserDetailsImpl;
 import com.caronte.caronte.customer.Customer;
 import com.caronte.caronte.customer.CustomerService;
+import com.caronte.caronte.user.User;
+import com.caronte.caronte.user.UserService;
 
 import jakarta.validation.Valid;
 
@@ -40,13 +43,15 @@ public class AuthController {
 	private final JwtUtils jwtUtils;
 	private CustomerService customerService;
 	private CompanyService companyService;
+	private UserService userService;
 
 	public AuthController(AuthenticationManager authenticationManager, JwtUtils jwtUtils,
-			CustomerService customerService, CompanyService companyService) {
+			CustomerService customerService, CompanyService companyService, UserService userService) {
 		this.authenticationManager = authenticationManager;
 		this.jwtUtils = jwtUtils;
 		this.customerService = customerService;
 		this.companyService = companyService;
+		this.userService = userService;
 	}
 
 	@PostMapping("/login")
@@ -71,6 +76,9 @@ public class AuthController {
 	@GetMapping("/customers/{customerId}")
 	@ResponseStatus(HttpStatus.OK)
 	public ResponseEntity<?> getCustomer(@PathVariable Long customerId) {
+		if (userService.findCurrentUser().getId() != customerId) {
+			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You can't access this data");
+		}
 		try {
 			Customer customer = customerService.findById(customerId);
 			return ResponseEntity.ok().body(customer);
@@ -85,12 +93,19 @@ public class AuthController {
 			@PathVariable Long customerId,
 			@RequestBody @Valid CustomerUpdateRequest request) {
 
+		if (userService.findCurrentUser().getId() != customerId) {
+			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You can't modify this data");
+		}
+
 		return customerService.update(customerId, request);
 	}
 
 	@GetMapping("/companies/{companyId}")
 	@ResponseStatus(HttpStatus.OK)
 	public ResponseEntity<?> getCompany(@PathVariable Long companyId) {
+		if (userService.findCurrentUser().getId() != companyId) {
+			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You can't access this data");
+		}
 		try {
 			Company company = companyService.findById(companyId);
 			return ResponseEntity.ok().body(company);
@@ -105,6 +120,9 @@ public class AuthController {
 			@PathVariable Long companyId,
 			@RequestBody @Valid CompanyUpdateRequest request) {
 
+		if (userService.findCurrentUser().getId() != companyId) {
+			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You can't modify this data");
+		}
 		return companyService.update(companyId, request);
 	}
 }

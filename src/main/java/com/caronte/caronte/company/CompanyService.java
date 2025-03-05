@@ -29,7 +29,6 @@ public class CompanyService {
         Company companyToUpdate = companyRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Company not found"));
         
         companyToUpdate.setName(request.getName());
-        companyToUpdate.setNif(request.getNif());
         companyToUpdate.setAddress(request.getAddress());
         companyToUpdate.setCity(request.getCity());
         companyToUpdate.setZipCode(request.getZipCode());
@@ -37,7 +36,7 @@ public class CompanyService {
         companyToUpdate.setTelephone(request.getTelephone());
         companyToUpdate.setImageUrl(request.getImageUrl());
         companyToUpdate.setDescription(request.getDescription());
-        
+    
         return companyRepository.save(companyToUpdate);
     }
 

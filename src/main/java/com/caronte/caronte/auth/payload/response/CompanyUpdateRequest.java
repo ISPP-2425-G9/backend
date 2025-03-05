@@ -21,8 +21,7 @@ public class CompanyUpdateRequest {
 	private String name;
 
 	@NotBlank
-	@Pattern(regexp = REGEX_NIF, message = "The nif is not valid")
-	private String nif;
+	private String password;
 
 	@NotBlank
 	private String address;
