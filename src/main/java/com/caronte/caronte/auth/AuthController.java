@@ -12,6 +12,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -124,4 +125,13 @@ public class AuthController {
 		}
 		return companyService.update(companyId, request);
 	}
+	@DeleteMapping("/{userId}")
+	@ResponseStatus(HttpStatus.NO_CONTENT)
+	public void deleteUser(@PathVariable Long userId) {
+		if (userService.findCurrentUser().getId() != userId) {
+			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You can only delete your own account");
+		}
+		userService.delete(userId);
+	}
+
 }

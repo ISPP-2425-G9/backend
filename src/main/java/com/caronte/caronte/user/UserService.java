@@ -32,4 +32,10 @@ public class UserService {
         return userRepository.findById(userDetails.getId())
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
     }
+
+    @Transactional
+    public void delete(Long id) {
+        userRepository.deleteById(id);
+    }
+
 }

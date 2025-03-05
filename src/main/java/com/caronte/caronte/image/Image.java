@@ -1,5 +1,8 @@
 package com.caronte.caronte.image;
 
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+
 import com.caronte.caronte.message.Message;
 
 import jakarta.persistence.Column;
@@ -28,5 +31,6 @@ public class Image {
     // Relationships
     @ManyToOne
     @JoinColumn(name = "message_id", nullable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private Message message;
 }
