@@ -128,10 +128,10 @@ public class AuthController {
 	@DeleteMapping("/{userId}")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	public void deleteUser(@PathVariable Long userId) {
-		if (UserService.findCurrentUser().getId() != userId) {
+		if (userService.findCurrentUser().getId() != userId) {
 			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You can only delete your own account");
 		}
-		UserService.delete(userId);
+		userService.delete(userId);
 	}
 
 }
