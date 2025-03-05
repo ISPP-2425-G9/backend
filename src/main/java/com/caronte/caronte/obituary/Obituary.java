@@ -2,6 +2,9 @@ package com.caronte.caronte.obituary;
 
 import java.util.Date;
 
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+
 import com.caronte.caronte.customer.Customer;
 import com.caronte.caronte.imageTemplate.ImageTemplate;
 
@@ -49,6 +52,7 @@ public class Obituary {
     // Relationships
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private Customer customer;
 
     @ManyToOne
