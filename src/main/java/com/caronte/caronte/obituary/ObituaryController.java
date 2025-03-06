@@ -1,6 +1,7 @@
 package com.caronte.caronte.obituary;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import com.caronte.caronte.imageTemplate.ImageTemplateService;
@@ -19,6 +20,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 import org.springframework.security.core.Authentication;
+import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 @RequestMapping("api/obituary")
