@@ -1,5 +1,8 @@
 package com.caronte.caronte.message;
 
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+
 import com.caronte.caronte.customer.Customer;
 
 import jakarta.persistence.Column;
@@ -37,5 +40,6 @@ public class Message {
     // Relationships
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private Customer customer;
 }

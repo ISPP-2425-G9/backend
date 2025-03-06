@@ -26,11 +26,6 @@ public class Image {
     @Column(name = "image_url", nullable = false, length = 512)
     private String imageUrl;
 
-    // Relationships
-    @ManyToOne
-    @JoinColumn(name = "message_id", nullable = true)
-    private Message message;
-
     @ManyToOne
     @JoinColumn(name = "company_id", nullable = true)
     private Company company;
