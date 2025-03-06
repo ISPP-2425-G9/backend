@@ -31,6 +31,18 @@ public class ObituaryService {
         return obituaryRepository.save(obituary);
     }
 
+
+    public Obituary findById(Long id) {
+        return obituaryRepository.findById(id).orElseThrow(() -> new RuntimeException("Obituary not found"));
+    }
+
+    public Obituary updateObituary(Obituary obituary) {
+        return obituaryRepository.save(obituary);
+    }
+
+    public void deleteObituary(Long id) {
+        obituaryRepository.deleteById(id);
+      
     @Transactional(readOnly = true)
     public Iterable<Obituary> getAllObituariesByCustomer(Long customerId) {
         Iterable<Obituary> obituaries = obituaryRepository.findByCustomerId(customerId);
@@ -46,6 +58,7 @@ public class ObituaryService {
         Obituary obituary = obituaryRepository.findById(obituaryId)
             .orElseThrow(() -> new IllegalArgumentException("Obituary not found"));
         return obituary;
+
     }
 
 }

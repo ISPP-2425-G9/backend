@@ -1,5 +1,7 @@
 package com.caronte.caronte.receiver;
 
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 
 import com.caronte.caronte.obituary.Obituary;
@@ -21,6 +23,10 @@ public class ReceiverService {
         receiver.setEmail(email);
         receiver.setObituary(obituary);
         return receiverRepository.save(receiver);
+    }
+
+    public void deleteReceiversByObituaryId(Obituary obituary) {
+        receiverRepository.deleteByObituary(obituary);
     }
 
     
