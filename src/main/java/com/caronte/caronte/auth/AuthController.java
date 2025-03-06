@@ -79,7 +79,8 @@ public class AuthController {
         try {
             authService.save(customer);
             LoginRequest loginRequest = LoginRequest.of(registerRequest.getEmail(), registerRequest.getPassword1());
-            return this.authenticateUser(loginRequest, bindingResult);        } catch (DataIntegrityViolationException ex) {
+            return this.authenticateUser(loginRequest, bindingResult);        
+        } catch (DataIntegrityViolationException ex) {
             errors.addError("*", ex.getMostSpecificCause().getMessage());
             return ResponseEntity.badRequest().body(errors);
         }
