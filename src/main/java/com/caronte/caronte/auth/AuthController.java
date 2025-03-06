@@ -46,7 +46,7 @@ public class AuthController {
     @PostMapping("/login")
 	public ResponseEntity<?> authenticateUser(
             @Valid @RequestBody LoginRequest loginRequest,
-            BindingResult bindingResult, Authentication authentication2) {
+            BindingResult bindingResult) {
         ErrorHandler errors = ErrorHandler.catchError(bindingResult);
         if(errors.hasErrors())
             return ResponseEntity.badRequest().body(errors);
