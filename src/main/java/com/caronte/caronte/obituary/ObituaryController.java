@@ -1,6 +1,7 @@
 package com.caronte.caronte.obituary;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import com.caronte.caronte.imageTemplate.ImageTemplateService;
@@ -19,11 +20,12 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 import org.springframework.security.core.Authentication;
+import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 @RequestMapping("api/obituary")
 public class ObituaryController {
-    
+
     private final ObituaryService obituaryService;
     private final CustomerRepository customerRepository;
     private final ImageTemplateService imageTemplateService;
@@ -165,6 +167,37 @@ public class ObituaryController {
             System.out.println(e);
         } 
         return ResponseEntity.ok("Obituary deleted successfully");
+    }
+
+    @GetMapping("/myObituaries")
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseEntity<?> getAllObituariesByCustomer(Authentication authentication) {
+        try {
+            UserDetailsImpl userPrincipal = (UserDetailsImpl) authentication.getPrincipal();
+            Long customerId = userPrincipal.getId();
+            Iterable<Obituary> obituaries = obituaryService.getAllObituariesByCustomer(customerId);
+            return ResponseEntity.ok().body(obituaries);
+        } catch (IllegalArgumentException exception) {
+            return ResponseEntity.badRequest().body(exception.getMessage());
+        }
+    }
+
+    @GetMapping("/myObituaries/{obituaryId}")
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseEntity<?> getObituaryById(@PathVariable Long obituaryId, Authentication authentication) {
+        try {
+            UserDetailsImpl userPrincipal = (UserDetailsImpl) authentication.getPrincipal();
+            Long customerId = userPrincipal.getId();
+            Obituary obituary = obituaryService.getObituaryById(obituaryId);
+            System.out.println(obituary.getCustomer().getId());
+            if (obituary.getCustomer().getId() != customerId) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You can't access this data");
+            }
+            obituary.setCustomer(null);
+            return ResponseEntity.ok().body(obituary);
+        } catch (IllegalArgumentException exception) {
+            return ResponseEntity.badRequest().body(exception.getMessage());
+        }
     }
 }
 

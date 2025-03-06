@@ -2,6 +2,7 @@ package com.caronte.caronte.obituary;
 
 import java.time.LocalDate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.caronte.caronte.customer.Customer;
 import com.caronte.caronte.imageTemplate.ImageTemplate;
@@ -30,6 +31,7 @@ public class ObituaryService {
         return obituaryRepository.save(obituary);
     }
 
+
     public Obituary findById(Long id) {
         return obituaryRepository.findById(id).orElseThrow(() -> new RuntimeException("Obituary not found"));
     }
@@ -40,6 +42,23 @@ public class ObituaryService {
 
     public void deleteObituary(Long id) {
         obituaryRepository.deleteById(id);
+      
+    @Transactional(readOnly = true)
+    public Iterable<Obituary> getAllObituariesByCustomer(Long customerId) {
+        Iterable<Obituary> obituaries = obituaryRepository.findByCustomerId(customerId);
+        for (Obituary obituary : obituaries) {
+            obituary.setCustomer(null);
+        }
+        return obituaries;
+
+    }
+
+    @Transactional(readOnly = true)
+    public Obituary getObituaryById(Long obituaryId) {
+        Obituary obituary = obituaryRepository.findById(obituaryId)
+            .orElseThrow(() -> new IllegalArgumentException("Obituary not found"));
+        return obituary;
+
     }
 
 }
