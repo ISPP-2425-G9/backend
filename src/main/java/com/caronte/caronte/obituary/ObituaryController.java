@@ -1,9 +1,8 @@
 package com.caronte.caronte.obituary;
 
-import java.util.List;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -11,27 +10,24 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
-import com.caronte.caronte.user.UserService;
+import com.caronte.caronte.configuration.services.UserDetailsImpl;
 
 @RestController
 @RequestMapping("api/obituary")
 public class ObituaryController {
 
     private ObituaryService obituaryService;
-    private UserService userService;
 
-    public ObituaryController(ObituaryService obituaryService, UserService userService) {
+    public ObituaryController(ObituaryService obituaryService) {
         this.obituaryService = obituaryService;
-        this.userService = userService;
     }
 
-    @GetMapping("/{customerId}/my_obituaries")
+    @GetMapping("/myObituaries")
     @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<?> getAllObituariesByCustomer(@PathVariable Long customerId) {
-        if (userService.findCurrentUser().getId() != customerId) {
-			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You can't access this data");
-		}
+    public ResponseEntity<?> getAllObituariesByCustomer(Authentication authentication) {
         try {
+            UserDetailsImpl userPrincipal = (UserDetailsImpl) authentication.getPrincipal();
+            Long customerId = userPrincipal.getId();
             Iterable<Obituary> obituaries = obituaryService.getAllObituariesByCustomer(customerId);
             return ResponseEntity.ok().body(obituaries);
         } catch (IllegalArgumentException exception) {
@@ -39,14 +35,18 @@ public class ObituaryController {
         }
     }
 
-    @GetMapping("/{customerId}/my_obituaries/{obituaryId}")
+    @GetMapping("/myObituaries/{obituaryId}")
     @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<?> getObituaryById(@PathVariable Long customerId, @PathVariable Long obituaryId) {
+    public ResponseEntity<?> getObituaryById(@PathVariable Long obituaryId, Authentication authentication) {
         try {
+            UserDetailsImpl userPrincipal = (UserDetailsImpl) authentication.getPrincipal();
+            Long customerId = userPrincipal.getId();
             Obituary obituary = obituaryService.getObituaryById(obituaryId);
+            System.out.println(obituary.getCustomer().getId());
             if (obituary.getCustomer().getId() != customerId) {
                 throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You can't access this data");
             }
+            obituary.setCustomer(null);
             return ResponseEntity.ok().body(obituary);
         } catch (IllegalArgumentException exception) {
             return ResponseEntity.badRequest().body(exception.getMessage());
