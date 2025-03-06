@@ -12,9 +12,9 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -30,13 +30,13 @@ import com.caronte.caronte.auth.payload.response.LoginRequest;
 import com.caronte.caronte.auth.payload.response.RegisterRequestCompany;
 import com.caronte.caronte.auth.payload.response.RegisterRequestCustomer;
 import com.caronte.caronte.company.Company;
+import com.caronte.caronte.company.CompanyService;
 import com.caronte.caronte.configuration.jwt.JwtUtils;
 import com.caronte.caronte.configuration.services.UserDetailsImpl;
 import com.caronte.caronte.customer.Customer;
-import com.caronte.caronte.util.ErrorHandler;
-import com.caronte.caronte.company.CompanyService;
 import com.caronte.caronte.customer.CustomerService;
 import com.caronte.caronte.user.UserService;
+import com.caronte.caronte.util.ErrorHandler;
 
 import jakarta.validation.Valid;
 
@@ -44,28 +44,34 @@ import jakarta.validation.Valid;
 @RequestMapping("api/auth")
 public class AuthController {
 
-    
-    private final AuthenticationManager authenticationManager;
-    private final AuthService authService;
-    private final JwtUtils jwtUtils;
+	private final AuthenticationManager authenticationManager;
+	private final AuthService authService;
+	private final JwtUtils jwtUtils;
+	private final UserService userService;
+	private final CustomerService customerService;
+	private final CompanyService companyService;
 
-	public AuthController(AuthenticationManager authenticationManager, AuthService authService, JwtUtils jwtUtils) {
+	public AuthController(AuthenticationManager authenticationManager, AuthService authService, UserService userService, 
+			CustomerService customerService, CompanyService companyService, JwtUtils jwtUtils) {
 		this.authenticationManager = authenticationManager;
 		this.authService = authService;
-        this.jwtUtils = jwtUtils;
-    }
+		this.userService = userService;
+		this.customerService = customerService;
+		this.companyService = companyService;
+		this.jwtUtils = jwtUtils;
+	}
 
-    @PostMapping("/login")
+	@PostMapping("/login")
 	public ResponseEntity<?> authenticateUser(
-            @Valid @RequestBody LoginRequest loginRequest,
-            BindingResult bindingResult) {
-        ErrorHandler errors = ErrorHandler.catchError(bindingResult);
-        if(errors.hasErrors())
-            return ResponseEntity.badRequest().body(errors);
-        
-		try{
+			@Valid @RequestBody LoginRequest loginRequest,
+			BindingResult bindingResult) {
+		ErrorHandler errors = ErrorHandler.catchError(bindingResult);
+		if (errors.hasErrors())
+			return ResponseEntity.badRequest().body(errors);
+
+		try {
 			Authentication authentication = authenticationManager.authenticate(
-				new UsernamePasswordAuthenticationToken(loginRequest.getId(), loginRequest.getPassword()));
+					new UsernamePasswordAuthenticationToken(loginRequest.getId(), loginRequest.getPassword()));
 			SecurityContextHolder.getContext().setAuthentication(authentication);
 			String jwt = jwtUtils.generateJwtToken(authentication);
 			UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
@@ -73,60 +79,55 @@ public class AuthController {
 					.collect(Collectors.toList());
 			JwtResponse jwtResponse = new JwtResponse(jwt, userDetails.getId(), userDetails.getUsername(), roles);
 			return ResponseEntity.ok().body(jwtResponse);
-		}catch(BadCredentialsException exception){
-            errors.addError("*","Credenciales incorrectas");
+		} catch (BadCredentialsException exception) {
+			errors.addError("*", "Credenciales incorrectas");
 			return ResponseEntity.badRequest().body(errors);
 		}
 	}
 
 	@PostMapping("/customers/signup")
-      	@ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<?> registerCustomer(
-            @Valid @RequestBody RegisterRequestCustomer registerRequest,
-            BindingResult bindingResult) {
-        ErrorHandler errors = ErrorHandler.catchError(bindingResult);
-        Customer customer = authService.validateAndBuildCustomer(registerRequest, errors);
-        
-        if(errors.hasErrors())
-            return ResponseEntity.badRequest().body(errors);
-        
-        try {
-            authService.save(customer);
-            LoginRequest loginRequest = LoginRequest.of(registerRequest.getEmail(), registerRequest.getPassword1());
-            return this.authenticateUser(loginRequest, bindingResult);        
-        } catch (DataIntegrityViolationException ex) {
-            errors.addError("*", ex.getMostSpecificCause().getMessage());
-            return ResponseEntity.badRequest().body(errors);
-        }
-    }
+	@ResponseStatus(HttpStatus.OK)
+	public ResponseEntity<?> registerCustomer(
+			@Valid @RequestBody RegisterRequestCustomer registerRequest,
+			BindingResult bindingResult) {
+		ErrorHandler errors = ErrorHandler.catchError(bindingResult);
+		Customer customer = authService.validateAndBuildCustomer(registerRequest, errors);
 
-    @PostMapping("/companies/signup")
-   	@ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<?> registerCompany(
-            @Valid @RequestBody RegisterRequestCompany registerRequest,
-            BindingResult bindingResult) {
-        ErrorHandler errors = ErrorHandler.catchError(bindingResult);
-        Company company = authService.validateAndBuildCompany(registerRequest, errors);
-        
-        if(errors.hasErrors())
-            return ResponseEntity.badRequest().body(errors);
-    
-        try {
-            authService.save(company);
-            LoginRequest loginRequest = LoginRequest.of(registerRequest.getEmail(), registerRequest.getPassword1());
-            return this.authenticateUser(loginRequest, bindingResult);
-        } catch (DataIntegrityViolationException ex) {
-            errors.addError("*", ex.getMostSpecificCause().getMessage());
-            return ResponseEntity.badRequest().body(errors);
-        }
-        
-    }
-}
+		if (errors.hasErrors())
+			return ResponseEntity.badRequest().body(errors);
 
-		} catch (BadCredentialsException exception) {
-			return ResponseEntity.badRequest().body("Bad Credentials!");
+		try {
+			authService.save(customer);
+			LoginRequest loginRequest = LoginRequest.of(registerRequest.getEmail(), registerRequest.getPassword1());
+			return this.authenticateUser(loginRequest, bindingResult);
+		} catch (DataIntegrityViolationException ex) {
+			errors.addError("*", ex.getMostSpecificCause().getMessage());
+			return ResponseEntity.badRequest().body(errors);
 		}
 	}
+
+	@PostMapping("/companies/signup")
+	@ResponseStatus(HttpStatus.OK)
+	public ResponseEntity<?> registerCompany(
+			@Valid @RequestBody RegisterRequestCompany registerRequest,
+			BindingResult bindingResult) {
+		ErrorHandler errors = ErrorHandler.catchError(bindingResult);
+		Company company = authService.validateAndBuildCompany(registerRequest, errors);
+
+		if (errors.hasErrors())
+			return ResponseEntity.badRequest().body(errors);
+
+		try {
+			authService.save(company);
+			LoginRequest loginRequest = LoginRequest.of(registerRequest.getEmail(), registerRequest.getPassword1());
+			return this.authenticateUser(loginRequest, bindingResult);
+		} catch (DataIntegrityViolationException ex) {
+			errors.addError("*", ex.getMostSpecificCause().getMessage());
+			return ResponseEntity.badRequest().body(errors);
+		}
+
+	}
+
 
 	@GetMapping("/customers/{customerId}")
 	@ResponseStatus(HttpStatus.OK)
@@ -191,4 +192,3 @@ public class AuthController {
 	}
 
 }
-

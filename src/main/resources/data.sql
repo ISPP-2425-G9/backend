@@ -30,9 +30,9 @@ INSERT INTO message (message_id ,body, code, is_last_will, title, user_id) VALUE
 (1, 'Este es el último mensaje de prueba.', 'MSG001', 1, 'Última Voluntad 1', 5),
 (2, 'Otro mensaje de prueba.', 'MSG002', 0, 'Mensaje General', 6);
 
-INSERT INTO image (image_id, image_url, message_id) VALUES 
-(1, 'https://static.nationalgeographicla.com/files/styles/image_3200/public/comedy-wildlife-awards-squirel-stop.jpg', 1),
-(2, 'https://static.nationalgeographicla.com/files/styles/image_3200/public/comedy-wildlife-awards-squirel-stop.jpg', 2);
+INSERT INTO image (image_id, image_url) VALUES 
+(1, 'https://static.nationalgeographicla.com/files/styles/image_3200/public/comedy-wildlife-awards-squirel-stop.jpg'),
+(2, 'https://static.nationalgeographicla.com/files/styles/image_3200/public/comedy-wildlife-awards-squirel-stop.jpg');
 
 INSERT INTO video (video_id, video_url, message_id) VALUES 
 (1, 'https://www.youtube.com/watch?v=9bZkp7q19f0', 1),
