@@ -1,19 +1,34 @@
 package com.caronte.caronte.obituary;
 
-import java.util.List;
-
-import org.springframework.beans.factory.annotation.Autowired;
+import java.time.LocalDate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.caronte.caronte.customer.Customer;
+import com.caronte.caronte.imageTemplate.ImageTemplate;
+
 @Service
 public class ObituaryService {
+    
+    ObituaryRepository obituaryRepository;
 
-    private ObituaryRepository obituaryRepository;
-
-    @Autowired
     public ObituaryService(ObituaryRepository obituaryRepository) {
         this.obituaryRepository = obituaryRepository;
+    }
+
+    public Obituary saveObituary(String name, LocalDate birth_date, LocalDate death_date, String custom_image_url, String farewell_message, String farewell_phrase, Boolean is_mine, Customer customer, ImageTemplate imageTemplate) {
+        Obituary obituary = new Obituary();
+
+        obituary.setName(name);
+        obituary.setBirthDate(birth_date);
+        obituary.setDeathDate(death_date);
+        obituary.setCustomImageUrl(custom_image_url);
+        obituary.setFarewellMessage(farewell_message);
+        obituary.setFarewellPhrase(farewell_phrase);
+        obituary.setIsMine(is_mine);
+        obituary.setCustomer(customer);
+        obituary.setImageTemplate(imageTemplate);
+        return obituaryRepository.save(obituary);
     }
 
     @Transactional(readOnly = true)
@@ -32,4 +47,5 @@ public class ObituaryService {
             .orElseThrow(() -> new IllegalArgumentException("Obituary not found"));
         return obituary;
     }
+
 }
