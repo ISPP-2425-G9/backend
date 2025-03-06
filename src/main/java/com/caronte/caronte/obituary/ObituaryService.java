@@ -30,4 +30,16 @@ public class ObituaryService {
         return obituaryRepository.save(obituary);
     }
 
+    public Obituary findById(Long id) {
+        return obituaryRepository.findById(id).orElseThrow(() -> new RuntimeException("Obituary not found"));
+    }
+
+    public Obituary updateObituary(Obituary obituary) {
+        return obituaryRepository.save(obituary);
+    }
+
+    public void deleteObituary(Long id) {
+        obituaryRepository.deleteById(id);
+    }
+
 }
