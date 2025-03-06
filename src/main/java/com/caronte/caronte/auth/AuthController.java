@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -79,12 +78,11 @@ public class AuthController {
         
         try {
             authService.save(customer);
-        } catch (DataIntegrityViolationException ex) {
+            LoginRequest loginRequest = LoginRequest.of(registerRequest.getEmail(), registerRequest.getPassword1());
+            return this.authenticateUser(loginRequest, bindingResult);        } catch (DataIntegrityViolationException ex) {
             errors.addError("*", ex.getMostSpecificCause().getMessage());
             return ResponseEntity.badRequest().body(errors);
         }
-        
-        return ResponseEntity.status(HttpStatus.CREATED).body("¡Cliente registrado correctamente!");
     }
 
     @PostMapping("/companies/signup")
@@ -99,11 +97,12 @@ public class AuthController {
     
         try {
             authService.save(company);
+            LoginRequest loginRequest = LoginRequest.of(registerRequest.getEmail(), registerRequest.getPassword1());
+            return this.authenticateUser(loginRequest, bindingResult);
         } catch (DataIntegrityViolationException ex) {
             errors.addError("*", ex.getMostSpecificCause().getMessage());
             return ResponseEntity.badRequest().body(errors);
         }
         
-        return ResponseEntity.status(HttpStatus.CREATED).body("¡Compañía registrada correctamente!");
     }
 }

@@ -23,4 +23,11 @@ public class LoginRequest {
 	@NotBlank
 	private String password;
 
+	public static LoginRequest of(String id, String password) {
+		LoginRequest loginRequest = new LoginRequest();
+		loginRequest.id = id;
+		loginRequest.password = password;
+		return loginRequest;
+	}
+
 }
