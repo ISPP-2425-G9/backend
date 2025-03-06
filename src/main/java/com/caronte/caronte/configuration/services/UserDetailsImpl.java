@@ -70,7 +70,7 @@ public class UserDetailsImpl implements UserDetails {
 		}
 
 		List<GrantedAuthority> authorities = Arrays.asList(Authorization.CUSTOMER.getAuthority(), customer_authorization);
-		return new UserDetailsImpl(customer.getId(), customer.getName(),
+		return new UserDetailsImpl(customer.getId(), customer.getEmail(),
 				customer.getPassword(),
 				authorities);
 	}
@@ -78,7 +78,7 @@ public class UserDetailsImpl implements UserDetails {
 	public static UserDetailsImpl build(Company company) {
 		List<GrantedAuthority> authorities = List.of(Authorization.COMPANY.getAuthority());
 
-		return new UserDetailsImpl(company.getId(), company.getNif(),
+		return new UserDetailsImpl(company.getId(), company.getEmail(),
 				company.getPassword(),
 				authorities);
 	}

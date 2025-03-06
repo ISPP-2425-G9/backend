@@ -8,10 +8,12 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 
 @Getter
 @Setter
+@ToString
 public class LoginRequest {
 
     private static final String REGEX = "^(" + REGEX_DNI + "|" + REGEX_NIF + "|" + REGEX_EMAIL + ")$";
