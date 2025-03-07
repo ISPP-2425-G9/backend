@@ -38,11 +38,11 @@ INSERT INTO video (video_id, video_url, message_id) VALUES
 (1, 'https://www.youtube.com/watch?v=9bZkp7q19f0', 1),
 (2, 'https://www.youtube.com/watch?v=9bZkp7q19f0', 2);
 
-INSERT INTO image_template (image_template_id , image_url) VALUES (1 ,'https://static.nationalgeographicla.com/files/styles/image_3200/public/comedy-wildlife-awards-squirel-stop.jpg'),
-(2 ,'https://static.nationalgeographicla.com/files/styles/image_3200/public/comedy-wildlife-awards-squirel-stop.jpg'),
-(3, 'https://static.nationalgeographicla.com/files/styles/image_3200/public/comedy-wildlife-awards-squirel-stop.jpg'),
-(4, 'https://static.nationalgeographicla.com/files/styles/image_3200/public/comedy-wildlife-awards-squirel-stop.jpg'),
-(5, 'https://static.nationalgeographicla.com/files/styles/image_3200/public/comedy-wildlife-awards-squirel-stop.jpg'),
+INSERT INTO image_template (image_template_id , image_url) VALUES (1 ,'https://www.orlaonline.es/files/plantillas/web/ORLA_34_PLANTILLA_web.jpg?72'),
+(2 ,'https://content.r9cdn.net/rimg/dimg/78/70/001b704a-city-15939-1629b33a69c.jpg?width=1366&height=768&xhint=1779&yhint=1365&crop=true'),
+(3, 'https://cms.w2m.com/dam/Sites/Flowo/imagenes-blog/blog/mejores-destinos-playa-verano-principal.jpg'),
+(4, 'https://www.luiscrux.es/sites/default/files/orlas//020.jpg'),
+(5, 'https://e00-elmundo.uecdn.es/assets/multimedia/imagenes/2022/03/09/16468231897426.jpg'),
 (6, 'https://static.nationalgeographicla.com/files/styles/image_3200/public/comedy-wildlife-awards-squirel-stop.jpg');
 
 INSERT INTO obituary (obituary_id, name, birth_date, death_date, custom_image_url, farewell_message, farewell_phrase, is_mine, user_id, image_template_id) VALUES 

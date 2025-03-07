@@ -42,7 +42,8 @@ public class ObituaryService {
 
     public void deleteObituary(Long id) {
         obituaryRepository.deleteById(id);
-      
+    }
+
     @Transactional(readOnly = true)
     public Iterable<Obituary> getAllObituariesByCustomer(Long customerId) {
         Iterable<Obituary> obituaries = obituaryRepository.findByCustomerId(customerId);
