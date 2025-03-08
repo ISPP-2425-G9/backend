@@ -26,9 +26,9 @@ public class Plan {
     @Column(name = "plan_type", nullable = false)
     private PlanType planType;
 
-    @Column(name = "expire_date", nullable = false)
+    @Column(name = "expire_date", nullable = true)
     private LocalDate expireDate;
 
-    @Column(name = "billing_address", nullable = false, length = 255)
+    @Column(name = "billing_address", nullable = true, length = 255)
     private String billingAddress;
 }

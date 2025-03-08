@@ -1,10 +1,10 @@
 INSERT INTO user (user_id, name, email, password, telephone) VALUES
-(1, 'admin1', 'admin1@caronte.site', 'hashed_password_1', '626077466'),
-(2, 'admin2', 'admin2@caronte.site', 'hashed_password_2', '626077466'),
-(3, 'empresa1','empresa1@caronte.site', 'hashed_password_1', '645384175'),
-(4, 'empresa2','empresa2@caronte.site', 'hashed_password_2', '957501307'),
-(5, 'cliente1', 'cliente1@caronte.site', 'hashed_password_1', '637892263'),
-(6, 'cliente2', 'cliente2@caronte.site', 'hashed_password_2', '643287465');
+(1, 'admin1', 'admin1@caronte.site', '$2a$10$EJ7goCEpyl.XTDXDf/jeVOz1Mfwn24Q4jbIXnwY9yLh9gJSghZecm', '626077466'),
+(2, 'admin2', 'admin2@caronte.site', '$2a$10$EJ7goCEpyl.XTDXDf/jeVOz1Mfwn24Q4jbIXnwY9yLh9gJSghZecm', '626077466'),
+(3, 'empresa1','empresa1@caronte.site', '$2a$10$7vxcruASLb/pJhbG1uJGgeb6RqSIBeHJub0UGXSzwJAYBd0LHPoGu', '645384175'),
+(4, 'empresa2','empresa2@caronte.site', '$2a$10$7vxcruASLb/pJhbG1uJGgeb6RqSIBeHJub0UGXSzwJAYBd0LHPoGu', '957501307'),
+(5, 'cliente1', 'cliente1@caronte.site', '$2a$10$.qePDyM..BhRQr829JMtGOuRLM7i0K6/im0tgGUWxHvoLQRTs9956', '637892263'),
+(6, 'cliente2', 'cliente2@caronte.site', '$2a$10$.qePDyM..BhRQr829JMtGOuRLM7i0K6/im0tgGUWxHvoLQRTs9956', '643287465');
 
 INSERT INTO admin (user_id) VALUES 
 (1),
@@ -30,9 +30,9 @@ INSERT INTO message (message_id ,body, code, is_last_will, title, user_id) VALUE
 (1, 'Este es el último mensaje de prueba.', 'MSG001', 1, 'Última Voluntad 1', 5),
 (2, 'Otro mensaje de prueba.', 'MSG002', 0, 'Mensaje General', 6);
 
-INSERT INTO image (image_id, image_url, message_id) VALUES 
-(1, 'https://static.nationalgeographicla.com/files/styles/image_3200/public/comedy-wildlife-awards-squirel-stop.jpg', 1),
-(2, 'https://static.nationalgeographicla.com/files/styles/image_3200/public/comedy-wildlife-awards-squirel-stop.jpg', 2);
+INSERT INTO image (image_id, image_url) VALUES 
+(1, 'https://static.nationalgeographicla.com/files/styles/image_3200/public/comedy-wildlife-awards-squirel-stop.jpg'),
+(2, 'https://static.nationalgeographicla.com/files/styles/image_3200/public/comedy-wildlife-awards-squirel-stop.jpg');
 
 INSERT INTO video (video_id, video_url, message_id) VALUES 
 (1, 'https://www.youtube.com/watch?v=9bZkp7q19f0', 1),

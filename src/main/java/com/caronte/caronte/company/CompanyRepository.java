@@ -10,4 +10,5 @@ import com.caronte.caronte.util.LongRepository;
 @Repository
 public interface CompanyRepository extends LongRepository<Company> {
     Optional<Company> findByNif(String nif);
+    boolean existsByNif(String nif);
 }

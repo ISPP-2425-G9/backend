@@ -10,5 +10,5 @@ import com.caronte.caronte.util.LongRepository;
 @Repository
 public interface UserRepository extends LongRepository<User> {
     Optional<User> findByEmail(String email);
-    Optional<User> findById(Long id);
+    boolean existsByEmail(String email);
 }
