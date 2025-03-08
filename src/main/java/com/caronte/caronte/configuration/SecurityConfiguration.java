@@ -1,7 +1,5 @@
 package com.caronte.caronte.configuration;
 
-import static org.springframework.security.config.Customizer.withDefaults;
-
 import javax.sql.DataSource;
 
 import org.springframework.context.annotation.Bean;
@@ -28,7 +26,7 @@ public class SecurityConfiguration {
 	public final AuthEntryPointJwt unauthorizedHandler;
 	public final DataSource dataSource;
 
-	public SecurityConfiguration(UserDetailsServiceImpl userDetailsService, AuthEntryPointJwt unauthorizedHandler,DataSource dataSource){
+	public SecurityConfiguration(UserDetailsServiceImpl userDetailsService, AuthEntryPointJwt unauthorizedHandler, DataSource dataSource){
 		this.userDetailsService = userDetailsService;
 		this.unauthorizedHandler = unauthorizedHandler;
 		this.dataSource = dataSource;
@@ -36,9 +34,7 @@ public class SecurityConfiguration {
 
     @Bean
 	SecurityFilterChain configure(HttpSecurity http) throws Exception {
-		
-		http
-			.cors(withDefaults())		
+		http	
 			.csrf(AbstractHttpConfigurer::disable)		
 			.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))			
 			.headers((headers) -> headers.frameOptions((frameOptions) -> frameOptions.disable()))
