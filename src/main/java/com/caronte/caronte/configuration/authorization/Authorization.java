@@ -4,6 +4,8 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 public enum Authorization {
     COMPANY,
+    COMPANY_FREE,
+    COMPANY_PREMIUM,
     CUSTOMER,
     CUSTOMER_FREE,
     CUSTOMER_PREMIUM,
