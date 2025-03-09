@@ -40,7 +40,10 @@ public class SecurityConfig {
 			.headers((headers) -> headers.frameOptions((frameOptions) -> frameOptions.disable()))
 			.exceptionHandling((exepciontHandling) -> exepciontHandling.authenticationEntryPoint(unauthorizedHandler))			
 			.authorizeHttpRequests(authorizeRequests ->	authorizeRequests
+				.requestMatchers("/api/auth/login").anonymous()
+				.requestMatchers("/api/auth/**/signup").anonymous()
 				.requestMatchers("/api/auth/customers/**").hasAnyAuthority("ADMIN", "CUSTOMER")
+				.requestMatchers("/api/auth/companies/**").hasAnyAuthority("ADMIN", "COMPANY")
 			.anyRequest().permitAll())
 			.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);		
 		return http.build();
