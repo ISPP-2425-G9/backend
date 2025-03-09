@@ -24,7 +24,6 @@ public class Obituary extends BaseEntity {
     @Column(length = 37)
     private String name;
 
-    @Column(nullable = false)
     private LocalDate birthDate;
 
     private LocalDate deathDate;
