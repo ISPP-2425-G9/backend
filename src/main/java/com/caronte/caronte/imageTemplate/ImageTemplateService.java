@@ -2,6 +2,8 @@ package com.caronte.caronte.imageTemplate;
 
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -13,11 +15,12 @@ public class ImageTemplateService {
     public ImageTemplateService(ImageTemplateRepository imageTemplateRepository) {
         this.imageTemplateRepository = imageTemplateRepository;
     }
-    
+    @Transactional
     public ImageTemplate findById(Long id) {
-        return imageTemplateRepository.findById(id).get();
+        ImageTemplate imageTemplate = imageTemplateRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Image template not found"));
+        return imageTemplate;
     }
-
+    @Transactional
     public List<ImageTemplate> getAllTemplateUrls() {
         return imageTemplateRepository.findAll()
                 .stream()

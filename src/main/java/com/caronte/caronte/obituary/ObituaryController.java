@@ -2,6 +2,7 @@ package com.caronte.caronte.obituary;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 
 import com.caronte.caronte.imageTemplate.ImageTemplateService;
@@ -18,7 +19,9 @@ import com.caronte.caronte.imageTemplate.ImageTemplate;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.security.core.Authentication;
 import org.springframework.web.server.ResponseStatusException;
@@ -40,87 +43,74 @@ public class ObituaryController {
     }
 
     @PostMapping("/create")
-    public ResponseEntity<Obituary> createObituary(@RequestBody @Valid ObituraryRequestDto request, Authentication authentication) {
-        Obituary obituary = null;
-        try{
-            
+    public ResponseEntity<?> createObituary(@RequestBody @Valid ObituraryRequestDto request, Authentication authentication) {
+        try {
             UserDetailsImpl userPrincipal = (UserDetailsImpl) authentication.getPrincipal();
             Long customerId = userPrincipal.getId();
             String name = request.getName();
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+
             LocalDate birthDate = null;
             LocalDate deathDate = null;
-            if( request.getDeathDate() != ""){
-                deathDate = LocalDate.parse(request.getDeathDate(), formatter);
+
+            if( request.getBirthDate() != ""){
+                System.out.println("-".repeat(50));
                 birthDate = LocalDate.parse(request.getBirthDate(), formatter);
             }
+
             String customImageUrl = request.getCustomImage();
             String farewellMessage = request.getFarewellMessage();
             String farewellPhrase = request.getFarewellPhrase();
-            Long imageTemplateId = Long.parseLong(request.getImageTemplate_id().toString());
-            Customer customer = customerRepository.findById(customerId).orElseThrow(() -> new RuntimeException("Customer not found"));
+            Long imageTemplateId = request.getImageTemplate_id();
+            Boolean isMine = Boolean.parseBoolean(request.getIsMine());
+
+            Customer customer = customerRepository.findById(customerId)
+                    .orElseThrow(() -> new RuntimeException("Customer not found"));
             ImageTemplate imageTemplate = imageTemplateService.findById(imageTemplateId);
-            Boolean is_mine = request.getIsMine();
 
-            obituary = obituaryService.saveObituary(
-                 name,
-                 birthDate,
-                 deathDate,
-                 customImageUrl,
-                 farewellMessage,
-                 farewellPhrase,
-                 is_mine,
-                 customer,
-                 imageTemplate
-             );
-            
-             List<ContactDto> contacts = request.getContacts();
-             for (ContactDto contact : contacts) {
-                 String contactName = contact.getName();
-                 String contactTelephone = contact.getPhone();
-                 String contactEmail = contact.getEmail();
-                 receiverService.saveObituaryReceiver(contactName, contactTelephone, contactEmail, obituary);   
-             }  
+            Obituary obituary = obituaryService.saveObituary(
+                    name, birthDate, deathDate, customImageUrl, farewellMessage, farewellPhrase, isMine, customer, imageTemplate
+            );
 
-            
-        }catch(Exception e){
-            System.out.println(e);
-        } 
-        return ResponseEntity.ok(obituary);
+            List<ObituraryRequestDto.ContactDto> contacts = request.getContacts();
+            for (ObituraryRequestDto.ContactDto contact : contacts) {
+                receiverService.saveObituaryReceiver(contact.getName(), contact.getPhone(), contact.getEmail(), obituary);
+            }
+
+            return ResponseEntity.ok("Obituary created successfully");
+
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", e.getMessage()));
+        }
     }
 
 
-
-
-
     @PostMapping("/update/{obituary_id}")
-    public ResponseEntity<String> updateObituary(@RequestBody @Valid ObituraryRequestDto request, @PathVariable Long obituary_id, Authentication authentication) {
-        Obituary oldObituary = null;
-        Obituary newObituary = null;
-        try{
-            
+    public ResponseEntity<?> updateObituary(@RequestBody @Valid ObituraryRequestDto request, @PathVariable Long obituary_id, Authentication authentication) {
+        try {
             UserDetailsImpl userPrincipal = (UserDetailsImpl) authentication.getPrincipal();
             Long customerId = userPrincipal.getId();
+            Obituary oldObituary = obituaryService.findById(obituary_id);
 
-            oldObituary = obituaryService.findById(obituary_id);
-
-            if(oldObituary.getCustomer().getId() != customerId){
-                return ResponseEntity.badRequest().body("You are not allowed to update this obituary");
+            if (oldObituary.getCustomer().getId() != customerId) {
+                return ResponseEntity.badRequest().body(Map.of("error", "You are not allowed to update this obituary"));
             }
+
             String name = request.getName();
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
             LocalDate birthDate = null;
             LocalDate deathDate = null;
-            if( request.getDeathDate() != ""){
-                deathDate = LocalDate.parse(request.getDeathDate(), formatter);
+            
+            if (!request.getBirthDate().isEmpty()) {
                 birthDate = LocalDate.parse(request.getBirthDate(), formatter);
             }
+
             String customImageUrl = request.getCustomImage();
             String farewellMessage = request.getFarewellMessage();
             String farewellPhrase = request.getFarewellPhrase();
-            Long imageTemplateId = Long.parseLong(request.getImageTemplate_id().toString());
+            Long imageTemplateId = request.getImageTemplate_id();
             ImageTemplate imageTemplate = imageTemplateService.findById(imageTemplateId);
-            Boolean is_mine = request.getIsMine();
+            Boolean isMine = Boolean.parseBoolean(request.getIsMine());
 
             oldObituary.setName(name);
             oldObituary.setBirthDate(birthDate);
@@ -128,24 +118,25 @@ public class ObituaryController {
             oldObituary.setCustomImageUrl(customImageUrl);
             oldObituary.setFarewellMessage(farewellMessage);
             oldObituary.setFarewellPhrase(farewellPhrase);
-            oldObituary.setIsMine(is_mine);
+            oldObituary.setIsMine(isMine);
             oldObituary.setImageTemplate(imageTemplate);
-            newObituary = obituaryService.updateObituary(oldObituary);
-            receiverService.deleteReceiversByObituaryId(newObituary);
-             List<ContactDto> contacts = request.getContacts();
-             for (ContactDto contact : contacts) {
-                 String contactName = contact.getName();
-                 String contactTelephone = contact.getPhone();
-                 String contactEmail = contact.getEmail();
-                 receiverService.saveObituaryReceiver(contactName, contactTelephone, contactEmail, newObituary);   
-             }  
 
-            
-        }catch(Exception e){
-            System.out.println(e);
-        } 
-        return ResponseEntity.ok("Obituary updated successfully");
+            Obituary newObituary = obituaryService.updateObituary(oldObituary);
+
+            receiverService.deleteReceiversByObituaryId(newObituary);
+
+            List<ObituraryRequestDto.ContactDto> contacts = request.getContacts();
+            for (ObituraryRequestDto.ContactDto contact : contacts) {
+                receiverService.saveObituaryReceiver(contact.getName(), contact.getPhone(), contact.getEmail(), newObituary);
+            }
+
+            return ResponseEntity.ok("Obituary updated successfully"); 
+
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", e.getMessage()));
+        }
     }
+
 
 
 
@@ -216,6 +207,22 @@ public class ObituaryController {
         } catch (IllegalArgumentException exception) {
             return ResponseEntity.badRequest().body(exception.getMessage());
         }
+    }
+
+
+    @ExceptionHandler({MethodArgumentNotValidException.class, IllegalArgumentException.class})
+    public ResponseEntity<Map<String, String>> handleValidationExceptions(Exception ex) {
+        Map<String, String> errors = new HashMap<>();
+    
+        if (ex instanceof MethodArgumentNotValidException) {
+            ((MethodArgumentNotValidException) ex).getBindingResult().getFieldErrors().forEach(error -> 
+                errors.put(error.getField(), error.getDefaultMessage())
+            );
+        } else {
+            errors.put("error", ex.getMessage());
+        }
+    
+        return ResponseEntity.badRequest().body(errors);
     }
 }
 

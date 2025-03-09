@@ -15,7 +15,7 @@ public class ObituaryService {
     public ObituaryService(ObituaryRepository obituaryRepository) {
         this.obituaryRepository = obituaryRepository;
     }
-
+    @Transactional
     public Obituary saveObituary(String name, LocalDate birth_date, LocalDate death_date, String custom_image_url, String farewell_message, String farewell_phrase, Boolean is_mine, Customer customer, ImageTemplate imageTemplate) {
         Obituary obituary = new Obituary();
 
@@ -31,15 +31,15 @@ public class ObituaryService {
         return obituaryRepository.save(obituary);
     }
 
-
+    @Transactional(readOnly = true)
     public Obituary findById(Long id) {
         return obituaryRepository.findById(id).orElseThrow(() -> new RuntimeException("Obituary not found"));
     }
-
+    @Transactional
     public Obituary updateObituary(Obituary obituary) {
         return obituaryRepository.save(obituary);
     }
-
+    @Transactional
     public void deleteObituary(Long id) {
         obituaryRepository.deleteById(id);
     }
