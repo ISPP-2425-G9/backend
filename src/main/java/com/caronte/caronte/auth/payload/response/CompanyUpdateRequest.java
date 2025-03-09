@@ -2,7 +2,7 @@ package com.caronte.caronte.auth.payload.response;
 
 import static com.caronte.caronte.util.RegexContants.REGEX_EMAIL;
 import static com.caronte.caronte.util.RegexContants.REGEX_TELEPHONE;
-import static com.caronte.caronte.util.RegexContants.REGEX_ZIPCODE;
+import static com.caronte.caronte.util.RegexContants.REGEX_ZIP_CODE;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
@@ -29,7 +29,7 @@ public class CompanyUpdateRequest {
 	private String city;
 
 	@NotBlank
-	@Pattern(regexp = REGEX_ZIPCODE, message = "The zip code is not valid")
+	@Pattern(regexp = REGEX_ZIP_CODE, message = "The zip code is not valid")
 	private String zipCode;
 
 	@NotBlank
