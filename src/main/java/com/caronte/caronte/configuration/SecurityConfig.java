@@ -41,7 +41,7 @@ public class SecurityConfig {
 			.exceptionHandling((exepciontHandling) -> exepciontHandling.authenticationEntryPoint(unauthorizedHandler))			
 			.authorizeHttpRequests(authorizeRequests ->	authorizeRequests
 				.requestMatchers("/api/auth/login").anonymous()
-				.requestMatchers("/api/auth/**/signup").anonymous()
+				.requestMatchers("/api/auth/customers/signup", "/api/auth/companies/signup").anonymous()
 				.requestMatchers("/api/auth/customers/**").hasAnyAuthority("ADMIN", "CUSTOMER")
 				.requestMatchers("/api/auth/companies/**").hasAnyAuthority("ADMIN", "COMPANY")
 			.anyRequest().permitAll())
