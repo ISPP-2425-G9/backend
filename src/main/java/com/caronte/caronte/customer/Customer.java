@@ -6,7 +6,6 @@ import com.caronte.caronte.user.User;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 import lombok.Getter;
 import lombok.Setter;
@@ -16,7 +15,7 @@ import lombok.Setter;
 @Setter
 public class Customer extends User {
 
-    @Column(name = "is_active", nullable = false)
+    @Column(nullable = false)
     private Boolean isActive;
 
     @Column(unique = true, nullable = false, length = 20)
@@ -24,7 +23,6 @@ public class Customer extends User {
 
     // Relationships
     @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "plan_id")
     private Plan plan;
 
 }
