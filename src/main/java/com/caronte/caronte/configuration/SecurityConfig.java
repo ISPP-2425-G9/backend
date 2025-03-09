@@ -14,19 +14,29 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import com.caronte.caronte.configuration.authorization.Authorization;
 import com.caronte.caronte.configuration.jwt.AuthEntryPointJwt;
 import com.caronte.caronte.configuration.jwt.AuthTokenFilter;
 import com.caronte.caronte.configuration.services.UserDetailsServiceImpl;
 
 @Configuration
 // @EnableWebSecurity
-public class SecurityConfiguration {
+public class SecurityConfig {
     
 	public final UserDetailsServiceImpl userDetailsService;
 	public final AuthEntryPointJwt unauthorizedHandler;
 	public final DataSource dataSource;
 
-	public SecurityConfiguration(UserDetailsServiceImpl userDetailsService, AuthEntryPointJwt unauthorizedHandler, DataSource dataSource){
+	private static final String ADMIN = Authorization.ADMIN.name(); 
+	private static final String CUSTOMER = Authorization.CUSTOMER.name();
+	private static final String CUSTOMER_FREE = Authorization.CUSTOMER_FREE.name(); 
+	private static final String CUSTOMER_PREMIUM = Authorization.CUSTOMER_PREMIUM.name(); 
+	private static final String COMPANY = Authorization.COMPANY.name();
+	private static final String COMPANY_FREE = Authorization.COMPANY_FREE.name(); 
+	private static final String COMPANY_PREMIUM = Authorization.COMPANY_PREMIUM.name(); 
+
+
+	public SecurityConfig(UserDetailsServiceImpl userDetailsService, AuthEntryPointJwt unauthorizedHandler, DataSource dataSource){
 		this.userDetailsService = userDetailsService;
 		this.unauthorizedHandler = unauthorizedHandler;
 		this.dataSource = dataSource;
@@ -40,7 +50,10 @@ public class SecurityConfiguration {
 			.headers((headers) -> headers.frameOptions((frameOptions) -> frameOptions.disable()))
 			.exceptionHandling((exepciontHandling) -> exepciontHandling.authenticationEntryPoint(unauthorizedHandler))			
 			.authorizeHttpRequests(authorizeRequests ->	authorizeRequests
-				.requestMatchers("/api/auth/customers/**").hasAnyAuthority("ADMIN", "CUSTOMER")
+				.requestMatchers("/api/auth/login").anonymous()
+				.requestMatchers("/api/auth/customers/signup", "/api/auth/companies/signup").anonymous()
+				.requestMatchers("/api/auth/customers/**").hasAnyAuthority(ADMIN, CUSTOMER)
+				.requestMatchers("/api/auth/companies/**").hasAnyAuthority(ADMIN, COMPANY)
 			.anyRequest().permitAll())
 			.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);		
 		return http.build();

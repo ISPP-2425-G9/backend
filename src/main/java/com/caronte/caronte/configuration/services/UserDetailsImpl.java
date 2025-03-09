@@ -76,7 +76,18 @@ public class UserDetailsImpl implements UserDetails {
 	}
 
 	public static UserDetailsImpl build(Company company) {
-		List<GrantedAuthority> authorities = List.of(Authorization.COMPANY.getAuthority());
+		PlanType planType = company.getPlan().getPlanType();
+		SimpleGrantedAuthority customer_authorization = null;
+		
+		if(planType == PlanType.FREE) {
+			customer_authorization = Authorization.COMPANY_FREE.getAuthority();
+		} else if(planType == PlanType.PREMIUM) {
+			customer_authorization = Authorization.COMPANY_PREMIUM.getAuthority();
+		} else {
+			throw new IllegalArgumentException("Invalid plan type");
+		}
+
+		List<GrantedAuthority> authorities = List.of(Authorization.COMPANY.getAuthority(), customer_authorization);
 
 		return new UserDetailsImpl(company.getId(), company.getEmail(),
 				company.getPassword(),
