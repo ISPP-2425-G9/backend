@@ -6,10 +6,9 @@ import com.caronte.caronte.user.User;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToOne;
 import lombok.Getter;
 import lombok.Setter;
-import jakarta.persistence.OneToOne;
 
 @Entity
 @Getter
@@ -35,6 +34,5 @@ public class Company extends User {
     private String nif;
 
     @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "plan_id")
     private Plan plan;
 }
