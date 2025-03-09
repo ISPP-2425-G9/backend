@@ -20,13 +20,13 @@ import com.caronte.caronte.configuration.services.UserDetailsServiceImpl;
 
 @Configuration
 // @EnableWebSecurity
-public class SecurityConfiguration {
+public class SecurityConfig {
     
 	public final UserDetailsServiceImpl userDetailsService;
 	public final AuthEntryPointJwt unauthorizedHandler;
 	public final DataSource dataSource;
 
-	public SecurityConfiguration(UserDetailsServiceImpl userDetailsService, AuthEntryPointJwt unauthorizedHandler, DataSource dataSource){
+	public SecurityConfig(UserDetailsServiceImpl userDetailsService, AuthEntryPointJwt unauthorizedHandler, DataSource dataSource){
 		this.userDetailsService = userDetailsService;
 		this.unauthorizedHandler = unauthorizedHandler;
 		this.dataSource = dataSource;
