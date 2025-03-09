@@ -9,13 +9,24 @@ import com.caronte.caronte.util.BaseEntity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.UniqueConstraint;
 import lombok.Getter;
 import lombok.Setter;
 
 @Entity
 @Getter
 @Setter
+@Table(
+     name = "receiver",
+     uniqueConstraints = {
+         @UniqueConstraint(columnNames = {"obituary_id", "telephone"}),
+         @UniqueConstraint(columnNames = {"obituary_id", "email"}),
+         @UniqueConstraint(columnNames = {"message_id", "telephone"}),
+         @UniqueConstraint(columnNames = {"message_id", "email"})
+     }
+ )
 public class Receiver extends BaseEntity {
 
     @Column(nullable = false, length = 100)
@@ -24,7 +35,7 @@ public class Receiver extends BaseEntity {
     @Column(nullable = false, length = 15)
     private String telephone;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false , length = 255)
     private String email;
 
     // Relationships
