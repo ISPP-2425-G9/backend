@@ -1,6 +1,5 @@
 package com.caronte.caronte.customer;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -9,9 +8,9 @@ import com.caronte.caronte.auth.payload.response.CustomerUpdateRequest;
 
 @Service
 public class CustomerService {
+    
     private CustomerRepository customerRepository;
 
-    @Autowired
     public CustomerService(CustomerRepository customerRepository) {
         this.customerRepository = customerRepository;
     }

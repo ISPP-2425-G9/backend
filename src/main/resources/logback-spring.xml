@@ -1,0 +1,37 @@
+<configuration>
+
+    <!-- Define la ruta donde se guardarán los logs -->
+    <property name="LOG_PATH" value="logs"/>
+
+    <!-- Appender para los logs en archivo -->
+    <appender name="ROLLING_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_PATH}/application.log</file>
+        
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!-- El nombre del archivo incluirá la fecha -->
+            <fileNamePattern>${LOG_PATH}/application-%d{yyyy-MM-dd_HH-mm-ss}.log</fileNamePattern>
+            <maxHistory>10</maxHistory>  <!-- Mantiene los últimos 10 archivos -->
+        </rollingPolicy>
+
+        <encoder>
+            <!-- El formato del log -->
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- Appender para los logs en consola -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <!-- El formato del log en consola -->
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- Definición del nivel de los logs -->
+    <logger name="root" level="INFO">
+        <!-- Se añaden ambos appenders: archivo y consola -->
+        <appender-ref ref="ROLLING_FILE"/>
+        <appender-ref ref="CONSOLE"/>
+    </logger>
+
+</configuration>
