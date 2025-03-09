@@ -29,5 +29,9 @@ public class ReceiverService {
         receiverRepository.deleteByObituary(obituary);
     }
 
+    public List<Receiver> getReceiversByObituaryId(Obituary obituary) {
+        return receiverRepository.findByObituary(obituary);
+    }
+
     
 }

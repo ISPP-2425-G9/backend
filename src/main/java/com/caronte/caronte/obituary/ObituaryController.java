@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.*;
 
 import com.caronte.caronte.imageTemplate.ImageTemplateService;
 import com.caronte.caronte.obituary.ObituraryRequestDto.ContactDto;
+import com.caronte.caronte.receiver.Receiver;
 import com.caronte.caronte.receiver.ReceiverService;
 
 import jakarta.validation.Valid;
@@ -189,12 +190,29 @@ public class ObituaryController {
             UserDetailsImpl userPrincipal = (UserDetailsImpl) authentication.getPrincipal();
             Long customerId = userPrincipal.getId();
             Obituary obituary = obituaryService.getObituaryById(obituaryId);
-            System.out.println(obituary.getCustomer().getId());
             if (obituary.getCustomer().getId() != customerId) {
                 throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You can't access this data");
             }
             obituary.setCustomer(null);
             return ResponseEntity.ok().body(obituary);
+        } catch (IllegalArgumentException exception) {
+            return ResponseEntity.badRequest().body(exception.getMessage());
+        }
+    }
+
+    @GetMapping("/receivers/{obituaryId}")
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseEntity<?> getReceiversByObituaryId(@PathVariable Long obituaryId, Authentication authentication) {
+        try {
+            UserDetailsImpl userPrincipal = (UserDetailsImpl) authentication.getPrincipal();
+            Long customerId = userPrincipal.getId();
+            Obituary obituary = obituaryService.getObituaryById(obituaryId);
+            List<Receiver> receivers = receiverService.getReceiversByObituaryId(obituary);
+            if (obituary.getCustomer().getId() != customerId) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You can't access this data");
+            }
+            obituary.setCustomer(null);
+            return ResponseEntity.ok().body(receivers);
         } catch (IllegalArgumentException exception) {
             return ResponseEntity.badRequest().body(exception.getMessage());
         }

@@ -18,4 +18,6 @@ public interface ReceiverRepository extends LongRepository<Receiver> {
 
     @Transactional
     void deleteByObituary(Obituary obituary);
+
+    List<Receiver> findByObituary(Obituary obituary);
 }
