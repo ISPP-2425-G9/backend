@@ -1,12 +1,10 @@
-SHOW DATABASES;
-
-INSERT INTO user (id, name, email, password, telephone) VALUES
-(1, 'admin1', 'admin1@caronte.site', 'hashed_password_1', '626077466'),
-(2, 'admin2', 'admin2@caronte.site', 'hashed_password_2', '626077466'),
-(3, 'empresa1','empresa1@caronte.site', 'hashed_password_1', '645384175'),
-(4, 'empresa2','empresa2@caronte.site', 'hashed_password_2', '957501307'),
-(5, 'cliente1', 'cliente1@caronte.site', 'hashed_password_1', '637892263'),
-(6, 'cliente2', 'cliente2@caronte.site', 'hashed_password_2', '643287465');
+INSERT INTO user (user_id, name, email, password, telephone) VALUES
+(1, 'admin1', 'admin1@caronte.site', '$2a$10$EJ7goCEpyl.XTDXDf/jeVOz1Mfwn24Q4jbIXnwY9yLh9gJSghZecm', '626077466'),
+(2, 'admin2', 'admin2@caronte.site', '$2a$10$EJ7goCEpyl.XTDXDf/jeVOz1Mfwn24Q4jbIXnwY9yLh9gJSghZecm', '626077466'),
+(3, 'empresa1','empresa1@caronte.site', '$2a$10$7vxcruASLb/pJhbG1uJGgeb6RqSIBeHJub0UGXSzwJAYBd0LHPoGu', '645384175'),
+(4, 'empresa2','empresa2@caronte.site', '$2a$10$7vxcruASLb/pJhbG1uJGgeb6RqSIBeHJub0UGXSzwJAYBd0LHPoGu', '957501307'),
+(5, 'cliente1', 'cliente1@caronte.site', '$2a$10$.qePDyM..BhRQr829JMtGOuRLM7i0K6/im0tgGUWxHvoLQRTs9956', '637892263'),
+(6, 'cliente2', 'cliente2@caronte.site', '$2a$10$.qePDyM..BhRQr829JMtGOuRLM7i0K6/im0tgGUWxHvoLQRTs9956', '643287465');
 
 INSERT INTO admin (id) VALUES 
 (1),

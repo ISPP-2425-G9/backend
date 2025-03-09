@@ -1,8 +1,6 @@
 package com.caronte.caronte.image;
 
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
-
+import com.caronte.caronte.company.Company;
 import com.caronte.caronte.message.Message;
 import com.caronte.caronte.util.BaseEntity;
 
@@ -21,9 +19,9 @@ public class Image extends BaseEntity{
     @Column(nullable = false, length = 512)
     private String imageUrl;
 
-    // Relationships
     @ManyToOne
     @JoinColumn(nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Message message;
+
 }

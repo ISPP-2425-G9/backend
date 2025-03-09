@@ -20,9 +20,7 @@ public class Plan extends BaseEntity {
     @Column(nullable = false)
     private PlanType planType;
 
-    @Column(nullable = false)
     private LocalDate expireDate;
 
-    @Column(nullable = false)
     private String billingAddress;
 }

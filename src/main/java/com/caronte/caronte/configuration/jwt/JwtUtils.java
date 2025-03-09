@@ -1,12 +1,6 @@
 package com.caronte.caronte.configuration.jwt;
 
 import java.security.Key;
-import java.security.KeyFactory;
-import java.security.PrivateKey;
-import java.security.PublicKey;
-import java.security.spec.PKCS8EncodedKeySpec;
-import java.security.spec.X509EncodedKeySpec;
-import java.util.Base64;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -22,6 +16,7 @@ import org.springframework.stereotype.Component;
 
 import com.caronte.caronte.configuration.services.UserDetailsImpl;
 
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.MalformedJwtException;
@@ -60,14 +55,23 @@ public class JwtUtils {
 					
 	}
 
+    public Claims getClaimsFromJwtToken(String token) {
+		SecretKey key = Keys.hmacShaKeyFor(Decoders.BASE64.decode(jwtSecret));
+        return Jwts.parser()
+				.verifyWith(key)
+				.build()  					
+				.parseSignedClaims(token)
+				.getPayload();
+    }
+
 	public String getUserNameFromJwtToken(String token) {
-		SecretKey key = Keys.hmacShaKeyFor(Decoders.BASE64.decode(jwtSecret));  // Convertir jwtSecret en una Key válida
-		return Jwts.parser()
-				.verifyWith(key)  			// Usar parserBuilder() en lugar de parser()
-				.build()  					// Construir el parser
-				.parseSignedClaims(token)  	// Parsear el JWT
-				.getPayload()  				// Obtener el cuerpo de los claims
-				.getSubject();  			// Extraer el "subject" (en este caso, el nombre de usuario)
+		Claims claims = getClaimsFromJwtToken(token);
+		return claims.getSubject();
+	}
+
+	public Long getIdByAuthentication(Object authentication) {
+		UserDetailsImpl userDetailsImpl = (UserDetailsImpl) ((Authentication) authentication).getPrincipal();
+		return userDetailsImpl.getId();
 	}
 
 	public boolean validateJwtToken(String authToken) {
@@ -88,19 +92,4 @@ public class JwtUtils {
 		return false;
 	}
 
-
-	public static PrivateKey getPrivateKeyFromString(String privateKeyBase64) throws Exception {
-        byte[] decodedKey = Base64.getDecoder().decode(privateKeyBase64);
-        PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(decodedKey);
-        KeyFactory keyFactory = KeyFactory.getInstance("RSA");
-        return keyFactory.generatePrivate(keySpec);
-    }
-
-
-	public static PublicKey getPublicKeyFromString(String publicKeyBase64) throws Exception {
-        byte[] decodedKey = Base64.getDecoder().decode(publicKeyBase64);
-        X509EncodedKeySpec keySpec = new X509EncodedKeySpec(decodedKey);
-        KeyFactory keyFactory = KeyFactory.getInstance("RSA");
-        return keyFactory.generatePublic(keySpec);
-    }
 }
