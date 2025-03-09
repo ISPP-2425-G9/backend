@@ -10,13 +10,15 @@ INSERT INTO admin (id) VALUES
 (1),
 (2);
 
-INSERT INTO company (id, address, city, description, image_url, nif, zip_code) VALUES 
-(3, 'Calle Tarfia, 67', 'Sevilla', 'Descripción de Empresa Uno', NULL, 'A12345678', '41001'),
-(4, 'Calle Mirador de Montepinar, 4', 'Madrid', 'Descripción de Empresa Dos', NULL, 'B87654321', '28001');
-
 INSERT INTO plan (id, billing_address, expire_date, plan_type) VALUES 
 (1, 'Calle Contubernio, 67', '2026-12-31', 'FREE'),
-(2, 'Calle El Olivo Torcido, 2', '2027-12-31', 'PREMIUM');
+(2, 'Calle El Olivo Torcido, 2', '2027-12-31', 'PREMIUM'),
+(3, 'Calle 13, 2', '2027-12-31', 'FREE'),
+(4, 'Calle Larga, 2', '2027-12-31', 'FREE');
+
+INSERT INTO company (id, address, city, description, image_url, nif, zip_code, plan_id) VALUES 
+(3, 'Calle Tarfia, 67', 'Sevilla', 'Descripción de Empresa Uno', NULL, 'A12345678', '41001', 3),
+(4, 'Calle Mirador de Montepinar, 4', 'Madrid', 'Descripción de Empresa Dos', NULL, 'B87654321', '28001', 4);
 
 INSERT INTO customer (id, dni, is_active, plan_id) VALUES 
 (5, '26745987T', 0, 1),
