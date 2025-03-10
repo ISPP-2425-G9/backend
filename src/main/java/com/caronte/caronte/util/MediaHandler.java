@@ -12,8 +12,6 @@ import javax.imageio.ImageIO;
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
 
-import io.github.cdimascio.dotenv.Dotenv;
-
 public class MediaHandler {
 
     public static BufferedImage base64ToImage(String base64String) {
@@ -33,8 +31,7 @@ public class MediaHandler {
     }
 
     public static String uploadImageToCloudinary(BufferedImage image) {
-        Dotenv dotenv = Dotenv.load();
-        Cloudinary cloudinary_image = new Cloudinary(System.getenv("CLOUDINARY_IMAGES_URL"));
+        Cloudinary cloudinary_image = new Cloudinary("modify_before_deploy");
 
         try {
             File tempFile = File.createTempFile("upload_", ".png");
