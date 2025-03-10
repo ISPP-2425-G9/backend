@@ -191,4 +191,24 @@ public class AuthController {
 		userService.delete(userId);
 	}
 
+	@GetMapping("/admin/customers")
+	@ResponseStatus(HttpStatus.OK)
+	public ResponseEntity<?> getCustomers() {
+		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+		if (!auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ADMIN"))) {
+			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You can't access this data");
+		}
+		return ResponseEntity.ok().body(customerService.findAll());
+	}
+
+	@GetMapping("/admin/companies")
+	@ResponseStatus(HttpStatus.OK)
+	public ResponseEntity<?> getCompanies() {
+		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+		if (!auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ADMIN"))) {
+			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You can't access this data");
+		}
+		return ResponseEntity.ok().body(companyService.findAll());
+	}
+
 }

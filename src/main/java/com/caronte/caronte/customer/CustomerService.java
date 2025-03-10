@@ -15,6 +15,11 @@ public class CustomerService {
         this.customerRepository = customerRepository;
     }
 
+    @Transactional
+    public Iterable<Customer> findAll(){
+        return customerRepository.findAll();
+    }
+
     @Transactional(readOnly = true)
     public Customer findById(Long id){
         Customer customer = customerRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Customer not found"));
