@@ -1,5 +1,6 @@
 package com.caronte.caronte.company;
 
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -11,9 +12,16 @@ import com.caronte.caronte.auth.payload.response.CompanyUpdateRequest;
 public class CompanyService { 
 
     private final CompanyRepository companyRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    public CompanyService(CompanyRepository companyRepository) {
+    public CompanyService(CompanyRepository companyRepository, PasswordEncoder passwordEncoder) {
         this.companyRepository = companyRepository;
+        this.passwordEncoder = passwordEncoder;
+    }
+
+    @Transactional(readOnly = true)
+    public Iterable<Company> findAll(){
+        return companyRepository.findAll();
     }
 
     @Transactional(readOnly = true)
@@ -31,6 +39,7 @@ public class CompanyService {
         companyToUpdate.setCity(request.getCity());
         companyToUpdate.setZipCode(request.getZipCode());
         companyToUpdate.setEmail(request.getEmail());
+        companyToUpdate.setPassword(passwordEncoder.encode(request.getPassword()));
         companyToUpdate.setTelephone(request.getTelephone());
         companyToUpdate.setImageUrl(request.getImageUrl());
         companyToUpdate.setDescription(request.getDescription());

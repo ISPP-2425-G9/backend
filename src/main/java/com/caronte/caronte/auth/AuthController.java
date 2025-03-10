@@ -191,14 +191,48 @@ public class AuthController {
 		userService.delete(userId);
 	}
 
-	@DeleteMapping("/admin/{userId}")
-	@ResponseStatus(HttpStatus.NO_CONTENT)
-	public void deleteAdmin(@PathVariable Long userId) {
+	@GetMapping("/admin/customers")
+	@ResponseStatus(HttpStatus.OK)
+	public ResponseEntity<?> getCustomers() {
 		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 		if (!auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ADMIN"))) {
 			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You can't access this data");
 		}
-		userService.delete(userId);
+		return ResponseEntity.ok().body(customerService.findAll());
+	}
+
+	@PutMapping("/admin/customers/{customerId}")
+	@ResponseStatus(HttpStatus.OK)
+	public Customer updateCustomerByAdmin(
+			@PathVariable Long customerId,
+			@RequestBody @Valid CustomerUpdateRequest request) {
+		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+		if (!auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ADMIN"))) {
+			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You can't modify this data");
+		}
+		return customerService.update(customerId, request);
+	}
+
+	@GetMapping("/admin/companies")
+	@ResponseStatus(HttpStatus.OK)
+	public ResponseEntity<?> getCompanies() {
+		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+		if (!auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ADMIN"))) {
+			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You can't access this data");
+		}
+		return ResponseEntity.ok().body(companyService.findAll());
+	}
+
+	@PutMapping("/admin/companies/{companyId}")
+	@ResponseStatus(HttpStatus.OK)
+	public Company updateCompanyByAdmin(
+			@PathVariable Long companyId,
+			@RequestBody @Valid CompanyUpdateRequest request) {
+		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+		if (!auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ADMIN"))) {
+			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You can't modify this data");
+		}
+		return companyService.update(companyId, request);
 	}
 
 }
