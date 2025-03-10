@@ -1,30 +1,36 @@
 package com.caronte.caronte.obituary;
 
-import org.springframework.http.ResponseEntity;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.annotation.*;
-
-import com.caronte.caronte.imageTemplate.ImageTemplateService;
-import com.caronte.caronte.obituary.ObituraryRequestDto.ContactDto;
-import com.caronte.caronte.receiver.Receiver;
-import com.caronte.caronte.receiver.ReceiverService;
-
-import jakarta.validation.Valid;
-
-import com.caronte.caronte.configuration.services.UserDetailsImpl;
-import com.caronte.caronte.customer.Customer;
-import com.caronte.caronte.customer.CustomerRepository;
-import com.caronte.caronte.imageTemplate.ImageTemplate;
-
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
+
+import com.caronte.caronte.configuration.services.UserDetailsImpl;
+import com.caronte.caronte.customer.Customer;
+import com.caronte.caronte.customer.CustomerRepository;
+import com.caronte.caronte.imageTemplate.ImageTemplate;
+import com.caronte.caronte.imageTemplate.ImageTemplateService;
+import com.caronte.caronte.receiver.Receiver;
+import com.caronte.caronte.receiver.ReceiverService;
+import com.caronte.caronte.util.MediaHandler;
+
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("api/obituary")
@@ -58,12 +64,15 @@ public class ObituaryController {
                 birthDate = LocalDate.parse(request.getBirthDate(), formatter);
             }
 
-            String customImageUrl = request.getCustomImage();
+            String customUrl = request.getCustomImage();
+            String customImageUrl = null;
+            if (customUrl != null)
+                customImageUrl = MediaHandler.uploadImageToCloudinary(MediaHandler.base64ToImage(customUrl));
             String farewellMessage = request.getFarewellMessage();
             String farewellPhrase = request.getFarewellPhrase();
             Long imageTemplateId = request.getImageTemplate_id();
             Boolean isMine = Boolean.parseBoolean(request.getIsMine());
-
+ 
             Customer customer = customerRepository.findById(customerId)
                     .orElseThrow(() -> new RuntimeException("Customer not found"));
             ImageTemplate imageTemplate = imageTemplateService.findById(imageTemplateId);
