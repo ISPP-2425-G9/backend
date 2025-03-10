@@ -1,7 +1,5 @@
 package com.caronte.caronte.obituary;
 
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,6 +13,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -23,7 +22,6 @@ import org.springframework.web.server.ResponseStatusException;
 
 import com.caronte.caronte.configuration.services.UserDetailsImpl;
 import com.caronte.caronte.customer.CustomerRepository;
-import com.caronte.caronte.imageTemplate.ImageTemplate;
 import com.caronte.caronte.imageTemplate.ImageTemplateService;
 import com.caronte.caronte.receiver.Receiver;
 import com.caronte.caronte.receiver.ReceiverService;
@@ -35,34 +33,12 @@ import jakarta.validation.Valid;
 public class ObituaryController {
 
     private final ObituaryService obituaryService;
-    private final CustomerRepository customerRepository;
-    private final ImageTemplateService imageTemplateService;
     private final ReceiverService receiverService;
 
     public ObituaryController(ObituaryService obituaryService, CustomerRepository customerRepository,
             ImageTemplateService imageTemplateService, ReceiverService receiverService) {
         this.obituaryService = obituaryService;
-        this.customerRepository = customerRepository;
-        this.imageTemplateService = imageTemplateService;
         this.receiverService = receiverService;
-    }
-
-    private LocalDate parseDate(String input) {
-        if (input == null || input.trim().isEmpty())
-            return null;
-
-        List<DateTimeFormatter> formatters = List.of(
-                DateTimeFormatter.ofPattern("dd/MM/yyyy"),
-                DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-
-        for (DateTimeFormatter formatter : formatters) {
-            try {
-                return LocalDate.parse(input, formatter);
-            } catch (Exception ignored) {
-            }
-        }
-
-        throw new RuntimeException("Formato de fecha inválido: " + input);
     }
 
     @PostMapping("/create")
@@ -85,50 +61,20 @@ public class ObituaryController {
         }
     }
 
-    @PostMapping("/update/{obituary_id}")
+    @PutMapping("/update/{obituary_id}")
     public ResponseEntity<?> updateObituary(@RequestBody @Valid ObituraryRequestDto request,
-            @PathVariable Long obituary_id, Authentication authentication) {
+            @PathVariable Long obituary_id,
+            Authentication authentication) {
         try {
             UserDetailsImpl userPrincipal = (UserDetailsImpl) authentication.getPrincipal();
             Long customerId = userPrincipal.getId();
-            Obituary oldObituary = obituaryService.findById(obituary_id);
 
-            if (oldObituary.getCustomer().getId() != customerId) {
-                return ResponseEntity.badRequest().body(Map.of("error", "You are not allowed to update this obituary"));
-            }
-
-            String name = request.getName();
-            LocalDate birthDate = parseDate(request.getBirthDate());
-            LocalDate deathDate = parseDate(request.getDeathDate());
-
-            String customImageUrl = request.getCustomImage();
-            String farewellMessage = request.getFarewellMessage();
-            String farewellPhrase = request.getFarewellPhrase();
-            Long imageTemplateId = request.getImageTemplate_id();
-            ImageTemplate imageTemplate = imageTemplateService.findById(imageTemplateId);
-            Boolean isMine = Boolean.parseBoolean(request.getIsMine());
-
-            oldObituary.setName(name);
-            oldObituary.setBirthDate(birthDate);
-            oldObituary.setDeathDate(deathDate);
-            oldObituary.setCustomImageUrl(customImageUrl);
-            oldObituary.setFarewellMessage(farewellMessage);
-            oldObituary.setFarewellPhrase(farewellPhrase);
-            oldObituary.setIsMine(isMine);
-            oldObituary.setImageTemplate(imageTemplate);
-
-            Obituary newObituary = obituaryService.updateObituary(oldObituary);
-
-            receiverService.deleteReceiversByObituaryId(newObituary);
-
-            List<ObituraryRequestDto.ContactDto> contacts = request.getContacts();
-            for (ObituraryRequestDto.ContactDto contact : contacts) {
-                receiverService.saveObituaryReceiver(contact.getName(), contact.getPhone(), contact.getEmail(),
-                        newObituary);
-            }
+            obituaryService.updateObituaryWithReceivers(customerId, obituary_id, request);
 
             return ResponseEntity.ok("Obituary updated successfully");
 
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("error", e.getMessage()));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", e.getMessage()));
         }
@@ -136,23 +82,19 @@ public class ObituaryController {
 
     @DeleteMapping("/delete/{obituary_id}")
     public ResponseEntity<String> deleteObituary(@PathVariable Long obituary_id, Authentication authentication) {
-        Obituary obituary = null;
         try {
-
             UserDetailsImpl userPrincipal = (UserDetailsImpl) authentication.getPrincipal();
             Long customerId = userPrincipal.getId();
 
-            obituary = obituaryService.findById(obituary_id);
+            obituaryService.deleteObituaryByCustomer(customerId, obituary_id);
 
-            if (obituary.getCustomer().getId() != customerId) {
-                return ResponseEntity.badRequest().body("You are not allowed to delete this obituary");
-            }
-            obituaryService.deleteObituary(obituary_id);
+            return ResponseEntity.ok("Obituary deleted successfully");
 
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
         } catch (Exception e) {
-            System.out.println(e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Unexpected error occurred");
         }
-        return ResponseEntity.ok("Obituary deleted successfully");
     }
 
     @GetMapping("/myObituaries")
@@ -175,7 +117,7 @@ public class ObituaryController {
             UserDetailsImpl userPrincipal = (UserDetailsImpl) authentication.getPrincipal();
             Long customerId = userPrincipal.getId();
             Obituary obituary = obituaryService.getObituaryById(obituaryId);
-            if (obituary.getCustomer().getId() != customerId) {
+            if (!obituary.getCustomer().getId().equals(customerId)) {
                 throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You can't access this data");
             }
             obituary.setCustomer(null);
@@ -193,7 +135,7 @@ public class ObituaryController {
             Long customerId = userPrincipal.getId();
             Obituary obituary = obituaryService.getObituaryById(obituaryId);
             List<Receiver> receivers = receiverService.getReceiversByObituaryId(obituary);
-            if (obituary.getCustomer().getId() != customerId) {
+            if (!obituary.getCustomer().getId().equals(customerId)) {
                 throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You can't access this data");
             }
             obituary.setCustomer(null);

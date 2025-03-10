@@ -85,6 +85,54 @@ public class ObituaryService {
     }
 
     @Transactional
+    public Obituary updateObituaryWithReceivers(Long customerId, Long obituaryId, ObituraryRequestDto request) {
+        Obituary obituary = findById(obituaryId);
+
+        if (!obituary.getCustomer().getId().equals(customerId)) {
+            throw new IllegalArgumentException("You are not allowed to update this obituary");
+        }
+
+        String name = request.getName();
+        LocalDate birthDate = parseDate(request.getBirthDate());
+        LocalDate deathDate = parseDate(request.getDeathDate());
+        String farewellMessage = request.getFarewellMessage();
+        String farewellPhrase = request.getFarewellPhrase();
+        Long imageTemplateId = request.getImageTemplate_id();
+        Boolean isMine = Boolean.parseBoolean(request.getIsMine());
+        String customUrl = request.getCustomImage();
+
+        ImageTemplate imageTemplate = imageTemplateService.findById(imageTemplateId);
+
+        String customImageUrl;
+        if (customUrl != null && customUrl.startsWith("data:image/")) {
+            customImageUrl = MediaHandler.uploadImageToCloudinary(MediaHandler.base64ToImage(customUrl));
+        } else {
+            customImageUrl = customUrl;
+        }
+
+        obituary.setName(name);
+        obituary.setBirthDate(birthDate);
+        obituary.setDeathDate(deathDate);
+        obituary.setCustomImageUrl(customImageUrl);
+        obituary.setFarewellMessage(farewellMessage);
+        obituary.setFarewellPhrase(farewellPhrase);
+        obituary.setIsMine(isMine);
+        obituary.setImageTemplate(imageTemplate);
+
+        Obituary updatedObituary = updateObituary(obituary);
+
+        receiverService.deleteReceiversByObituaryId(updatedObituary);
+
+        List<ObituraryRequestDto.ContactDto> contacts = request.getContacts();
+        for (ObituraryRequestDto.ContactDto contact : contacts) {
+            receiverService.saveObituaryReceiver(contact.getName(), contact.getPhone(), contact.getEmail(),
+                    updatedObituary);
+        }
+
+        return updatedObituary;
+    }
+
+    @Transactional
     public Obituary saveObituary(String name, LocalDate birth_date, LocalDate death_date, String custom_image_url,
             String farewell_message, String farewell_phrase, Boolean is_mine, Customer customer,
             ImageTemplate imageTemplate) {
@@ -101,6 +149,19 @@ public class ObituaryService {
         obituary.setImageTemplate(imageTemplate);
         return obituaryRepository.save(obituary);
     }
+
+    @Transactional
+    public void deleteObituaryByCustomer(Long customerId, Long obituaryId) {
+        Obituary obituary = findById(obituaryId);
+
+        if (!obituary.getCustomer().getId().equals(customerId)) {
+            throw new IllegalArgumentException("You are not allowed to delete this obituary");
+        }
+
+        obituaryRepository.deleteById(obituaryId);
+    }
+
+    
 
     @Transactional(readOnly = true)
     public Obituary findById(Long id) {
