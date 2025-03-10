@@ -235,4 +235,14 @@ public class AuthController {
 		return companyService.update(companyId, request);
 	}
 
+	@DeleteMapping("/admin/{userId}")
+ 	@ResponseStatus(HttpStatus.NO_CONTENT)
+ 	public void deleteAdmin(@PathVariable Long userId) {
+ 		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+ 		if (!auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ADMIN"))) {
+ 			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You can't access this data");
+ 		}
+ 		userService.delete(userId);
+ 	}
+
 }
