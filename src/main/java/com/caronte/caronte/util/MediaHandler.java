@@ -1,16 +1,18 @@
 package com.caronte.caronte.util;
 
-import com.cloudinary.Cloudinary;
-import com.cloudinary.utils.ObjectUtils;
-import io.github.cdimascio.dotenv.Dotenv;
-
-import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.Base64;
 import java.util.Map;
+
+import javax.imageio.ImageIO;
+
+import com.cloudinary.Cloudinary;
+import com.cloudinary.utils.ObjectUtils;
+
+import io.github.cdimascio.dotenv.Dotenv;
 
 public class MediaHandler {
 
@@ -32,7 +34,7 @@ public class MediaHandler {
 
     public static String uploadImageToCloudinary(BufferedImage image) {
         Dotenv dotenv = Dotenv.load();
-        Cloudinary cloudinary_image = new Cloudinary(dotenv.get("CLOUDINARY_IMAGES_URL"));
+        Cloudinary cloudinary_image = new Cloudinary(System.getenv("CLOUDINARY_IMAGES_URL"));
 
         try {
             File tempFile = File.createTempFile("upload_", ".png");
