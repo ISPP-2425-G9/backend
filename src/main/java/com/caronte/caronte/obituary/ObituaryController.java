@@ -41,49 +41,66 @@ public class ObituaryController {
     private final ImageTemplateService imageTemplateService;
     private final ReceiverService receiverService;
 
-    public ObituaryController(ObituaryService obituaryService, CustomerRepository customerRepository,ImageTemplateService imageTemplateService, ReceiverService receiverService) {
+    public ObituaryController(ObituaryService obituaryService, CustomerRepository customerRepository,
+            ImageTemplateService imageTemplateService, ReceiverService receiverService) {
         this.obituaryService = obituaryService;
         this.customerRepository = customerRepository;
         this.imageTemplateService = imageTemplateService;
         this.receiverService = receiverService;
     }
 
+    private LocalDate parseDate(String input) {
+        if (input == null || input.trim().isEmpty())
+            return null;
+
+        List<DateTimeFormatter> formatters = List.of(
+                DateTimeFormatter.ofPattern("dd/MM/yyyy"),
+                DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+
+        for (DateTimeFormatter formatter : formatters) {
+            try {
+                return LocalDate.parse(input, formatter);
+            } catch (Exception ignored) {
+            }
+        }
+
+        throw new RuntimeException("Formato de fecha inválido: " + input);
+    }
+
     @PostMapping("/create")
-    public ResponseEntity<?> createObituary(@RequestBody @Valid ObituraryRequestDto request, Authentication authentication) {
+    public ResponseEntity<?> createObituary(@RequestBody @Valid ObituraryRequestDto request,
+            Authentication authentication) {
         try {
             UserDetailsImpl userPrincipal = (UserDetailsImpl) authentication.getPrincipal();
             Long customerId = userPrincipal.getId();
             String name = request.getName();
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-
-            LocalDate birthDate = null;
-            LocalDate deathDate = null;
-
-            if( request.getBirthDate() != ""){
-                System.out.println("-".repeat(50));
-                birthDate = LocalDate.parse(request.getBirthDate(), formatter);
-            }
+            LocalDate birthDate = parseDate(request.getBirthDate());
+            LocalDate deathDate = parseDate(request.getDeathDate());
 
             String customUrl = request.getCustomImage();
             String customImageUrl = null;
-            if (customUrl != null)
+            if (customUrl != null && customUrl.startsWith("data:image/")) {
                 customImageUrl = MediaHandler.uploadImageToCloudinary(MediaHandler.base64ToImage(customUrl));
+            } else {
+                customImageUrl = customUrl;
+            }
             String farewellMessage = request.getFarewellMessage();
             String farewellPhrase = request.getFarewellPhrase();
             Long imageTemplateId = request.getImageTemplate_id();
             Boolean isMine = Boolean.parseBoolean(request.getIsMine());
- 
+
             Customer customer = customerRepository.findById(customerId)
                     .orElseThrow(() -> new RuntimeException("Customer not found"));
             ImageTemplate imageTemplate = imageTemplateService.findById(imageTemplateId);
 
             Obituary obituary = obituaryService.saveObituary(
-                    name, birthDate, deathDate, customImageUrl, farewellMessage, farewellPhrase, isMine, customer, imageTemplate
-            );
+                    name, birthDate, deathDate, customImageUrl, farewellMessage, farewellPhrase, isMine, customer,
+                    imageTemplate);
 
             List<ObituraryRequestDto.ContactDto> contacts = request.getContacts();
             for (ObituraryRequestDto.ContactDto contact : contacts) {
-                receiverService.saveObituaryReceiver(contact.getName(), contact.getPhone(), contact.getEmail(), obituary);
+                receiverService.saveObituaryReceiver(contact.getName(), contact.getPhone(), contact.getEmail(),
+                        obituary);
             }
 
             return ResponseEntity.ok("Obituary created successfully");
@@ -93,9 +110,9 @@ public class ObituaryController {
         }
     }
 
-
     @PostMapping("/update/{obituary_id}")
-    public ResponseEntity<?> updateObituary(@RequestBody @Valid ObituraryRequestDto request, @PathVariable Long obituary_id, Authentication authentication) {
+    public ResponseEntity<?> updateObituary(@RequestBody @Valid ObituraryRequestDto request,
+            @PathVariable Long obituary_id, Authentication authentication) {
         try {
             UserDetailsImpl userPrincipal = (UserDetailsImpl) authentication.getPrincipal();
             Long customerId = userPrincipal.getId();
@@ -106,13 +123,8 @@ public class ObituaryController {
             }
 
             String name = request.getName();
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-            LocalDate birthDate = null;
-            LocalDate deathDate = null;
-            
-            if (!request.getBirthDate().isEmpty()) {
-                birthDate = LocalDate.parse(request.getBirthDate(), formatter);
-            }
+            LocalDate birthDate = parseDate(request.getBirthDate());
+            LocalDate deathDate = parseDate(request.getDeathDate());
 
             String customImageUrl = request.getCustomImage();
             String farewellMessage = request.getFarewellMessage();
@@ -136,37 +148,35 @@ public class ObituaryController {
 
             List<ObituraryRequestDto.ContactDto> contacts = request.getContacts();
             for (ObituraryRequestDto.ContactDto contact : contacts) {
-                receiverService.saveObituaryReceiver(contact.getName(), contact.getPhone(), contact.getEmail(), newObituary);
+                receiverService.saveObituaryReceiver(contact.getName(), contact.getPhone(), contact.getEmail(),
+                        newObituary);
             }
 
-            return ResponseEntity.ok("Obituary updated successfully"); 
+            return ResponseEntity.ok("Obituary updated successfully");
 
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", e.getMessage()));
         }
     }
 
-
-
-
     @DeleteMapping("/delete/{obituary_id}")
     public ResponseEntity<String> deleteObituary(@PathVariable Long obituary_id, Authentication authentication) {
         Obituary obituary = null;
-        try{
-            
+        try {
+
             UserDetailsImpl userPrincipal = (UserDetailsImpl) authentication.getPrincipal();
             Long customerId = userPrincipal.getId();
 
             obituary = obituaryService.findById(obituary_id);
 
-            if(obituary.getCustomer().getId() != customerId){
+            if (obituary.getCustomer().getId() != customerId) {
                 return ResponseEntity.badRequest().body("You are not allowed to delete this obituary");
             }
             obituaryService.deleteObituary(obituary_id);
-            
-        }catch(Exception e){
+
+        } catch (Exception e) {
             System.out.println(e);
-        } 
+        }
         return ResponseEntity.ok("Obituary deleted successfully");
     }
 
@@ -218,25 +228,17 @@ public class ObituaryController {
         }
     }
 
-
-    @ExceptionHandler({MethodArgumentNotValidException.class, IllegalArgumentException.class})
+    @ExceptionHandler({ MethodArgumentNotValidException.class, IllegalArgumentException.class })
     public ResponseEntity<Map<String, String>> handleValidationExceptions(Exception ex) {
         Map<String, String> errors = new HashMap<>();
-    
+
         if (ex instanceof MethodArgumentNotValidException) {
-            ((MethodArgumentNotValidException) ex).getBindingResult().getFieldErrors().forEach(error -> 
-                errors.put(error.getField(), error.getDefaultMessage())
-            );
+            ((MethodArgumentNotValidException) ex).getBindingResult().getFieldErrors()
+                    .forEach(error -> errors.put(error.getField(), error.getDefaultMessage()));
         } else {
             errors.put("error", ex.getMessage());
         }
-    
+
         return ResponseEntity.badRequest().body(errors);
     }
 }
-
-
-
-
-    
-
