@@ -80,6 +80,7 @@ public class ObituaryController {
                  String contactEmail = contact.getEmail();
                  receiverService.saveObituaryReceiver(contactName, contactTelephone, contactEmail, obituary);   
              }  
+             receiverService.notifyReceivers(contacts, obituary);
 
             
         }catch(Exception e){
