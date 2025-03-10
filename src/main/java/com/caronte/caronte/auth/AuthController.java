@@ -235,7 +235,7 @@ public class AuthController {
 		return companyService.update(companyId, request);
 	}
 
-	@DeleteMapping("/admin/{userId}")
+	@DeleteMapping("/admin/users/{userId}")
  	@ResponseStatus(HttpStatus.NO_CONTENT)
  	public void deleteAdmin(@PathVariable Long userId) {
  		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
