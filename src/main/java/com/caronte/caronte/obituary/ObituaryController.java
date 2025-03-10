@@ -22,13 +22,11 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.caronte.caronte.configuration.services.UserDetailsImpl;
-import com.caronte.caronte.customer.Customer;
 import com.caronte.caronte.customer.CustomerRepository;
 import com.caronte.caronte.imageTemplate.ImageTemplate;
 import com.caronte.caronte.imageTemplate.ImageTemplateService;
 import com.caronte.caronte.receiver.Receiver;
 import com.caronte.caronte.receiver.ReceiverService;
-import com.caronte.caronte.util.MediaHandler;
 
 import jakarta.validation.Valid;
 
@@ -73,40 +71,17 @@ public class ObituaryController {
         try {
             UserDetailsImpl userPrincipal = (UserDetailsImpl) authentication.getPrincipal();
             Long customerId = userPrincipal.getId();
-            String name = request.getName();
-            LocalDate birthDate = parseDate(request.getBirthDate());
-            LocalDate deathDate = parseDate(request.getDeathDate());
 
-            String customUrl = request.getCustomImage();
-            String customImageUrl = null;
-            if (customUrl != null && customUrl.startsWith("data:image/")) {
-                customImageUrl = MediaHandler.uploadImageToCloudinary(MediaHandler.base64ToImage(customUrl));
-            } else {
-                customImageUrl = customUrl;
-            }
-            String farewellMessage = request.getFarewellMessage();
-            String farewellPhrase = request.getFarewellPhrase();
-            Long imageTemplateId = request.getImageTemplate_id();
-            Boolean isMine = Boolean.parseBoolean(request.getIsMine());
+            Obituary obituary = obituaryService.createObituaryWithReceivers(request, customerId);
 
-            Customer customer = customerRepository.findById(customerId)
-                    .orElseThrow(() -> new RuntimeException("Customer not found"));
-            ImageTemplate imageTemplate = imageTemplateService.findById(imageTemplateId);
-
-            Obituary obituary = obituaryService.saveObituary(
-                    name, birthDate, deathDate, customImageUrl, farewellMessage, farewellPhrase, isMine, customer,
-                    imageTemplate);
-
-            List<ObituraryRequestDto.ContactDto> contacts = request.getContacts();
-            for (ObituraryRequestDto.ContactDto contact : contacts) {
-                receiverService.saveObituaryReceiver(contact.getName(), contact.getPhone(), contact.getEmail(),
-                        obituary);
-            }
+            System.out.println(obituary);
 
             return ResponseEntity.ok("Obituary created successfully");
 
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", e.getMessage()));
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", e.getMessage()));
         }
     }
 
