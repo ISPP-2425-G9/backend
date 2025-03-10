@@ -22,6 +22,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import com.caronte.caronte.util.MediaHandler;
 
 import org.springframework.security.core.Authentication;
 import org.springframework.web.server.ResponseStatusException;
@@ -34,12 +35,14 @@ public class ObituaryController {
     private final CustomerRepository customerRepository;
     private final ImageTemplateService imageTemplateService;
     private final ReceiverService receiverService;
+    private final MediaHandler mediaHandler;
 
     public ObituaryController(ObituaryService obituaryService, CustomerRepository customerRepository,ImageTemplateService imageTemplateService, ReceiverService receiverService) {
         this.obituaryService = obituaryService;
         this.customerRepository = customerRepository;
         this.imageTemplateService = imageTemplateService;
         this.receiverService = receiverService;
+        this.mediaHandler = new MediaHandler();
     }
 
     @PostMapping("/create")
@@ -58,7 +61,8 @@ public class ObituaryController {
                 birthDate = LocalDate.parse(request.getBirthDate(), formatter);
             }
 
-            String customImageUrl = request.getCustomImage();
+            String customUrl = request.getCustomImage();
+            String customImageUrl = mediaHandler.uploadImageToCloudinary(MediaHandler.base64ToImage(customUrl));
             String farewellMessage = request.getFarewellMessage();
             String farewellPhrase = request.getFarewellPhrase();
             Long imageTemplateId = request.getImageTemplate_id();
