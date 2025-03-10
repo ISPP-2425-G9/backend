@@ -161,8 +161,6 @@ public class ObituaryService {
         obituaryRepository.deleteById(obituaryId);
     }
 
-    
-
     @Transactional(readOnly = true)
     public Obituary findById(Long id) {
         return obituaryRepository.findById(id).orElseThrow(() -> new RuntimeException("Obituary not found"));
