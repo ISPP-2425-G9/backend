@@ -43,7 +43,6 @@ public class RegisterRequestCompany {
     
     @Length(max=255)
     @NotBlank(message = "La dirección es requerida")
-    @JsonProperty("direction")
     private String address;
     
     @Length(max=100)
