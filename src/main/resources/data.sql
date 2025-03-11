@@ -10,17 +10,19 @@ INSERT INTO admin (id) VALUES
 (1),
 (2);
 
-INSERT INTO company (id, address, city, description, image_url, nif, zip_code) VALUES 
-(3, 'Calle Tarfia, 67', 'Sevilla', 'Descripción de Empresa Uno', NULL, 'A12345678', '41001'),
-(4, 'Calle Mirador de Montepinar, 4', 'Madrid', 'Descripción de Empresa Dos', NULL, 'B87654321', '28001');
-
 INSERT INTO plan (id, billing_address, expire_date, plan_type) VALUES 
-(1, 'Calle Contubernio, 67', '2026-12-31', 'FREE'),
-(2, 'Calle El Olivo Torcido, 2', '2027-12-31', 'PREMIUM');
+(1, NULL, NULL, 'FREE'),
+(2, 'ES7921000813610123456789', '2027-12-31', 'PREMIUM'),
+(3, NULL, NULL, 'FREE'),
+(4, 'DE89370400440532013000', '2025-10-25', 'PREMIUM');
+
+INSERT INTO company (id, address, city, description, image_url, nif, zip_code, plan_id) VALUES 
+(3, 'Calle Tarfia, 67', 'Sevilla', 'Descripción de Empresa Uno', NULL, 'A12345678', '41001', 1),
+(4, 'Calle Mirador de Montepinar, 4', 'Madrid', 'Descripción de Empresa Dos', NULL, 'B87654321', '28001', 2);
 
 INSERT INTO customer (id, dni, is_active, plan_id) VALUES 
-(5, '26745987T', 0, 1),
-(6, '24072003L', 1, 2);
+(5, '26745987T', 0, 3),
+(6, '24072003L', 1, 4);
 
 INSERT INTO emergency_contact (id, email, name, telephone, customer_id) VALUES 
 (1, 'contacto1@caronte.site', 'Contacto Uno', '678945638', 5),
