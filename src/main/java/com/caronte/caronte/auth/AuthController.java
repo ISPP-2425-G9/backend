@@ -145,15 +145,25 @@ public class AuthController {
 
 	@PutMapping("/customers/{customerId}")
 	@ResponseStatus(HttpStatus.OK)
-	public Customer updateCustomer(
+	public ResponseEntity<?> updateCustomer(
 			@PathVariable Long customerId,
 			@RequestBody @Valid CustomerUpdateRequest request) {
-
-		if (userService.findCurrentUser().getId() != customerId) {
-			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You can't modify this data");
+		try {
+			if (userService.findCurrentUser().getId() != customerId) {
+				throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You can't modify this data");
+			}
+			Customer customer = customerService.update(customerId, request);
+			UserDetailsImpl userDetails = UserDetailsImpl.build(customer);
+			String jwt = jwtUtils.generateJwtToken(userDetails);
+			List<String> roles = userDetails.getAuthorities().stream().map(item -> item.getAuthority())
+					.collect(Collectors.toList());
+			JwtResponse jwtResponse = new JwtResponse(jwt, userDetails.getId(), userDetails.getUsername(), roles);
+			return ResponseEntity.ok().body(jwtResponse);
+		} catch (Exception e) {
+			return ResponseEntity.badRequest().body(e.getMessage());
 		}
 
-		return customerService.update(customerId, request);
+
 	}
 
 	@GetMapping("/companies/{companyId}")
@@ -166,20 +176,30 @@ public class AuthController {
 			Company company = companyService.findById(companyId);
 			return ResponseEntity.ok().body(company);
 		} catch (IllegalArgumentException exception) {
-			return ResponseEntity.badRequest().body("Company not found");
+			return ResponseEntity.badRequest().body(exception.getMessage());
 		}
 	}
 
 	@PutMapping("/companies/{companyId}")
 	@ResponseStatus(HttpStatus.OK)
-	public Company updateCompany(
+	public ResponseEntity<?> updateCompany(
 			@PathVariable Long companyId,
 			@RequestBody @Valid CompanyUpdateRequest request) {
-
-		if (userService.findCurrentUser().getId() != companyId) {
-			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You can't modify this data");
+		try {
+			if (userService.findCurrentUser().getId() != companyId) {
+				throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You can't modify this data");
+			}
+			Company company = companyService.update(companyId, request);
+			UserDetailsImpl userDetails = UserDetailsImpl.build(company);
+			String jwt = jwtUtils.generateJwtToken(userDetails);
+			List<String> roles = userDetails.getAuthorities().stream().map(item -> item.getAuthority())
+					.collect(Collectors.toList());
+			JwtResponse jwtResponse = new JwtResponse(jwt, userDetails.getId(), userDetails.getUsername(), roles);
+			return ResponseEntity.ok().body(jwtResponse);
+		} catch (Exception e) {
+			return ResponseEntity.badRequest().body(e.getMessage());
 		}
-		return companyService.update(companyId, request);
+
 	}
 
 	@DeleteMapping("/{userId}")
