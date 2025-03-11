@@ -13,16 +13,20 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.filter.CorsFilter;
 
 import com.caronte.caronte.configuration.authorization.Authorization;
 import com.caronte.caronte.configuration.jwt.AuthEntryPointJwt;
 import com.caronte.caronte.configuration.jwt.AuthTokenFilter;
 import com.caronte.caronte.configuration.services.UserDetailsServiceImpl;
 
+import java.util.Arrays;
+
 @Configuration
-// @EnableWebSecurity
 public class SecurityConfig {
-    
+
 	public final UserDetailsServiceImpl userDetailsService;
 	public final AuthEntryPointJwt unauthorizedHandler;
 	public final DataSource dataSource;
@@ -35,7 +39,6 @@ public class SecurityConfig {
 	private static final String COMPANY_FREE = Authorization.COMPANY_FREE.name(); 
 	private static final String COMPANY_PREMIUM = Authorization.COMPANY_PREMIUM.name(); 
 
-
 	public SecurityConfig(UserDetailsServiceImpl userDetailsService, AuthEntryPointJwt unauthorizedHandler, DataSource dataSource){
 		this.userDetailsService = userDetailsService;
 		this.unauthorizedHandler = unauthorizedHandler;
@@ -44,23 +47,26 @@ public class SecurityConfig {
 
     @Bean
 	SecurityFilterChain configure(HttpSecurity http) throws Exception {
-		http	
+		http
+			.cors(cors -> cors.configurationSource(corsConfigurationSource()))  // ✅ CORS habilitado aquí
 			.csrf(AbstractHttpConfigurer::disable)		
 			.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))			
-			.headers((headers) -> headers.frameOptions((frameOptions) -> frameOptions.disable()))
-			.exceptionHandling((exepciontHandling) -> exepciontHandling.authenticationEntryPoint(unauthorizedHandler))			
-			.authorizeHttpRequests(authorizeRequests ->	authorizeRequests
+			.headers(headers -> headers.frameOptions(frameOptions -> frameOptions.disable()))
+			.exceptionHandling(exepciontHandling -> exepciontHandling.authenticationEntryPoint(unauthorizedHandler))
+			.authorizeHttpRequests(authorizeRequests -> authorizeRequests
 				.requestMatchers("/api/auth/login").anonymous()
 				.requestMatchers("/api/auth/customers/signup", "/api/auth/companies/signup").anonymous()
-				.requestMatchers("/api/auth/customers/**").hasAnyAuthority(ADMIN, CUSTOMER)
-				.requestMatchers("/api/auth/companies/**").hasAnyAuthority(ADMIN, COMPANY)
-			.anyRequest().permitAll())
-			.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);		
+				.requestMatchers("/api/auth/customers/**").hasAnyAuthority(ADMIN, CUSTOMER, CUSTOMER_FREE, CUSTOMER_PREMIUM) // ✅ Permitir acceso a clientes autenticados
+				.requestMatchers("/api/auth/companies/**").hasAnyAuthority(ADMIN, COMPANY, COMPANY_FREE, COMPANY_PREMIUM) // ✅ Permitir acceso a empresas autenticadas
+				.anyRequest().permitAll()
+			)
+			.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
+
 		return http.build();
 	}
 
     @Bean
-    AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception{
+    AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
 		return config.getAuthenticationManager();
 	}	
 
@@ -74,4 +80,29 @@ public class SecurityConfig {
     	return new BCryptPasswordEncoder();
     }
 
+    // ✅ Configuración CORS aplicada a todas las rutas protegidas
+    @Bean
+    public CorsFilter corsFilter() {
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        CorsConfiguration config = new CorsConfiguration();
+        config.setAllowCredentials(true);
+        config.setAllowedOrigins(Arrays.asList("http://localhost:8081")); // ✅ Asegurar que el frontend tiene acceso
+        config.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type")); // ✅ Permitir token JWT
+        config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        source.registerCorsConfiguration("/**", config);
+        return new CorsFilter(source);
+    }
+
+    // ✅ Fuente de configuración de CORS para HttpSecurity
+    @Bean
+    public UrlBasedCorsConfigurationSource corsConfigurationSource() {
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        CorsConfiguration config = new CorsConfiguration();
+        config.setAllowCredentials(true);
+        config.setAllowedOrigins(Arrays.asList("http://localhost:8081")); // ✅ Permitir solo el frontend
+        config.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type")); // ✅ Importante para el JWT
+        config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        source.registerCorsConfiguration("/**", config);
+        return source;
+    }
 }
