@@ -18,7 +18,6 @@ public class ObituraryRequestDto {
 
     private String deathDate;
 
-    @Size(max = 512, message = "The custom image URL must be at most 512 characters long")
     private String customImage; 
 
     @Size(max = 624, message = "The farewell message must be at most 624 characters long")
