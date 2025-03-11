@@ -1,5 +1,6 @@
 package com.caronte.caronte.customer;
 
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -9,10 +10,12 @@ import com.caronte.caronte.auth.payload.response.CustomerUpdateRequest;
 @Service
 public class CustomerService {
     
-    private CustomerRepository customerRepository;
+    private final CustomerRepository customerRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    public CustomerService(CustomerRepository customerRepository) {
+    public CustomerService(CustomerRepository customerRepository, PasswordEncoder passwordEncoder) {
         this.customerRepository = customerRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Transactional(readOnly = true)
@@ -28,8 +31,7 @@ public class CustomerService {
         customerToUpdate.setEmail(request.getEmail());
         customerToUpdate.setName(request.getFullName());
         customerToUpdate.setTelephone(request.getTelephone());
-        customerToUpdate.setPassword(request.getPassword());
-        
+        customerToUpdate.setPassword(this.passwordEncoder.encode(request.getPassword()));
         return customerRepository.save(customerToUpdate);
     }
 

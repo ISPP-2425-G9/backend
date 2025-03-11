@@ -37,6 +37,10 @@ public class JwtUtils {
 
 	public String generateJwtToken(Authentication authentication) {
 		UserDetailsImpl userPrincipal = (UserDetailsImpl) authentication.getPrincipal();
+		return generateJwtToken(userPrincipal);
+	}
+
+	public String generateJwtToken(UserDetailsImpl userPrincipal) {
 		Map<String, Object> claims = new HashMap<>();
 		claims.put("authorities",
 				userPrincipal.getAuthorities().stream().map(auth -> auth.getAuthority()).collect(Collectors.toList()));

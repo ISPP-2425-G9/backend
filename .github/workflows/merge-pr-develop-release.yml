@@ -1,0 +1,92 @@
+name: Create PR from develop to release on Tag Creation
+
+on:
+  push:
+    tags:
+      - 'v*'
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Clone the repository
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      # Step 2: Ensure all remote branches are available
+      - name: Fetch all branches
+        run: git fetch --all
+
+      # Step 3: Create a temporary branch from develop
+      - name: Create PR from develop to release
+        id: pr
+        run: |
+          # Configure git identity using GitHub Actions credentials
+          git config --global user.email "${{ github.actor }}@users.noreply.github.com"
+          git config --global user.name "${{ github.actor }}"
+
+          # Get the tag name
+          TAG_NAME="${GITHUB_REF##*/}"
+          PR_TITLE="Merge from develop to release on tag $TAG_NAME"
+          PR_BODY="This PR is automatically created to merge the changes from develop into release triggered by tag $TAG_NAME"
+
+          # Create a new branch from develop
+          git checkout -b temp-branch origin/develop
+
+          # Attempt to merge develop into release
+          git merge origin/release --no-ff --no-edit
+
+          # Push the temporary branch
+          git push origin temp-branch
+
+          # Create the PR using curl
+          PR_RESPONSE=$(curl -X POST -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            -d '{"title": "'"${PR_TITLE}"'", "body": "'"${PR_BODY}"'", "head": "temp-branch", "base": "release"}' \
+            "https://api.github.com/repos/${{ github.repository }}/pulls")
+
+          # Output the full response for debugging
+          echo "PR Response: $PR_RESPONSE"
+
+          # Extract the PR number
+          PR_NUMBER=$(echo "$PR_RESPONSE" | jq -r '.number')
+
+          # Check if the PR number is valid
+          if [ "$PR_NUMBER" == "null" ] || [ -z "$PR_NUMBER" ]; then
+            echo "Error: Could not retrieve the PR number. API response: $PR_RESPONSE"
+            exit 1
+          fi
+
+          echo "Created PR #$PR_NUMBER"
+
+          # Set the PR number as output to use in the merge step
+          echo "PR_NUMBER=$PR_NUMBER" >> $GITHUB_ENV
+
+      # Step 4: Auto-merge the PR
+      - name: Auto-merge Pull Request
+        run: |
+          PR_NUMBER=${{ env.PR_NUMBER }}
+          
+          # Check that the PR_NUMBER is not null
+          if [ "$PR_NUMBER" == "null" ] || [ -z "$PR_NUMBER" ]; then
+            echo "PR number is invalid or not set. Exiting..."
+            exit 1
+          fi
+
+          echo "Merging PR #$PR_NUMBER"
+
+          # Use GitHub CLI to merge the PR automatically
+          gh pr merge $PR_NUMBER --merge --admin --delete-branch
+
+          # Check if the PR was merged successfully
+          PR_STATE=$(gh pr view $PR_NUMBER --json state -q ".state")
+          if [ "$PR_STATE" == "MERGED" ]; then
+            echo "PR #$PR_NUMBER successfully merged."
+
+          else
+            echo "PR #$PR_NUMBER was not merged successfully. Exiting..."
+            exit 1
+          fi
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
