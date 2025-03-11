@@ -10,7 +10,7 @@ import com.caronte.caronte.auth.payload.response.CustomerUpdateRequest;
 @Service
 public class CustomerService {
     
-    private CustomerRepository customerRepository;
+    private final CustomerRepository customerRepository;
     private final PasswordEncoder passwordEncoder;
 
     public CustomerService(CustomerRepository customerRepository, PasswordEncoder passwordEncoder) {
@@ -36,8 +36,7 @@ public class CustomerService {
         customerToUpdate.setEmail(request.getEmail());
         customerToUpdate.setName(request.getFullName());
         customerToUpdate.setTelephone(request.getTelephone());
-        customerToUpdate.setPassword(passwordEncoder.encode(request.getPassword()));
-        
+        customerToUpdate.setPassword(this.passwordEncoder.encode(request.getPassword()));
         return customerRepository.save(customerToUpdate);
     }
 

@@ -33,7 +33,6 @@ public class CompanyService {
     @Transactional
     public Company update(Long id, CompanyUpdateRequest request) {
         Company companyToUpdate = companyRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Company not found"));
-        
         companyToUpdate.setName(request.getName());
         companyToUpdate.setAddress(request.getAddress());
         companyToUpdate.setCity(request.getCity());
@@ -43,7 +42,7 @@ public class CompanyService {
         companyToUpdate.setTelephone(request.getTelephone());
         companyToUpdate.setImageUrl(request.getImageUrl());
         companyToUpdate.setDescription(request.getDescription());
-    
+        companyToUpdate.setPassword(this.passwordEncoder.encode(request.getPassword()));
         return companyRepository.save(companyToUpdate);
     }
 
