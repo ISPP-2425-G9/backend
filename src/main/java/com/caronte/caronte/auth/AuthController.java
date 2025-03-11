@@ -201,6 +201,21 @@ public class AuthController {
 		return ResponseEntity.ok().body(customerService.findAll());
 	}
 
+	@GetMapping("/admin/customers/{customerId}")
+	@ResponseStatus(HttpStatus.OK)
+	public ResponseEntity<?> getCustomerByAdmin(@PathVariable Long customerId) {
+		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+		if (!auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ADMIN"))) {
+			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You can't access this data");
+		}
+		try {
+			Customer customer = customerService.findById(customerId);
+			return ResponseEntity.ok().body(customer);
+		} catch (IllegalArgumentException exception) {
+			return ResponseEntity.badRequest().body("Customer not found");
+		}
+	}
+
 	@PutMapping("/admin/customers/{customerId}")
 	@ResponseStatus(HttpStatus.OK)
 	public Customer updateCustomerByAdmin(
@@ -221,6 +236,21 @@ public class AuthController {
 			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You can't access this data");
 		}
 		return ResponseEntity.ok().body(companyService.findAll());
+	}
+
+	@GetMapping("/admin/companies/{companyId}")
+	@ResponseStatus(HttpStatus.OK)
+	public ResponseEntity<?> getCompanyByAdmin(@PathVariable Long companyId) {
+		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+		if (!auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ADMIN"))) {
+			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You can't access this data");
+		}
+		try {
+			Company company = companyService.findById(companyId);
+			return ResponseEntity.ok().body(company);
+		} catch (IllegalArgumentException exception) {
+			return ResponseEntity.badRequest().body("Company not found");
+		}
 	}
 
 	@PutMapping("/admin/companies/{companyId}")
