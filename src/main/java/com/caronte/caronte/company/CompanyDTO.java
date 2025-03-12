@@ -1,9 +1,7 @@
 package com.caronte.caronte.company;
 
-import com.caronte.caronte.plan.Plan;
 
 public class CompanyDTO {
-
     private String name;
     private String email;
     private String telephone;

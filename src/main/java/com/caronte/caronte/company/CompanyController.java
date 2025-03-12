@@ -1,6 +1,5 @@
 package com.caronte.caronte.company;
 
-import com.caronte.caronte.plan.PlanType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
