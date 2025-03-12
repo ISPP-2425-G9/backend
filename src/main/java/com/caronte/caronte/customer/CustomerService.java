@@ -36,11 +36,8 @@ public class CustomerService {
         customerToUpdate.setEmail(request.getEmail());
         customerToUpdate.setName(request.getFullName());
         customerToUpdate.setTelephone(request.getTelephone());
-        customerToUpdate.setPassword(this.passwordEncoder.encode(request.getPassword()));
         return customerRepository.save(customerToUpdate);
     }
 
-
-    
 
 }
