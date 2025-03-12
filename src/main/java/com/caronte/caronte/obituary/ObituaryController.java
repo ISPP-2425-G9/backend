@@ -127,24 +127,6 @@ public class ObituaryController {
         }
     }
 
-    @GetMapping("/receivers/{obituaryId}")
-    @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<?> getReceiversByObituaryId(@PathVariable Long obituaryId, Authentication authentication) {
-        try {
-            UserDetailsImpl userPrincipal = (UserDetailsImpl) authentication.getPrincipal();
-            Long customerId = userPrincipal.getId();
-            Obituary obituary = obituaryService.getObituaryById(obituaryId);
-            List<Receiver> receivers = receiverService.getReceiversByObituaryId(obituary);
-            if (!obituary.getCustomer().getId().equals(customerId)) {
-                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You can't access this data");
-            }
-            obituary.setCustomer(null);
-            return ResponseEntity.ok().body(receivers);
-        } catch (IllegalArgumentException exception) {
-            return ResponseEntity.badRequest().body(exception.getMessage());
-        }
-    }
-
     @ExceptionHandler({ MethodArgumentNotValidException.class, IllegalArgumentException.class })
     public ResponseEntity<Map<String, String>> handleValidationExceptions(Exception ex) {
         Map<String, String> errors = new HashMap<>();

@@ -1,5 +1,6 @@
 package com.caronte.caronte.receiver;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -30,9 +31,21 @@ public class ReceiverService {
         receiverRepository.deleteByObituary(obituary);
     }
     @Transactional(readOnly = true)
-    public List<Receiver> getReceiversByObituaryId(Obituary obituary) {
-        return receiverRepository.findByObituary(obituary);
+    public List<ReceiverResponseDTO> getReceiversByObituaryId(Obituary obituary) {
+        List<ReceiverResponseDTO> receivers = new ArrayList();
+        List<Receiver> receiversList = receiverRepository.findByObituary(obituary);
+        for (Receiver receiver : receiversList) {
+            ReceiverResponseDTO receiverResponseDTO = new ReceiverResponseDTO();
+            receiverResponseDTO.setName(receiver.getName());
+            receiverResponseDTO.setTelephone(receiver.getTelephone());
+            receiverResponseDTO.setEmail(receiver.getEmail());
+            receivers.add(receiverResponseDTO);
+        }
+
+        return receivers;
     }
+
+
 
     
 }
