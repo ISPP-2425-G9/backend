@@ -25,7 +25,7 @@ public class CompanyService {
     }
 
     @Transactional(readOnly = true)
-    public Company findById(Long id){
+    public Company findById(Long id){   
         Company company = companyRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Company not found"));
         return company;
     }
@@ -42,7 +42,11 @@ public class CompanyService {
         companyToUpdate.setTelephone(request.getTelephone());
         companyToUpdate.setImageUrl(request.getImageUrl());
         companyToUpdate.setDescription(request.getDescription());
-        companyToUpdate.setPassword(this.passwordEncoder.encode(request.getPassword()));
+        if(passwordEncoder.matches(request.getPassword(), companyToUpdate.getPassword())) {
+            companyToUpdate.setPassword(companyToUpdate.getPassword());
+        } else {
+            companyToUpdate.setPassword(this.passwordEncoder.encode(request.getPassword()));
+        }
         return companyRepository.save(companyToUpdate);
     }
 
