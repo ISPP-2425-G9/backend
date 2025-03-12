@@ -29,6 +29,7 @@ public class ReceiverService {
     @Transactional
     public void deleteReceiversByObituaryId(Obituary obituary) {
         receiverRepository.deleteByObituary(obituary);
+        receiverRepository.flush();
     }
     @Transactional(readOnly = true)
     public List<ReceiverResponseDTO> getReceiversByObituaryId(Obituary obituary) {
