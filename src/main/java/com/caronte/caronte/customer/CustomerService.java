@@ -36,10 +36,8 @@ public class CustomerService {
         customerToUpdate.setEmail(request.getEmail());
         customerToUpdate.setName(request.getFullName());
         customerToUpdate.setTelephone(request.getTelephone());
-        if(passwordEncoder.matches(request.getPassword(), customerToUpdate.getPassword())) {
-            customerToUpdate.setPassword(customerToUpdate.getPassword());
-        } else {
-            customerToUpdate.setPassword(this.passwordEncoder.encode(request.getPassword()));
+        if (!request.getPassword().equals(customerToUpdate.getPassword())) {
+            customerToUpdate.setPassword(passwordEncoder.encode(request.getPassword()));
         }
         return customerRepository.save(customerToUpdate);
     }

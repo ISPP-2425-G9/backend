@@ -6,10 +6,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.caronte.caronte.auth.payload.response.CompanyUpdateRequest;
 
-
-
 @Service
-public class CompanyService { 
+public class CompanyService {
 
     private final CompanyRepository companyRepository;
     private final PasswordEncoder passwordEncoder;
@@ -20,19 +18,21 @@ public class CompanyService {
     }
 
     @Transactional(readOnly = true)
-    public Iterable<Company> findAll(){
+    public Iterable<Company> findAll() {
         return companyRepository.findAll();
     }
 
     @Transactional(readOnly = true)
-    public Company findById(Long id){   
-        Company company = companyRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Company not found"));
+    public Company findById(Long id) {
+        Company company = companyRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Company not found"));
         return company;
     }
 
     @Transactional
     public Company update(Long id, CompanyUpdateRequest request) {
-        Company companyToUpdate = companyRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Company not found"));
+        Company companyToUpdate = companyRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Company not found"));
         companyToUpdate.setName(request.getName());
         companyToUpdate.setAddress(request.getAddress());
         companyToUpdate.setCity(request.getCity());
@@ -42,14 +42,10 @@ public class CompanyService {
         companyToUpdate.setTelephone(request.getTelephone());
         companyToUpdate.setImageUrl(request.getImageUrl());
         companyToUpdate.setDescription(request.getDescription());
-        if(passwordEncoder.matches(request.getPassword(), companyToUpdate.getPassword())) {
-            companyToUpdate.setPassword(companyToUpdate.getPassword());
-        } else {
-            companyToUpdate.setPassword(this.passwordEncoder.encode(request.getPassword()));
+        if (!request.getPassword().equals(companyToUpdate.getPassword())) {
+            companyToUpdate.setPassword(request.getPassword());
         }
         return companyRepository.save(companyToUpdate);
     }
-
-    
 
 }
