@@ -36,6 +36,7 @@ public class ReceiverService {
         List<Receiver> receiversList = receiverRepository.findByObituary(obituary);
         for (Receiver receiver : receiversList) {
             ReceiverResponseDTO receiverResponseDTO = new ReceiverResponseDTO();
+            receiverResponseDTO.setId(receiver.getId());
             receiverResponseDTO.setName(receiver.getName());
             receiverResponseDTO.setTelephone(receiver.getTelephone());
             receiverResponseDTO.setEmail(receiver.getEmail());

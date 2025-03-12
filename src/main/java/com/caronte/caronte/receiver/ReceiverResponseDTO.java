@@ -1,5 +1,6 @@
 package com.caronte.caronte.receiver;
 
+import jakarta.persistence.Id;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -11,6 +12,9 @@ import lombok.Setter;
 @Getter
 @Setter
 public class ReceiverResponseDTO {
+
+    @Id
+    Long id;
 
     @NotBlank(message = "The contact name cannot be empty")
     @Size(max = 100, message = "The name must be at most 100 characters long")
