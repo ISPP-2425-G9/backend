@@ -40,13 +40,10 @@ INSERT INTO video (id, video_url, message_id) VALUES
 (1, 'https://www.youtube.com/watch?v=9bZkp7q19f0', 1),
 (2, 'https://www.youtube.com/watch?v=9bZkp7q19f0', 2);
 
-INSERT INTO image_template (id , image_url) VALUES (1 ,'https://www.orlaonline.es/files/plantillas/web/ORLA_34_PLANTILLA_web.jpg?72'),
- (2 ,'https://content.r9cdn.net/rimg/dimg/78/70/001b704a-city-15939-1629b33a69c.jpg?width=1366&height=768&xhint=1779&yhint=1365&crop=true'),
- (3, 'https://cms.w2m.com/dam/Sites/Flowo/imagenes-blog/blog/mejores-destinos-playa-verano-principal.jpg'),
- (4, 'https://www.luiscrux.es/sites/default/files/orlas//020.jpg'),
- (5, 'https://e00-elmundo.uecdn.es/assets/multimedia/imagenes/2022/03/09/16468231897426.jpg'),
- (6, 'https://static.nationalgeographicla.com/files/styles/image_3200/public/comedy-wildlife-awards-squirel-stop.jpg');
-
+INSERT INTO image_template (id , image_url) VALUES (1 ,'https://res.cloudinary.com/ds02duuid/image/upload/v1741707864/images/obituaries/templates/fbrpmmujaksc5dbbrbbi.jpg'),
+ (2 ,'https://res.cloudinary.com/ds02duuid/image/upload/v1741707864/images/obituaries/templates/jqqcvnp28w3adaymwkcr.jpg'),
+ (3, 'https://res.cloudinary.com/ds02duuid/image/upload/v1741707864/images/obituaries/templates/pl6ual71zcpcsfiv8n3q.jpg');
+ 
 INSERT INTO obituary (id, name, birth_date, death_date, custom_image_url, farewell_message, farewell_phrase, is_mine, customer_id, image_template_id) VALUES 
 (1, 'Nombre Ejemplo 1', '1980-01-01', '2023-01-01', 'https://static.nationalgeographicla.com/files/styles/image_3200/public/comedy-wildlife-awards-squirel-stop.jpg', 'Mensaje de despedida 1', 'Frase de despedida 1', 1, 5, 1),
 (2, 'Nombre Ejemplo 2', '1975-05-15', '2022-12-20', 'https://static.nationalgeographicla.com/files/styles/image_3200/public/comedy-wildlife-awards-squirel-stop.jpg', 'Mensaje de despedida 2', 'Frase de despedida 2', 0, 6, 1);

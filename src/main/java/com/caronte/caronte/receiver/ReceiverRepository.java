@@ -3,7 +3,6 @@ package com.caronte.caronte.receiver;
 import java.util.List;
 
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.caronte.caronte.obituary.Obituary;
 import com.caronte.caronte.util.LongRepository;
@@ -15,7 +14,6 @@ public interface ReceiverRepository extends LongRepository<Receiver> {
 
     //Optional<Receiver> findByEmailAndObituary(String email, Obituary obituary);
 
-    @Transactional
     void deleteByObituary(Obituary obituary);
 
     List<Receiver> findByObituary(Obituary obituary);
