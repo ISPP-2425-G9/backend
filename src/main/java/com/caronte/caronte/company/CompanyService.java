@@ -20,6 +20,11 @@ public class CompanyService {
     }
 
     @Transactional(readOnly = true)
+    public Iterable<Company> findAll(){
+        return companyRepository.findAll();
+    }
+
+    @Transactional(readOnly = true)
     public Company findById(Long id){
         Company company = companyRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Company not found"));
         return company;
@@ -33,6 +38,7 @@ public class CompanyService {
         companyToUpdate.setCity(request.getCity());
         companyToUpdate.setZipCode(request.getZipCode());
         companyToUpdate.setEmail(request.getEmail());
+        companyToUpdate.setPassword(passwordEncoder.encode(request.getPassword()));
         companyToUpdate.setTelephone(request.getTelephone());
         companyToUpdate.setImageUrl(request.getImageUrl());
         companyToUpdate.setDescription(request.getDescription());
