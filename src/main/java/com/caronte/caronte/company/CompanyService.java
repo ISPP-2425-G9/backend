@@ -1,10 +1,13 @@
 package com.caronte.caronte.company;
 
+import java.util.List;
+
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.caronte.caronte.auth.payload.response.CompanyUpdateRequest;
+import com.caronte.caronte.plan.PlanType;
 
 @Service
 public class CompanyService {
@@ -46,6 +49,22 @@ public class CompanyService {
             companyToUpdate.setPassword(request.getPassword());
         }
         return companyRepository.save(companyToUpdate);
+    }
+
+    @Transactional
+    public List<CompanyDTO> findAllCompaniesPublicInformation(){
+        List<Company> companiesWithPlan = companyRepository.findByPlan_PlanType(PlanType.PREMIUM);
+        return companiesWithPlan.stream().map(company -> new CompanyDTO(
+            company.getName(), 
+            company.getEmail(), 
+            company.getTelephone(), 
+            company.getAddress(), 
+            company.getCity(), 
+            company.getZipCode(), 
+            company.getImageUrl(), 
+            company.getDescription(),
+            company.getNif()))
+            .toList();
     }
 
 }
