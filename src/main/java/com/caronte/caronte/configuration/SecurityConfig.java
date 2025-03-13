@@ -1,5 +1,7 @@
 package com.caronte.caronte.configuration;
 
+import java.util.Arrays;
+
 import javax.sql.DataSource;
 
 import org.springframework.context.annotation.Bean;
@@ -21,8 +23,6 @@ import com.caronte.caronte.configuration.authorization.Authorization;
 import com.caronte.caronte.configuration.jwt.AuthEntryPointJwt;
 import com.caronte.caronte.configuration.jwt.AuthTokenFilter;
 import com.caronte.caronte.configuration.services.UserDetailsServiceImpl;
-
-import java.util.Arrays;
 
 @Configuration
 public class SecurityConfig {
@@ -86,11 +86,11 @@ public class SecurityConfig {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowCredentials(true);
-        config.setAllowedOrigins(Arrays.asList("http://localhost:8081")); // ✅ Asegurar que el frontend tiene acceso
-        config.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type")); // ✅ Permitir token JWT
+        config.setAllowedOrigins(Arrays.asList("https://sprint1.caronte.site", "http://sprint1.caronte.site", "https://www.sprint1.caronte.site", "http://www.sprint1.caronte.site")); // ✅ Asegurar que el frontend tiene acceso
+        config.setAllowedHeaders(Arrays.asList("*"));
         config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         source.registerCorsConfiguration("/**", config);
-        return new CorsFilter(source);
+        return new CorsFilter(source);	
     }
 
     // ✅ Fuente de configuración de CORS para HttpSecurity
@@ -99,8 +99,8 @@ public class SecurityConfig {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowCredentials(true);
-        config.setAllowedOrigins(Arrays.asList("http://localhost:8081")); // ✅ Permitir solo el frontend
-        config.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type")); // ✅ Importante para el JWT
+        config.setAllowedOrigins(Arrays.asList("https://sprint1.caronte.site", "http://sprint1.caronte.site", "https://www.sprint1.caronte.site", "http://www.sprint1.caronte.site"));
+        config.setAllowedHeaders(Arrays.asList("*"));
         config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         source.registerCorsConfiguration("/**", config);
         return source;
