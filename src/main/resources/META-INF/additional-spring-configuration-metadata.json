@@ -1,14 +1,17 @@
-{
-    "properties": [
-        {
-            "name": "caronte.app.jwt.secret",
-            "type": "java.lang.String",
-            "description": "Secret key used to sign and verify the JWT."
-        },
-        {
-            "name": "caronte.app.jwt.expiration",
-            "type": "java.lang.Long",
-            "description": "Expiration time of the JWT in milliseconds."
-        }
-    ]
-}
+{"properties": [
+  {
+    "name": "caronte.app.jwt.secret",
+    "type": "java.lang.String",
+    "description": "Secret key used to sign and verify the JWT."
+  },
+  {
+    "name": "caronte.app.jwt.expiration",
+    "type": "java.lang.Long",
+    "description": "Expiration time of the JWT in milliseconds."
+  },
+  {
+    "name": "stripe.api.key",
+    "type": "java.lang.String",
+    "description": "Stripe private key for making payments"
+  }
+]}

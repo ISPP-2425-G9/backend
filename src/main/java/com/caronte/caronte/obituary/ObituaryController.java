@@ -1,6 +1,7 @@
 package com.caronte.caronte.obituary;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.http.HttpStatus;
@@ -19,10 +20,18 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.caronte.caronte.auth.AuthService;
 import com.caronte.caronte.configuration.services.UserDetailsImpl;
 import com.caronte.caronte.customer.CustomerRepository;
 import com.caronte.caronte.imageTemplate.ImageTemplateService;
 import com.caronte.caronte.receiver.ReceiverService;
+import com.caronte.caronte.user.UserService;
+import com.stripe.model.Customer;
+import com.stripe.model.checkout.Session;
+import com.stripe.param.CustomerCreateParams;
+import com.stripe.param.CustomerListParams;
+import com.stripe.param.checkout.SessionCreateParams;
+import com.stripe.param.checkout.SessionCreateParams.LineItem;
 
 import jakarta.validation.Valid;
 
@@ -32,11 +41,13 @@ public class ObituaryController {
 
     private final ObituaryService obituaryService;
     private final ReceiverService receiverService;
+    private final UserService userService;
 
     public ObituaryController(ObituaryService obituaryService, CustomerRepository customerRepository,
-            ImageTemplateService imageTemplateService, ReceiverService receiverService) {
+            ImageTemplateService imageTemplateService, ReceiverService receiverService, UserService userService, AuthService authService) {
         this.obituaryService = obituaryService;
         this.receiverService = receiverService;
+        this.userService = userService;
     }
 
     @PostMapping("/create")
@@ -122,6 +133,47 @@ public class ObituaryController {
             return ResponseEntity.ok().body(obituary);
         } catch (IllegalArgumentException exception) {
             return ResponseEntity.badRequest().body(exception.getMessage());
+        }
+    }
+
+    // TODO: Aclararme quien realiza el pago (usuario normal o de pago, cuando lo realiza, etc.)
+    // TODO: IMPORTANTE!!! Actualmente esto es una versión inicial, se debe de cambiar dependiendo de como se realice el pago
+    //       Actual esto lo que devuelve es una url que lleva a la pantalla de pago
+    @PostMapping("/pay")
+    public ResponseEntity<?> pay() {
+        String email = this.userService.findCurrentUser().getEmail(); 
+        String priceId = "price_1R3GluGa0d4217RGL5hpbiZr"; // price_id de la esquela
+
+        try {
+            List<Customer> customers = Customer.list(CustomerListParams.builder()
+                    .setEmail(email)
+                    .setLimit(1L) 
+                    .build()).getData();
+
+            // Se realiza una búsqueda de si existe dicho Customer en Stripe por su gmail, en caso contrario, se crea
+            Customer customer = !customers.isEmpty() ? customers.get(0)
+                    : Customer.create(
+                            CustomerCreateParams.builder()
+                                    .setEmail(email)
+                                    .build());
+
+            LineItem line =  LineItem.builder()
+                    .setPrice(priceId)
+                    .setQuantity(1L) 
+                    .build();
+            
+            SessionCreateParams params = SessionCreateParams.builder()
+                    .setCustomer(customer.getId()) // El ID del cliente
+                    .addLineItem(line)
+                    .setMode(SessionCreateParams.Mode.PAYMENT) // El modo es un pago único
+                    .setSuccessUrl("https://localhost:8080/exito") // URL de éxito después de completar el pago
+                    .setCancelUrl("https://localhost:8080/cancelado") // URL de cancelación si el pago falla
+                    .build();
+
+            Session session = Session.create(params);
+            return ResponseEntity.ok(Map.of("url", session.getUrl()));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 
