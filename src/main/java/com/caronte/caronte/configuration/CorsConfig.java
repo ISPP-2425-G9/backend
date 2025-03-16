@@ -13,7 +13,7 @@ public class CorsConfig {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**")
-                        .allowedOrigins("https://sprint1.caronte.site", "http://sprint1.caronte.site", "https://www.sprint1.caronte.site", "http://www.sprint1.caronte.site")
+                        .allowedOrigins("https://sprint2.caronte.site", "http://sprint2.caronte.site", "https://www.sprint2.caronte.site", "http://www.sprint2.caronte.site")
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                         .allowedHeaders("*")
                         .allowCredentials(true);
