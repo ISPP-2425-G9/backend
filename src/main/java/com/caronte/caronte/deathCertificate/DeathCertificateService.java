@@ -24,7 +24,7 @@ public class DeathCertificateService {
     @Transactional
     public void createDeathCertificate(DeathCertificateRequestDTO request) {
 
-        String certificate = request.getCertificate();
+        String certificate = request.getFile();
         if (certificate != null && certificate.startsWith("data:image/") ) {
             certificate = MediaHandler.uploadImageToCloudinary(MediaHandler.base64ToImage(certificate), "certificates");
         } else {
