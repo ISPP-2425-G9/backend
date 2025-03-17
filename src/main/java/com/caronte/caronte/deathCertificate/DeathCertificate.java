@@ -17,5 +17,4 @@ public class DeathCertificate extends BaseEntity{
 
     @Column(nullable = false)
     private Boolean isVerified;
-    
 }
