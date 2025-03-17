@@ -16,14 +16,11 @@ public class CreateMessageRequestDto {
     @NotBlank
     private String body;
 
-    @NotBlank
-    private String code;
+    private String videoUrl;
+    private String imageUrl;
 
     @NotNull
     private Boolean isLastWill;
-
-    private String videoUrl;
-    private String image;
 
     private List<RecipientDto> recipients;
 
