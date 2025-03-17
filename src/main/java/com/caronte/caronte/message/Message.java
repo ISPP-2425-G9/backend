@@ -30,7 +30,12 @@ public class Message extends BaseEntity {
     @Column(nullable = false)
     private Boolean isLastWill;
 
-    // Relationships
+    @Column
+    private String videoUrl;
+
+    @Column
+    private String image;
+
     @ManyToOne
     @JoinColumn(nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
