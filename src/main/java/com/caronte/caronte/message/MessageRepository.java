@@ -5,4 +5,5 @@ import com.caronte.caronte.util.LongRepository;
 
 @Repository
 public interface MessageRepository extends LongRepository<Message> {
+    boolean existsByCode(String code);
 }
