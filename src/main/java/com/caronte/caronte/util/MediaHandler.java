@@ -32,7 +32,7 @@ public class MediaHandler {
 
     public static String uploadImageToCloudinary(BufferedImage image, String folder) {
         Dotenv dotenv = Dotenv.load();
-        Cloudinary cloudinary_image = new Cloudinary(dotenv.get("CLOUDINARY_TEST"));
+        Cloudinary cloudinary_image = new Cloudinary(dotenv.get("CLOUDINARY_IMAGES_URL"));
 
         try {
             File tempFile = File.createTempFile("upload_", ".png");
