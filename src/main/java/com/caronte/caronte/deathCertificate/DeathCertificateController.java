@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -33,7 +34,6 @@ public ResponseEntity<?> uploadDeathCertificate(@RequestBody @Valid DeathCertifi
     try {
 
         deathCertificateService.createDeathCertificate(deathCertificateRequestDTO);
-        
         return ResponseEntity.ok("Death Certificate uploaded successfully");
     } catch (Exception e) {
         e.printStackTrace();
@@ -41,6 +41,17 @@ public ResponseEntity<?> uploadDeathCertificate(@RequestBody @Valid DeathCertifi
                 .body(Map.of("error", e.getMessage()));
     }
 
+}
+
+@GetMapping("/all")
+public ResponseEntity<?> getAllDeathCertificates() {
+    try {
+        return ResponseEntity.ok(deathCertificateService.getAllDeathCertificates());
+    } catch (Exception e) {
+        e.printStackTrace();
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(Map.of("error", e.getMessage()));
+    }
 }
 
 @ExceptionHandler({ MethodArgumentNotValidException.class, IllegalArgumentException.class })
@@ -56,5 +67,7 @@ public ResponseEntity<Map<String, String>> handleValidationExceptions(Exception 
 
     return ResponseEntity.badRequest().body(errors);
 }
+
+
 
 }
