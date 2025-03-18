@@ -1,7 +1,6 @@
 package com.caronte.caronte.obituary;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.springframework.http.HttpStatus;
@@ -23,7 +22,6 @@ import org.springframework.web.server.ResponseStatusException;
 import com.caronte.caronte.configuration.services.UserDetailsImpl;
 import com.caronte.caronte.customer.CustomerRepository;
 import com.caronte.caronte.imageTemplate.ImageTemplateService;
-import com.caronte.caronte.receiver.Receiver;
 import com.caronte.caronte.receiver.ReceiverService;
 
 import jakarta.validation.Valid;
