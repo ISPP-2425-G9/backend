@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.Setter;
 import java.util.List;
 
+import com.caronte.caronte.deathCertificate.DeathCertificateRequestDTO;
+
 @Getter
 @Setter
 public class ObituraryRequestDto {
@@ -33,6 +35,9 @@ public class ObituraryRequestDto {
     @Pattern(regexp = "^(true|false)$", message = "The 'isMine' field must be either 'true' or 'false'")
     private String isMine;
 
+    @NotNull(message = "DeathCertificate can not be null")
+    private DeathCertificateRequestDTO deathCertificate;
+
     @AssertTrue(message = "The deathDate field must be null or empty")
     public boolean isDeathDateValid() {
         return deathDate == null || deathDate.trim().isEmpty();
@@ -53,4 +58,7 @@ public class ObituraryRequestDto {
         @NotBlank(message = "The email cannot be empty")
         private String email;
     }
+
+
+
 }

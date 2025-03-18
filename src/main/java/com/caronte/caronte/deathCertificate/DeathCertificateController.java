@@ -35,7 +35,7 @@ public ResponseEntity<?> uploadDeathCertificate(@RequestBody @Valid DeathCertifi
         Authentication authentication){ 
     try {
 
-        deathCertificateService.createDeathCertificate(deathCertificateRequestDTO);
+        deathCertificateService.createDeathCertificateAndRelations(deathCertificateRequestDTO);
         return ResponseEntity.ok("Death Certificate uploaded successfully");
     } catch (Exception e) {
         e.printStackTrace();

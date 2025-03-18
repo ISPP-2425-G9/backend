@@ -9,10 +9,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.caronte.caronte.customer.Customer;
 import com.caronte.caronte.customer.CustomerRepository;
+import com.caronte.caronte.deathCertificate.DeathCertificate;
 import com.caronte.caronte.imageTemplate.ImageTemplate;
 import com.caronte.caronte.imageTemplate.ImageTemplateService;
 import com.caronte.caronte.receiver.ReceiverService;
 import com.caronte.caronte.util.MediaHandler;
+import com.caronte.caronte.deathCertificate.DeathCertificateService;
 
 @Service
 public class ObituaryService {
@@ -21,13 +23,15 @@ public class ObituaryService {
     CustomerRepository customerRepository;
     ImageTemplateService imageTemplateService;
     ReceiverService receiverService;
+    DeathCertificateService deathCertificateService;
 
     public ObituaryService(ObituaryRepository obituaryRepository, CustomerRepository customerRepository,
-            ImageTemplateService imageTemplateService, ReceiverService receiverService) {
+            ImageTemplateService imageTemplateService, ReceiverService receiverService, DeathCertificateService deathCertificateService) {
         this.receiverService = receiverService;
         this.customerRepository = customerRepository;
         this.imageTemplateService = imageTemplateService;
         this.obituaryRepository = obituaryRepository;
+        this.deathCertificateService = deathCertificateService;
     }
 
     private LocalDate parseDate(String input) {
@@ -72,9 +76,23 @@ public class ObituaryService {
         } else {
             customImageUrl = customUrl;
         }
+        
+        DeathCertificate deathCertificate = null;
+        
+        if(!isMine){
+            Iterable<Obituary> obituaries = obituaryRepository.findByCustomerDni(request.getDeathCertificate().getDni());
+            Boolean existCustomer = customerRepository.existsByDni(request.getDeathCertificate().getDni());
+
+            if( existCustomer && obituaries.iterator().hasNext() && obituaries.iterator().next().getDeathCertificate() == null){
+                deathCertificate = deathCertificateService.createDeathCertificateAndRelations(request.getDeathCertificate());
+
+            }else{
+                deathCertificate = deathCertificateService.createDeathCertificate(request.getDeathCertificate());  
+            }
+        }
 
         Obituary obituary = saveObituary(name, birthDate, deathDate, customImageUrl, farewellMessage, farewellPhrase,
-                isMine, customer, imageTemplate);
+                isMine, customer, imageTemplate,deathCertificate);
 
         List<ObituraryRequestDto.ContactDto> contacts = request.getContacts();
         for (ObituraryRequestDto.ContactDto contact : contacts) {
@@ -140,7 +158,7 @@ public class ObituaryService {
     @Transactional
     public Obituary saveObituary(String name, LocalDate birth_date, LocalDate death_date, String custom_image_url,
             String farewell_message, String farewell_phrase, Boolean is_mine, Customer customer,
-            ImageTemplate imageTemplate) {
+            ImageTemplate imageTemplate, DeathCertificate certificate) {
         Obituary obituary = new Obituary();
 
         obituary.setName(name);
@@ -152,6 +170,7 @@ public class ObituaryService {
         obituary.setIsMine(is_mine);
         obituary.setCustomer(customer);
         obituary.setImageTemplate(imageTemplate);
+        obituary.setDeathCertificate(certificate);
         return obituaryRepository.save(obituary);
     }
 

@@ -9,10 +9,10 @@ import lombok.Setter;
 @Setter
 public class DeathCertificateRequestDTO {
 
-    @NotBlank(message = "El certificado no puede estar en blanco")
+    @NotBlank(message = "The certificate cannot be blank")
     private String file;
 
-    @Pattern(regexp = "^[\\d]{8}[A-Za-z]$", message = "El DNI debe tener 8 dígitos seguidos de una letra")
+    @Pattern(regexp = "^[\\d]{8}[A-Za-z]$", message = "The DNI must have 8 digits followed by a letter")
     private String dni;
 
 }

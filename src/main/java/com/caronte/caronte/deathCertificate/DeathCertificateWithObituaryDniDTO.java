@@ -7,10 +7,10 @@ import lombok.Setter;
 @Setter
 @Getter
 public class DeathCertificateWithObituaryDniDTO {
-    @NotBlank(message = "El DNI no puede estar en blanco")
+    @NotBlank(message = "The DNI cannot be blank")
     private String dni;
 
-    @NotBlank(message = "El certificado no puede estar en blanco")
+    @NotBlank(message = "The certificate cannot be blank")
     private DeathCertificate deathCertificate;
 
     public DeathCertificateWithObituaryDniDTO(String dni, DeathCertificate deathCertificate) {

@@ -4,7 +4,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
-import com.caronte.caronte.deathCertificate.DeathCertificateWithObituaryDniDTO;
 
 import com.caronte.caronte.obituary.Obituary;
 import com.caronte.caronte.obituary.ObituaryRepository;
@@ -23,32 +22,37 @@ public class DeathCertificateService {
 
 
     @Transactional
-    public void createDeathCertificate(DeathCertificateRequestDTO request) {
+    public DeathCertificate createDeathCertificateAndRelations(DeathCertificateRequestDTO request) {
+        Iterable<Obituary> obituaries = obituaryRepository.findByCustomerDni(request.getDni());
+        if (!obituaries.iterator().hasNext()) {
+            throw new IllegalArgumentException("There are no obituaries with that ID number.");        
+        }
+        if(obituaries.iterator().next().getDeathCertificate() != null){
+            throw new CertificateAssociationException("The death certificate has already been uploaded.");
+        }
+        DeathCertificate certificate = createDeathCertificate(request);
 
+        for (Obituary obituary : obituaries) {
+            obituary.setDeathCertificate(certificate);
+            obituaryRepository.save(obituary);
+        }
+        return certificate;
+    }
+
+    @Transactional
+    public DeathCertificate createDeathCertificate(DeathCertificateRequestDTO request) {
         String certificate = request.getFile();
         if (certificate != null && certificate.startsWith("data:image/") ) {
             certificate = MediaHandler.uploadImageToCloudinary(MediaHandler.base64ToImage(certificate), "certificates");
         } else {
-            throw new IllegalArgumentException("El certificado de defunción no es una imagen válida");
+            throw new IllegalArgumentException("The death certificate is not a valid image");
         }
-        Iterable<Obituary> obituaries = obituaryRepository.findByCustomerDni(request.getDni());
-        if (!obituaries.iterator().hasNext()) {
-            throw new IllegalArgumentException("No existen esquelas con ese DNI");        
-        }
-        if(obituaries.iterator().next().getDeathCertificate() != null){
-            throw new CertificateAssociationException("El certificado de defunción ya ha sido subido");
-        }
-
         DeathCertificate deathCertificate = new DeathCertificate();
         deathCertificate.setUrl(certificate);
         deathCertificate.setIsVerified(false);
 
         deathCertificateRepository.save(deathCertificate);
-
-        for (Obituary obituary : obituaries) {
-            obituary.setDeathCertificate(deathCertificate);
-            obituaryRepository.save(obituary);
-        }
+        return deathCertificate; 
     }
 
     @Transactional
@@ -57,17 +61,16 @@ public class DeathCertificateService {
     }
 
     @Transactional
-public DeathCertificateWithObituaryDniDTO getDeathCertificateByObituaryId(Long obituaryId) {
-    Obituary obituary = obituaryRepository.findById(obituaryId)
-        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "No se ha encontrado la esquela"));
+    public DeathCertificateWithObituaryDniDTO getDeathCertificateByObituaryId(Long obituaryId) {
+        Obituary obituary = obituaryRepository.findById(obituaryId)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "The obituary has not been found"));
 
-    if (obituary.getDeathCertificate() == null) {
-        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No se ha encontrado el certificado de defunción");
+        if (obituary.getDeathCertificate() == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Death certificate not found");
+        }
+
+        return new DeathCertificateWithObituaryDniDTO(obituary.getCustomer().getDni(), obituary.getDeathCertificate());
     }
-
-    // Devolver el DTO con el DNI y el certificado de defunción
-    return new DeathCertificateWithObituaryDniDTO(obituary.getCustomer().getDni(), obituary.getDeathCertificate());
-}
 
 
     
