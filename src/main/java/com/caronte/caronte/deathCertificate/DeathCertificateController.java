@@ -10,12 +10,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.validation.Valid;
+import jakarta.websocket.server.PathParam;
 
 
 @RestController
@@ -47,6 +49,17 @@ public ResponseEntity<?> uploadDeathCertificate(@RequestBody @Valid DeathCertifi
 public ResponseEntity<?> getAllDeathCertificates() {
     try {
         return ResponseEntity.ok(deathCertificateService.getAllDeathCertificates());
+    } catch (Exception e) {
+        e.printStackTrace();
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(Map.of("error", e.getMessage()));
+    }
+}
+
+@GetMapping("/obituary/{obituaryId}")
+public ResponseEntity<?> getDeathCertificateByObituaryId(@PathVariable Long obituaryId) {
+    try {
+        return ResponseEntity.ok(deathCertificateService.getDeathCertificateByObituaryId(obituaryId));
     } catch (Exception e) {
         e.printStackTrace();
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)

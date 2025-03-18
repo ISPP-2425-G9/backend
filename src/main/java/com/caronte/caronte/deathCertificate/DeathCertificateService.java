@@ -55,4 +55,16 @@ public class DeathCertificateService {
         return deathCertificateRepository.findAll().iterator().next();
     }
 
+    @Transactional
+    public DeathCertificate getDeathCertificateByObituaryId(Long obituaryId) {
+        Obituary obituary = obituaryRepository.findById(obituaryId)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "No se ha encontrado la esquela"));
+
+        if (obituary.getDeathCertificate() == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No se ha encontrado el certificado de defunción");
+        }
+
+        return obituary.getDeathCertificate();
+    }
+
 }
