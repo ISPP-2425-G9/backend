@@ -46,7 +46,10 @@ public class UserService {
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
         if (!request.getNewPassword().equals(request.getConfirmPassword())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Passwords do not match");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "La contraseña no coinciden");
+        }
+        if (request.getNewPassword().length() < 6) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "La contraseña debe tener al menos 6 caracteres");
         }
         user.setPassword(this.passwordEncoder.encode(request.getNewPassword()));
 
