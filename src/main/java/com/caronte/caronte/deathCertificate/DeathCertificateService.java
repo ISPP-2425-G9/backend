@@ -4,6 +4,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
+import com.caronte.caronte.deathCertificate.DeathCertificateWithObituaryDniDTO;
 
 import com.caronte.caronte.obituary.Obituary;
 import com.caronte.caronte.obituary.ObituaryRepository;
@@ -56,15 +57,19 @@ public class DeathCertificateService {
     }
 
     @Transactional
-    public DeathCertificate getDeathCertificateByObituaryId(Long obituaryId) {
-        Obituary obituary = obituaryRepository.findById(obituaryId)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "No se ha encontrado la esquela"));
+public DeathCertificateWithObituaryDniDTO getDeathCertificateByObituaryId(Long obituaryId) {
+    Obituary obituary = obituaryRepository.findById(obituaryId)
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "No se ha encontrado la esquela"));
 
-        if (obituary.getDeathCertificate() == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No se ha encontrado el certificado de defunción");
-        }
-
-        return obituary.getDeathCertificate();
+    if (obituary.getDeathCertificate() == null) {
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No se ha encontrado el certificado de defunción");
     }
+
+    // Devolver el DTO con el DNI y el certificado de defunción
+    return new DeathCertificateWithObituaryDniDTO(obituary.getCustomer().getDni(), obituary.getDeathCertificate());
+}
+
+
+    
 
 }

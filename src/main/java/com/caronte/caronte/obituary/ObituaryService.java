@@ -92,13 +92,18 @@ public class ObituaryService {
             throw new IllegalArgumentException("You are not allowed to update this obituary");
         }
 
+        Boolean isMine = Boolean.parseBoolean(request.getIsMine());
+        if(obituary.getIsMine() && !isMine || !obituary.getIsMine() && isMine){
+            throw new IllegalArgumentException("You can't change de IsMine property");
+        }
+
         String name = request.getName();
         LocalDate birthDate = parseDate(request.getBirthDate());
         LocalDate deathDate = parseDate(request.getDeathDate());
         String farewellMessage = request.getFarewellMessage();
         String farewellPhrase = request.getFarewellPhrase();
         Long imageTemplateId = request.getImageTemplate_id();
-        Boolean isMine = Boolean.parseBoolean(request.getIsMine());
+        
         String customUrl = request.getCustomImage();
 
         ImageTemplate imageTemplate = imageTemplateService.findById(imageTemplateId);
