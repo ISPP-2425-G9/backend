@@ -1,5 +1,8 @@
 package com.caronte.caronte.plan;
 
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+
 import com.caronte.caronte.company.CompanyDTO;
 import com.caronte.caronte.user.UserService;
 import org.springframework.http.HttpStatus;
@@ -22,18 +25,19 @@ public class PlanController {
 
     @PutMapping("/{userId}/premium")
     public Plan setPremiumPlan(@PathVariable Long userId) {
-        if (userService.findCurrentUser().getId() != userId) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (userService.findCurrentUser().getId() != userId & !auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ADMIN"))) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "No puedes cambiar el plan de otro usuario");
         }
 
         Long planId = userService.getPlanId(userId);
-        System.out.println(planId);
         return planService.changePlan(planId, PlanType.PREMIUM);
     }
 
     @PutMapping("/{userId}/free")
     public Plan setFreePlan(@PathVariable Long userId) {
-        if (userService.findCurrentUser().getId() != userId) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (userService.findCurrentUser().getId() != userId & !auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ADMIN"))) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "No puedes cambiar el plan de otro usuario");
         }
         Long planId = userService.getPlanId(userId);
