@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -20,11 +21,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
-import com.caronte.caronte.auth.AuthService;
 import com.caronte.caronte.configuration.services.UserDetailsImpl;
-import com.caronte.caronte.customer.CustomerRepository;
-import com.caronte.caronte.imageTemplate.ImageTemplateService;
-import com.caronte.caronte.receiver.ReceiverService;
 import com.caronte.caronte.user.UserService;
 import com.stripe.model.Customer;
 import com.stripe.model.PaymentIntent;
@@ -39,15 +36,14 @@ import jakarta.validation.Valid;
 @RequestMapping("api/obituary")
 public class ObituaryController {
 
+    @Value("${stripe.obituary.price.id}")
+    private String obituaryPriceId;
+
     private final ObituaryService obituaryService;
-    private final ReceiverService receiverService;
     private final UserService userService;
 
-    public ObituaryController(ObituaryService obituaryService, CustomerRepository customerRepository,
-            ImageTemplateService imageTemplateService, ReceiverService receiverService, UserService userService,
-            AuthService authService) {
+    public ObituaryController(ObituaryService obituaryService, UserService userService) {
         this.obituaryService = obituaryService;
-        this.receiverService = receiverService;
         this.userService = userService;
     }
 
@@ -156,7 +152,7 @@ public class ObituaryController {
                                     .setEmail(email)
                                     .build());
 
-            Price price = Price.retrieve("price_1R3GluGa0d4217RGL5hpbiZr");
+            Price price = Price.retrieve(obituaryPriceId);
 
             PaymentIntentCreateParams params = PaymentIntentCreateParams.builder()
                     .setAmount(price.getUnitAmount())
