@@ -1,15 +1,14 @@
 package com.caronte.caronte.plan;
 
+import com.caronte.caronte.plan.dtos.PlanResponse;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
-import com.caronte.caronte.company.CompanyDTO;
 import com.caronte.caronte.user.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/plans")
@@ -42,5 +41,14 @@ public class PlanController {
         }
         Long planId = userService.getPlanId(userId);
         return planService.changePlan(planId, PlanType.FREE);
+    }
+
+    @GetMapping("/{userId}")
+    public ResponseEntity<PlanResponse> getPlan (@PathVariable Long userId){
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (userService.findCurrentUser().getId() != userId & !auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ADMIN"))) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "No puedes ver el plan de otro usuario");
+        }
+        return ResponseEntity.ok(planService.getPlanInfo(userId));
     }
 }
