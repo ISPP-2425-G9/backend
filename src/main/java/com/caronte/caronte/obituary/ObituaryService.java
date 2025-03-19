@@ -126,8 +126,9 @@ public class ObituaryService {
         String farewellPhrase = request.getFarewellPhrase();
         Long imageTemplateId = request.getImageTemplate_id();
         
-        String customUrl = request.getCustomImage();
+        
 
+        String customUrl = request.getCustomImage();
         ImageTemplate imageTemplate = imageTemplateService.findById(imageTemplateId);
 
         String customImageUrl;
@@ -137,25 +138,43 @@ public class ObituaryService {
             customImageUrl = customUrl;
         }
 
-        obituary.setName(name);
-        obituary.setBirthDate(birthDate);
-        obituary.setDeathDate(deathDate);
-        obituary.setCustomImageUrl(customImageUrl);
-        obituary.setFarewellMessage(farewellMessage);
-        obituary.setFarewellPhrase(farewellPhrase);
-        obituary.setIsMine(isMine);
-        obituary.setImageTemplate(imageTemplate);
+        Obituary updatedObituary = null;
+        if(!isMine){
+            if(obituary.getDeathCertificate().getIsVerified() == false){
+                obituary.setName(name);
+                obituary.setBirthDate(birthDate);
+                obituary.setDeathDate(deathDate);
+                obituary.setCustomImageUrl(customImageUrl);
+                obituary.setFarewellMessage(farewellMessage);
+                obituary.setFarewellPhrase(farewellPhrase);
+                obituary.setIsMine(isMine);
+                obituary.setImageTemplate(imageTemplate);
 
-        Obituary updatedObituary = updateObituary(obituary);
+                updatedObituary = updateObituary(obituary);
 
-        receiverService.deleteReceiversByObituaryId(updatedObituary);
+            }else { 
+                throw new IllegalArgumentException("You can't upload the obituary since the death certificate is verified");
+            }
+        }else {
+            obituary.setName(name);
+            obituary.setBirthDate(birthDate);
+            obituary.setDeathDate(deathDate);
+            obituary.setCustomImageUrl(customImageUrl);
+            obituary.setFarewellMessage(farewellMessage);
+            obituary.setFarewellPhrase(farewellPhrase);
+            obituary.setIsMine(isMine);
+            obituary.setImageTemplate(imageTemplate);
 
-        List<ObituraryRequestDto.ContactDto> contacts = request.getContacts();
-        for (ObituraryRequestDto.ContactDto contact : contacts) {
-            receiverService.saveObituaryReceiver(contact.getName(), contact.getPhone(), contact.getEmail(),
-                    updatedObituary);
+            updatedObituary = updateObituary(obituary);
+
+            receiverService.deleteReceiversByObituaryId(updatedObituary);
+
+            List<ObituraryRequestDto.ContactDto> contacts = request.getContacts();
+            for (ObituraryRequestDto.ContactDto contact : contacts) {
+                receiverService.saveObituaryReceiver(contact.getName(), contact.getPhone(), contact.getEmail(),
+                        updatedObituary);
+            }
         }
-
         return updatedObituary;
     }
 

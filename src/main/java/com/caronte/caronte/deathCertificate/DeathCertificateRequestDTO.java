@@ -15,4 +15,7 @@ public class DeathCertificateRequestDTO {
     @Pattern(regexp = "^[\\d]{8}[A-Za-z]$", message = "The DNI must have 8 digits followed by a letter")
     private String dni;
 
+    
+    private Boolean isVerificate;
+
 }
