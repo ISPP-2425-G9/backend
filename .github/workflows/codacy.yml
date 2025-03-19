@@ -1,13 +1,13 @@
 name: Codacy CI for Spring Boot
 
 on:
+  pull_request:
+    branches: [develop]
+    types: [opened, reopened, edited, review_requested, synchronize]
   push:
     branches:
-      - main
-  pull_request:
-    branches:
-      - main
-      - develop
+      - "develop"
+  workflow_call:
 
 jobs:
   build:
