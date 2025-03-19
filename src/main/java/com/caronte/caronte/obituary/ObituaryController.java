@@ -44,7 +44,8 @@ public class ObituaryController {
     private final UserService userService;
 
     public ObituaryController(ObituaryService obituaryService, CustomerRepository customerRepository,
-            ImageTemplateService imageTemplateService, ReceiverService receiverService, UserService userService, AuthService authService) {
+            ImageTemplateService imageTemplateService, ReceiverService receiverService, UserService userService,
+            AuthService authService) {
         this.obituaryService = obituaryService;
         this.receiverService = receiverService;
         this.userService = userService;
@@ -136,14 +137,11 @@ public class ObituaryController {
         }
     }
 
-    // TODO: Aclararme quien realiza el pago (usuario normal o de pago, cuando lo realiza, etc.)
     // TODO: IMPORTANTE!!! Actualmente esto es una versión inicial, se debe de cambiar dependiendo de como se realice el pago
-    //       Actual esto lo que devuelve es una url que lleva a la pantalla de pago
     @PostMapping("/pay")
-    public ResponseEntity<?> payOblituary(@PathVariable Long obituaryId, 
-                                          @RequestBody PayObituaryDTO payObituaryDTO) {  
+    public ResponseEntity<?> payOblituary(@PathVariable Long obituaryId,
+            @RequestBody PayObituaryDTO payObituaryDTO) {
         try {
-
             String email = userService.findCurrentUser().getEmail();
             String paymentMethodId = payObituaryDTO.getPaymentId();
             List<Customer> customers = Customer.list(CustomerListParams.builder()
@@ -151,9 +149,8 @@ public class ObituaryController {
                     .setLimit(1L)
                     .build()).getData();
 
-            // Se realiza una búsqueda de si existe dicho Customer en Stripe por su email,
-            // en caso contrario, se crea
-            Customer customer = !customers.isEmpty() ? customers.get(0)
+            // Se realiza una búsqueda de si existe dicho Customer en Stripe por su email, en caso contrario, se crea
+            Customer customer = !customers.isEmpty() ? customers.getFirst()
                     : Customer.create(
                             CustomerCreateParams.builder()
                                     .setEmail(email)
@@ -162,12 +159,16 @@ public class ObituaryController {
             Price price = Price.retrieve("price_1R3GluGa0d4217RGL5hpbiZr");
 
             PaymentIntentCreateParams params = PaymentIntentCreateParams.builder()
-                    .setAmount(price.getUnitAmount()) 
-                    .setCurrency(price.getCurrency()) 
+                    .setAmount(price.getUnitAmount())
+                    .setCurrency(price.getCurrency())
                     .setCustomer(customer.getId()) // ID del cliente
-                    .setDescription("Compra de producto")
-                    .setPaymentMethod(paymentMethodId) // ID del método de pago (debe venir del frontend o haber sido guardado antes)
+                    .setPaymentMethod(paymentMethodId) // ID del método de pago (debe venir del frontend o generado antes)
                     .setConfirm(true) // Confirma el pago inmediatamente
+                    .setAutomaticPaymentMethods(
+                        PaymentIntentCreateParams.AutomaticPaymentMethods.builder()
+                            .setEnabled(true)
+                            .setAllowRedirects(PaymentIntentCreateParams.AutomaticPaymentMethods.AllowRedirects.NEVER)
+                            .build())
                     .build();
 
             PaymentIntent.create(params);
