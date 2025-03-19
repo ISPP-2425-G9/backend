@@ -67,7 +67,25 @@ public class ObituaryService {
                 .orElseThrow(() -> new RuntimeException("Customer not found"));
 
         ImageTemplate imageTemplate = imageTemplateService.findById(imageTemplateId);
+        DeathCertificate deathCertificate = null;
+        
+        if(!isMine){
+            if(request.getDeathCertificate() == null || request.getDeathCertificate().getDni() == null || request.getDeathCertificate().getFile() == null){
+                throw new IllegalArgumentException("The Death Certificate is invalid");
+            }
+            if (customer.getDni().equals(request.getDeathCertificate().getDni())){
+                throw new IllegalArgumentException("You can't upload a death certificate for yourself");
+            }
+            Iterable<Obituary> obituaries = obituaryRepository.findByCustomerDni(request.getDeathCertificate().getDni());
+            Boolean existCustomer = customerRepository.existsByDni(request.getDeathCertificate().getDni());
 
+            if(existCustomer && obituaries.iterator().hasNext() && obituaries.iterator().next().getDeathCertificate() == null){
+                deathCertificate = deathCertificateService.createDeathCertificateAndRelations(request.getDeathCertificate(), customerId );
+
+            }else{
+                deathCertificate = deathCertificateService.createDeathCertificate(request.getDeathCertificate());  
+            }
+        }
         String customUrl = request.getCustomImage();
         String customImageUrl = null;
 
@@ -75,20 +93,6 @@ public class ObituaryService {
             customImageUrl = MediaHandler.uploadImageToCloudinary(MediaHandler.base64ToImage(customUrl), "obituaries");
         } else {
             customImageUrl = customUrl;
-        }
-        
-        DeathCertificate deathCertificate = null;
-        
-        if(!isMine){
-            Iterable<Obituary> obituaries = obituaryRepository.findByCustomerDni(request.getDeathCertificate().getDni());
-            Boolean existCustomer = customerRepository.existsByDni(request.getDeathCertificate().getDni());
-
-            if( existCustomer && obituaries.iterator().hasNext() && obituaries.iterator().next().getDeathCertificate() == null){
-                deathCertificate = deathCertificateService.createDeathCertificateAndRelations(request.getDeathCertificate());
-
-            }else{
-                deathCertificate = deathCertificateService.createDeathCertificate(request.getDeathCertificate());  
-            }
         }
 
         Obituary obituary = saveObituary(name, birthDate, deathDate, customImageUrl, farewellMessage, farewellPhrase,
@@ -112,7 +116,7 @@ public class ObituaryService {
 
         Boolean isMine = Boolean.parseBoolean(request.getIsMine());
         if(obituary.getIsMine() && !isMine || !obituary.getIsMine() && isMine){
-            throw new IllegalArgumentException("You can't change de IsMine property");
+            throw new IllegalArgumentException("You can't change IsMine property");
         }
 
         String name = request.getName();

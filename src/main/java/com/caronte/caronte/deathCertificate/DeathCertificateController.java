@@ -16,8 +16,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.caronte.caronte.configuration.services.UserDetailsImpl;
+
 import jakarta.validation.Valid;
-import jakarta.websocket.server.PathParam;
 
 
 @RestController
@@ -34,8 +35,12 @@ public DeathCertificateController(DeathCertificateService deathCertificateServic
 public ResponseEntity<?> uploadDeathCertificate(@RequestBody @Valid DeathCertificateRequestDTO deathCertificateRequestDTO,
         Authentication authentication){ 
     try {
-
-        deathCertificateService.createDeathCertificateAndRelations(deathCertificateRequestDTO);
+        Long customerId = null;
+        if (authentication != null) {
+            UserDetailsImpl userPrincipal = (UserDetailsImpl) authentication.getPrincipal();
+            customerId = userPrincipal.getId();
+        }
+        deathCertificateService.createDeathCertificateAndRelations(deathCertificateRequestDTO, customerId);
         return ResponseEntity.ok("Death Certificate uploaded successfully");
     } catch (Exception e) {
         e.printStackTrace();

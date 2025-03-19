@@ -35,7 +35,6 @@ public class ObituraryRequestDto {
     @Pattern(regexp = "^(true|false)$", message = "The 'isMine' field must be either 'true' or 'false'")
     private String isMine;
 
-    @NotNull(message = "DeathCertificate can not be null")
     private DeathCertificateRequestDTO deathCertificate;
 
     @AssertTrue(message = "The deathDate field must be null or empty")
