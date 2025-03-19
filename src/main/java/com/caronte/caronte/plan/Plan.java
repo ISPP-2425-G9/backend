@@ -18,7 +18,7 @@ public class Plan extends BaseEntity {
     @Column(nullable = false)
     private PlanType planType;
 
-    private Long subscriptionId;
+    private String subscriptionId;
 
     public static Plan newFreePlan() {
         Plan plan = new Plan();

@@ -10,11 +10,11 @@ INSERT INTO admin (id) VALUES
 (1),
 (2);
 
-INSERT INTO plan (id, billing_address, expire_date, plan_type) VALUES 
-(1, NULL, NULL, 'FREE'),
-(2, 'ES7921000813610123456789', '2027-12-31', 'PREMIUM'),
-(3, NULL, NULL, 'FREE'),
-(4, 'DE89370400440532013000', '2025-10-25', 'PREMIUM');
+INSERT INTO plan (id, subscription_id, plan_type) VALUES 
+(1, NULL, 'FREE'),
+(2, 'sub_1R4QNiGa0d4217RGhH5rCRHl', 'PREMIUM'),
+(3, NULL, 'FREE'),
+(4, 'sub_1R4QQbGa0d4217RGFKZprtnL', 'PREMIUM');
 
 INSERT INTO company (id, address, city, description, image_url, nif, zip_code, plan_id) VALUES 
 (3, 'Calle Tarfia, 67', 'Sevilla', 'Descripción de Empresa Uno', NULL, 'A12345678', '41001', 1),

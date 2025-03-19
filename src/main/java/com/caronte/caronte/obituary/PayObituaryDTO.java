@@ -6,6 +6,6 @@ import lombok.Getter;
 public class PayObituaryDTO {
     
     private String obituaryId;
-    private String paymentId;
+    private String paymentMethodId;
 
 }

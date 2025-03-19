@@ -134,12 +134,12 @@ public class ObituaryController {
     }
 
     // TODO: IMPORTANTE!!! Actualmente esto es una versión inicial, se debe de cambiar dependiendo de como se realice el pago
+    
     @PostMapping("/pay")
-    public ResponseEntity<?> payOblituary(@PathVariable Long obituaryId,
-            @RequestBody PayObituaryDTO payObituaryDTO) {
+    public ResponseEntity<?> payOblituary(@RequestBody PayObituaryDTO payObituaryDTO) {
         try {
             String email = userService.findCurrentUser().getEmail();
-            String paymentMethodId = payObituaryDTO.getPaymentId();
+            String paymentMethodId = payObituaryDTO.getPaymentMethodId();
             List<Customer> customers = Customer.list(CustomerListParams.builder()
                     .setEmail(email)
                     .setLimit(1L)
