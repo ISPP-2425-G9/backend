@@ -5,7 +5,6 @@ import org.hibernate.annotations.OnDeleteAction;
 
 import com.caronte.caronte.customer.Customer;
 import com.caronte.caronte.util.BaseEntity;
-import com.caronte.caronte.video.Video;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

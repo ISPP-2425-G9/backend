@@ -9,8 +9,6 @@ import com.caronte.caronte.image.Image;
 import com.caronte.caronte.image.ImageRepository;
 import com.caronte.caronte.receiver.ReceiverService;
 
-import java.util.List;
-
 import com.caronte.caronte.video.Video;
 import com.caronte.caronte.video.VideoRepository;
 

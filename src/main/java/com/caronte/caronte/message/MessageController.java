@@ -26,7 +26,7 @@ public class MessageController {
         this.messageService = messageService;
     }
 
-    @PostMapping("/create")
+    @PostMapping()
     public ResponseEntity<?> createMessage(
             @Valid @RequestBody CreateMessageRequestDto request,
             BindingResult bindingResult,
