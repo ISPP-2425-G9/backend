@@ -21,6 +21,7 @@ jobs:
         uses: actions/setup-java@v3
         with:
           java-version: '23'
+          distribution: 'temurin'
 
       - name: Install Codacy CLI
         run: |
