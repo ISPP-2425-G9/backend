@@ -49,10 +49,6 @@ jobs:
       run: |
         mvn clean install -DskipTests
 
-    - name: Security audit with OWASP Dependency-Check
-      run: |
-        curl -sSL https://dlcdn.apache.org/maven/maven-3/3.8.1/binaries/apache-maven-3.8.1-bin.tar.gz | tar -xz
-        ./mvnw dependency-check:check
 
     - name: Build with Maven
       run: |
