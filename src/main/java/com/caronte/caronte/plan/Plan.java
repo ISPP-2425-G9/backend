@@ -1,7 +1,5 @@
 package com.caronte.caronte.plan;
 
-import java.time.LocalDate;
-
 import com.caronte.caronte.util.BaseEntity;
 
 import jakarta.persistence.Column;
@@ -20,7 +18,12 @@ public class Plan extends BaseEntity {
     @Column(nullable = false)
     private PlanType planType;
 
-    private LocalDate expireDate;
+    private Long subscriptionId;
 
-    private String billingAddress;
+    public static Plan newFreePlan() {
+        Plan plan = new Plan();
+        plan.setPlanType(PlanType.FREE);
+        return plan;
+    }
+
 }

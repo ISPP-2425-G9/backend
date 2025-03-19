@@ -27,11 +27,11 @@ import com.caronte.caronte.imageTemplate.ImageTemplateService;
 import com.caronte.caronte.receiver.ReceiverService;
 import com.caronte.caronte.user.UserService;
 import com.stripe.model.Customer;
-import com.stripe.model.checkout.Session;
+import com.stripe.model.PaymentIntent;
+import com.stripe.model.Price;
 import com.stripe.param.CustomerCreateParams;
 import com.stripe.param.CustomerListParams;
-import com.stripe.param.checkout.SessionCreateParams;
-import com.stripe.param.checkout.SessionCreateParams.LineItem;
+import com.stripe.param.PaymentIntentCreateParams;
 
 import jakarta.validation.Valid;
 
@@ -140,38 +140,39 @@ public class ObituaryController {
     // TODO: IMPORTANTE!!! Actualmente esto es una versión inicial, se debe de cambiar dependiendo de como se realice el pago
     //       Actual esto lo que devuelve es una url que lleva a la pantalla de pago
     @PostMapping("/pay")
-    public ResponseEntity<?> pay() {
-        String email = this.userService.findCurrentUser().getEmail(); 
-        String priceId = "price_1R3GluGa0d4217RGL5hpbiZr"; // price_id de la esquela
-
+    public ResponseEntity<?> payOblituary(@PathVariable Long obituaryId, 
+                                          @RequestBody PayObituaryDTO payObituaryDTO) {  
         try {
+
+            String email = userService.findCurrentUser().getEmail();
+            String paymentMethodId = payObituaryDTO.getPaymentId();
             List<Customer> customers = Customer.list(CustomerListParams.builder()
                     .setEmail(email)
-                    .setLimit(1L) 
+                    .setLimit(1L)
                     .build()).getData();
 
-            // Se realiza una búsqueda de si existe dicho Customer en Stripe por su gmail, en caso contrario, se crea
+            // Se realiza una búsqueda de si existe dicho Customer en Stripe por su email,
+            // en caso contrario, se crea
             Customer customer = !customers.isEmpty() ? customers.get(0)
                     : Customer.create(
                             CustomerCreateParams.builder()
                                     .setEmail(email)
                                     .build());
 
-            LineItem line =  LineItem.builder()
-                    .setPrice(priceId)
-                    .setQuantity(1L) 
-                    .build();
-            
-            SessionCreateParams params = SessionCreateParams.builder()
-                    .setCustomer(customer.getId()) // El ID del cliente
-                    .addLineItem(line)
-                    .setMode(SessionCreateParams.Mode.PAYMENT) // El modo es un pago único
-                    .setSuccessUrl("https://localhost:8080/exito") // URL de éxito después de completar el pago
-                    .setCancelUrl("https://localhost:8080/cancelado") // URL de cancelación si el pago falla
+            Price price = Price.retrieve("price_1R3GluGa0d4217RGL5hpbiZr");
+
+            PaymentIntentCreateParams params = PaymentIntentCreateParams.builder()
+                    .setAmount(price.getUnitAmount()) 
+                    .setCurrency(price.getCurrency()) 
+                    .setCustomer(customer.getId()) // ID del cliente
+                    .setDescription("Compra de producto")
+                    .setPaymentMethod(paymentMethodId) // ID del método de pago (debe venir del frontend o haber sido guardado antes)
+                    .setConfirm(true) // Confirma el pago inmediatamente
                     .build();
 
-            Session session = Session.create(params);
-            return ResponseEntity.ok(Map.of("url", session.getUrl()));
+            PaymentIntent.create(params);
+
+            return ResponseEntity.ok("Compra de esquela exitosa");
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
