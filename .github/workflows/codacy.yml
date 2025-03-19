@@ -1,36 +1,68 @@
-name: Codacy Analysis
+name: Codacy CI for Spring Boot
 
 on:
-  pull_request:
-    branches: [develop]
-    types: [opened, reopened, edited, review_requested, synchronize]
   push:
     branches:
-      - "develop"
-  workflow_call:
+      - main
+  pull_request:
+    branches:
+      - main
+      - develop
 
 jobs:
-  codacy-analysis:
+  build:
+
     runs-on: ubuntu-latest
 
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Set up JDK 23
-        uses: actions/setup-java@v3
-        with:
-          java-version: '23'
-          distribution: 'temurin'
-
-      - name: Install Codacy CLI
-        run: |
-          wget https://download.codacy.com/cli/linux/codacy-cli-5.0.0-linux-amd64.tar.gz
-          tar -xzf codacy-cli-5.0.0-linux-amd64.tar.gz
-          sudo mv codacy-cli-*/codacy-cli /usr/local/bin/codacy-cli
-
-      - name: Run Codacy Analysis
+    services:
+      mysql:
+        image: mysql:5.7
         env:
-          CODACY_PROJECT_TOKEN: ${{ secrets.CODACY_TOKEN }}
-        run: |
-          codacy-cli -r .
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: caronte
+          MYSQL_USER: caronte_user
+          MYSQL_PASSWORD: caronte_password
+        ports:
+          - 3306:3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+
+    strategy:
+      matrix:
+        java-version: ['23']
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Java
+      uses: actions/setup-java@v3
+      with:
+        java-version: ${{ matrix.java-version }}
+        distribution: 'adoptopenjdk'
+
+    - name: Set up Maven
+      uses: actions/setup-java@v3
+      with:
+        java-version: ${{ matrix.java-version }}
+        maven-version: '4.0.0'
+
+    - name: Install dependencies (Maven)
+      run: |
+        mvn clean install -DskipTests
+
+    - name: Security audit with OWASP Dependency-Check
+      run: |
+        curl -sSL https://dlcdn.apache.org//maven/maven-3/3.8.1/maven-3.8.1-bin.tar.gz | tar -xz
+        ./mvnw dependency-check:check
+
+    - name: Build with Maven
+      run: |
+        mvn package -DskipTests
+
+    - name: Upload coverage to Codacy
+      run: |
+        curl -Ls https://github.com/codacy/codacy-coverage-reporter/releases/download/3.0.1/codacy-coverage-reporter-3.0.1-linux-x86_64.tar.gz | tar xz
+        ./codacy-coverage-reporter-3.0.1-linux-x86_64/codacy-coverage-reporter -l Java -r target/site/jacoco-aggregate/jacoco.xml
+
+      env:
+        CODACY_PROJECT_TOKEN: ${{ secrets.CODACY_TOKEN }}
