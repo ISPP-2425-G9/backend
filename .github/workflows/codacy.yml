@@ -25,7 +25,8 @@ jobs:
 
       - name: Install Codacy CLI
         run: |
-          curl -sSL https://download.codacy.com/cli/linux/codacy-cli-5.0.0-linux-amd64.tar.gz | tar xz
+          wget https://download.codacy.com/cli/linux/codacy-cli-5.0.0-linux-amd64.tar.gz
+          tar -xzf codacy-cli-5.0.0-linux-amd64.tar.gz
           sudo mv codacy-cli-*/codacy-cli /usr/local/bin/codacy-cli
 
       - name: Run Codacy Analysis
