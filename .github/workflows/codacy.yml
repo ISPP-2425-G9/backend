@@ -41,9 +41,8 @@ jobs:
         distribution: 'temurin'
 
     - name: Set up Maven
-      uses: actions/setup-java@v3
+      uses: aliomran/setup-maven@v2
       with:
-        java-version: ${{ matrix.java-version }}
         maven-version: '4.0.0'
 
     - name: Install dependencies (Maven)
