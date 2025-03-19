@@ -54,10 +54,17 @@ jobs:
       run: |
         mvn package -DskipTests
 
-    - name: Upload coverage to Codacy
+    - name: Download and debug Codacy coverage reporter
       run: |
         curl -Ls https://github.com/codacy/codacy-coverage-reporter/releases/download/3.0.1/codacy-coverage-reporter-3.0.1-linux-x86_64.tar.gz -o codacy-coverage-reporter.tar.gz
+        head -n 20 codacy-coverage-reporter.tar.gz
+
+    - name: Extract Codacy coverage reporter
+      run: |
         tar xzvf codacy-coverage-reporter.tar.gz
+
+    - name: Upload coverage to Codacy
+      run: |
         ./codacy-coverage-reporter-3.0.1-linux-x86_64/codacy-coverage-reporter -l Java -r target/site/jacoco-aggregate/jacoco.xml
 
       env:
