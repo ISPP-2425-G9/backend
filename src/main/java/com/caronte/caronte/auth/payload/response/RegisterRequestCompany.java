@@ -80,8 +80,7 @@ public class RegisterRequestCompany {
         
         Plan plan = new Plan();
         plan.setPlanType(PlanType.FREE);
-        plan.setExpireDate(null);
-        plan.setBillingAddress(null);
+        plan.setSubscriptionId(null);
         company.setPlan(plan);
 
         return company;
