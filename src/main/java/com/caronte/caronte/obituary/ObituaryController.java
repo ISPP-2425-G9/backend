@@ -1,7 +1,6 @@
 package com.caronte.caronte.obituary;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -23,12 +22,6 @@ import org.springframework.web.server.ResponseStatusException;
 
 import com.caronte.caronte.configuration.services.UserDetailsImpl;
 import com.caronte.caronte.user.UserService;
-import com.stripe.model.Customer;
-import com.stripe.model.PaymentIntent;
-import com.stripe.model.Price;
-import com.stripe.param.CustomerCreateParams;
-import com.stripe.param.CustomerListParams;
-import com.stripe.param.PaymentIntentCreateParams;
 
 import jakarta.validation.Valid;
 
@@ -130,48 +123,6 @@ public class ObituaryController {
             return ResponseEntity.ok().body(obituary);
         } catch (IllegalArgumentException exception) {
             return ResponseEntity.badRequest().body(exception.getMessage());
-        }
-    }
-
-    // TODO: IMPORTANTE!!! Actualmente esto es una versión inicial, se debe de cambiar dependiendo de como se realice el pago
-    
-    @PostMapping("/pay")
-    public ResponseEntity<?> payOblituary(@RequestBody PayObituaryDTO payObituaryDTO) {
-        try {
-            String email = userService.findCurrentUser().getEmail();
-            String paymentMethodId = payObituaryDTO.getPaymentMethodId();
-            List<Customer> customers = Customer.list(CustomerListParams.builder()
-                    .setEmail(email)
-                    .setLimit(1L)
-                    .build()).getData();
-
-            // Se realiza una búsqueda de si existe dicho Customer en Stripe por su email, en caso contrario, se crea
-            Customer customer = !customers.isEmpty() ? customers.getFirst()
-                    : Customer.create(
-                            CustomerCreateParams.builder()
-                                    .setEmail(email)
-                                    .build());
-
-            Price price = Price.retrieve(obituaryPriceId);
-
-            PaymentIntentCreateParams params = PaymentIntentCreateParams.builder()
-                    .setAmount(price.getUnitAmount())
-                    .setCurrency(price.getCurrency())
-                    .setCustomer(customer.getId()) // ID del cliente
-                    .setPaymentMethod(paymentMethodId) // ID del método de pago (debe venir del frontend o generado antes)
-                    .setConfirm(true) // Confirma el pago inmediatamente
-                    .setAutomaticPaymentMethods(
-                        PaymentIntentCreateParams.AutomaticPaymentMethods.builder()
-                            .setEnabled(true)
-                            .setAllowRedirects(PaymentIntentCreateParams.AutomaticPaymentMethods.AllowRedirects.NEVER)
-                            .build())
-                    .build();
-
-            PaymentIntent.create(params);
-
-            return ResponseEntity.ok("Compra de esquela exitosa");
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 
