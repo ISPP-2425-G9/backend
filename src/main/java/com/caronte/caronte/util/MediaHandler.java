@@ -30,7 +30,7 @@ public class MediaHandler {
         return image;
     }
 
-    public static String uploadImageToCloudinary(BufferedImage image) {
+    public static String uploadImageToCloudinary(BufferedImage image, String folder) {
         Dotenv dotenv = Dotenv.load();
         Cloudinary cloudinary_image = new Cloudinary(dotenv.get("CLOUDINARY_IMAGES_URL"));
 
@@ -39,7 +39,7 @@ public class MediaHandler {
             ImageIO.write(image, "png", tempFile);
 
             Map<String, Object> options = ObjectUtils.asMap(
-                "folder", "images/obituaries/"
+                "folder", "images/" + folder + "/"
             );
 
             Map uploadResult = cloudinary_image.uploader().upload(tempFile, options);

@@ -22,7 +22,6 @@ import org.springframework.web.server.ResponseStatusException;
 import com.caronte.caronte.configuration.services.UserDetailsImpl;
 import com.caronte.caronte.customer.CustomerRepository;
 import com.caronte.caronte.imageTemplate.ImageTemplateService;
-import com.caronte.caronte.receiver.ReceiverService;
 
 import jakarta.validation.Valid;
 
@@ -31,24 +30,20 @@ import jakarta.validation.Valid;
 public class ObituaryController {
 
     private final ObituaryService obituaryService;
-    private final ReceiverService receiverService;
 
     public ObituaryController(ObituaryService obituaryService, CustomerRepository customerRepository,
-            ImageTemplateService imageTemplateService, ReceiverService receiverService) {
+            ImageTemplateService imageTemplateService) {
         this.obituaryService = obituaryService;
-        this.receiverService = receiverService;
     }
 
-    @PostMapping()
+    @PostMapping("/create")
     public ResponseEntity<?> createObituary(@RequestBody @Valid ObituraryRequestDto request,
             Authentication authentication) {
         try {
             UserDetailsImpl userPrincipal = (UserDetailsImpl) authentication.getPrincipal();
             Long customerId = userPrincipal.getId();
 
-            Obituary obituary = obituaryService.createObituaryWithReceivers(request, customerId);
-
-            System.out.println(obituary);
+            obituaryService.createObituaryWithReceivers(request, customerId);
 
             return ResponseEntity.ok("Obituary created successfully");
 
