@@ -49,7 +49,7 @@ public class DeathCertificateService {
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "The customer has not been found"));
         }
         if(customerLogged != null && customerLogged.getDni().equals(request.getDni())){
-            throw new IllegalArgumentException("No puedes subir un certificado de defunción para tu propio DNI");
+            throw new IllegalArgumentException("No puedes subir un certificado de defunción con tu DNI");
         }
         Iterable<Obituary> obituaries = obituaryRepository.findByCustomerDni(request.getDni());
         if (!obituaries.iterator().hasNext()) {

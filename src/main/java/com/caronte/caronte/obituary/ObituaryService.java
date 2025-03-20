@@ -74,7 +74,7 @@ public class ObituaryService {
                 throw new IllegalArgumentException("The Death Certificate is invalid");
             }
             if (customer.getDni().equals(request.getDeathCertificate().getDni())){
-                throw new IllegalArgumentException("You can't upload a death certificate for yourself");
+                throw new IllegalArgumentException("No puedes subir un certificado con tu DNI");
             }
             Iterable<Obituary> obituaries = obituaryRepository.findByCustomerDni(request.getDeathCertificate().getDni());
             Boolean existCustomer = customerRepository.existsByDni(request.getDeathCertificate().getDni());
