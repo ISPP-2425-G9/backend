@@ -38,6 +38,9 @@ public class Obituary extends BaseEntity {
     @Column(length = 90)
     private String farewellPhrase;
 
+    @Column(nullable = false, length = 5)
+    private String wordColor;
+
     @Column(nullable = false)
     private Boolean isMine;
 

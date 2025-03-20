@@ -34,6 +34,10 @@ public class ObituraryRequestDto {
     @NotNull(message = "The 'isMine' field cannot be null")
     private Boolean isMine;
 
+    @NotBlank(message = "The wordColor field cannot be empty")
+    @Size(max = 5, message = "The wordColor must be at most 5 characters long (RGB)")
+    private String  wordColor; 
+
     private DeathCertificateRequestDTO deathCertificate;
 
     @AssertTrue(message = "The deathDate field must be null or empty")

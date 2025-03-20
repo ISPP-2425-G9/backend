@@ -62,6 +62,7 @@ public class ObituaryService {
         String farewellPhrase = request.getFarewellPhrase();
         Long imageTemplateId = request.getImageTemplate_id();
         Boolean isMine = request.getIsMine();
+        String wordColor = request.getWordColor();
 
         Customer customer = customerRepository.findById(customerId)
                 .orElseThrow(() -> new RuntimeException("Customer not found"));
@@ -95,8 +96,10 @@ public class ObituaryService {
             customImageUrl = customUrl;
         }
 
+        
+
         Obituary obituary = saveObituary(name, birthDate, deathDate, customImageUrl, farewellMessage, farewellPhrase,
-                isMine, customer, imageTemplate,deathCertificate);
+                isMine, customer, imageTemplate,deathCertificate,wordColor);
 
         List<ObituraryRequestDto.ContactDto> contacts = request.getContacts();
         for (ObituraryRequestDto.ContactDto contact : contacts) {
@@ -132,6 +135,7 @@ public class ObituaryService {
         
         String customUrl = request.getCustomImage();
         ImageTemplate imageTemplate = imageTemplateService.findById(imageTemplateId);
+        String wordColor = request.getWordColor();
 
         String customImageUrl;
         if (customUrl != null && customUrl.startsWith("data:image/")) {
@@ -150,6 +154,7 @@ public class ObituaryService {
         obituary.setFarewellPhrase(farewellPhrase);
         obituary.setIsMine(isMine);
         obituary.setImageTemplate(imageTemplate);
+        obituary.setWordColor(wordColor);
 
         updatedObituary = updateObituary(obituary);
 
@@ -167,7 +172,7 @@ public class ObituaryService {
     @Transactional
     public Obituary saveObituary(String name, LocalDate birth_date, LocalDate death_date, String custom_image_url,
             String farewell_message, String farewell_phrase, Boolean is_mine, Customer customer,
-            ImageTemplate imageTemplate, DeathCertificate certificate) {
+            ImageTemplate imageTemplate, DeathCertificate certificate, String word_color) {
         Obituary obituary = new Obituary();
 
         obituary.setName(name);
@@ -180,6 +185,7 @@ public class ObituaryService {
         obituary.setCustomer(customer);
         obituary.setImageTemplate(imageTemplate);
         obituary.setDeathCertificate(certificate);
+        obituary.setWordColor(word_color);
         return obituaryRepository.save(obituary);
     }
 
