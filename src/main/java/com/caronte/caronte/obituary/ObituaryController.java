@@ -43,9 +43,7 @@ public class ObituaryController {
             UserDetailsImpl userPrincipal = (UserDetailsImpl) authentication.getPrincipal();
             Long customerId = userPrincipal.getId();
 
-            Obituary obituary = obituaryService.createObituaryWithReceivers(request, customerId);
-
-            System.out.println(obituary);
+            obituaryService.createObituaryWithReceivers(request, customerId);
 
             return ResponseEntity.ok("Obituary created successfully");
 

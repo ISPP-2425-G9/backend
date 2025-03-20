@@ -20,7 +20,7 @@ public class MediaHandler {
             if (base64String != null && base64String.contains(",")) {
                 base64String = base64String.substring(base64String.indexOf(",") + 1);
             }
-    
+
             byte[] imageBytes = Base64.getDecoder().decode(base64String);
             ByteArrayInputStream bis = new ByteArrayInputStream(imageBytes);
             image = ImageIO.read(bis);
@@ -30,16 +30,14 @@ public class MediaHandler {
         return image;
     }
 
-    public static String uploadImageToCloudinary(BufferedImage image) {
+    public static String uploadImageToCloudinary(BufferedImage image, String folder) {
         Cloudinary cloudinary_image = new Cloudinary("modify_before_deploy");
-
         try {
             File tempFile = File.createTempFile("upload_", ".png");
             ImageIO.write(image, "png", tempFile);
 
             Map<String, Object> options = ObjectUtils.asMap(
-                "folder", "images/obituaries/"
-            );
+                    "folder", "images/" + folder + "/");
 
             Map uploadResult = cloudinary_image.uploader().upload(tempFile, options);
             tempFile.delete();

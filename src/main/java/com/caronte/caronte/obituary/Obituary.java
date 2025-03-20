@@ -6,6 +6,7 @@ import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
 import com.caronte.caronte.customer.Customer;
+import com.caronte.caronte.deathCertificate.DeathCertificate;
 import com.caronte.caronte.imageTemplate.ImageTemplate;
 import com.caronte.caronte.util.BaseEntity;
 
@@ -48,4 +49,8 @@ public class Obituary extends BaseEntity {
     @ManyToOne
     @JoinColumn(nullable = false)
     private ImageTemplate imageTemplate;
+
+    @ManyToOne
+    private DeathCertificate deathCertificate;
+
 }

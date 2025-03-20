@@ -29,12 +29,14 @@ import com.caronte.caronte.auth.payload.response.JwtResponse;
 import com.caronte.caronte.auth.payload.response.LoginRequest;
 import com.caronte.caronte.auth.payload.response.RegisterRequestCompany;
 import com.caronte.caronte.auth.payload.response.RegisterRequestCustomer;
+import com.caronte.caronte.auth.payload.response.UserChangePasswordRequest;
 import com.caronte.caronte.company.Company;
 import com.caronte.caronte.company.CompanyService;
 import com.caronte.caronte.configuration.jwt.JwtUtils;
 import com.caronte.caronte.configuration.services.UserDetailsImpl;
 import com.caronte.caronte.customer.Customer;
 import com.caronte.caronte.customer.CustomerService;
+import com.caronte.caronte.user.User;
 import com.caronte.caronte.user.UserService;
 import com.caronte.caronte.util.ErrorHandler;
 
@@ -154,6 +156,30 @@ public class AuthController {
 			}
 			Customer customer = customerService.update(customerId, request);
 			UserDetailsImpl userDetails = UserDetailsImpl.build(customer);
+			String jwt = jwtUtils.generateJwtToken(userDetails);
+			List<String> roles = userDetails.getAuthorities().stream().map(item -> item.getAuthority())
+					.collect(Collectors.toList());
+			JwtResponse jwtResponse = new JwtResponse(jwt, userDetails.getId(), userDetails.getUsername(), roles);
+			return ResponseEntity.ok().body(jwtResponse);
+		} catch (Exception e) {
+			return ResponseEntity.badRequest().body(e.getMessage());
+		}
+
+
+	}
+
+	@PutMapping("/password/{userId}")
+	@ResponseStatus(HttpStatus.OK)
+	public ResponseEntity<?> updateCustomer(
+			@PathVariable Long userId,
+			@RequestBody @Valid UserChangePasswordRequest request) {
+		try {
+			Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+			if (userService.findCurrentUser().getId() != userId & !auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ADMIN"))) {
+				throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You can't modify this data");
+			}
+			User user = userService.changePassword(userId, request);
+			UserDetailsImpl userDetails = UserDetailsImpl.build(user);
 			String jwt = jwtUtils.generateJwtToken(userDetails);
 			List<String> roles = userDetails.getAuthorities().stream().map(item -> item.getAuthority())
 					.collect(Collectors.toList());

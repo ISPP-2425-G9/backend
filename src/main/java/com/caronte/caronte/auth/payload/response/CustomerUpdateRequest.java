@@ -20,9 +20,6 @@ public class CustomerUpdateRequest {
     private String email;
 
 	@NotBlank
-	private String password;
-
-	@NotBlank
 	private String fullName;
 
 	@NotBlank

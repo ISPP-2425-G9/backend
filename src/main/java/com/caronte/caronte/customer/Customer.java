@@ -21,8 +21,6 @@ public class Customer extends User {
     @Column(unique = true, nullable = false, length = 20)
     private String dni;
 
-    // Relationships
-    @OneToOne(cascade = CascadeType.ALL)
-    private Plan plan;
+
 
 }
