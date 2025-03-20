@@ -1,7 +1,6 @@
 package com.caronte.caronte.deathCertificate;
 
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
@@ -28,6 +27,19 @@ public class DeathCertificateService {
 
     @Transactional
     public DeathCertificate createDeathCertificateAndRelations(DeathCertificateRequestDTO request, Long customerId) {
+
+        checkDeathCertificate(request, customerId);
+        DeathCertificate certificate = createDeathCertificate(request);
+        Iterable<Obituary> obituaries = obituaryRepository.findByCustomerDni(request.getDni());
+        for (Obituary obituary : obituaries) {
+            obituary.setDeathCertificate(certificate);
+            obituaryRepository.save(obituary);
+        }
+        return certificate;
+    }
+
+    @Transactional
+    public void checkDeathCertificate(DeathCertificateRequestDTO request, Long customerId) {
         if(request == null || request.getDni() == null || request.getFile() == null){
             throw new IllegalArgumentException("The Death Certificate is invalid");
         }
@@ -46,13 +58,6 @@ public class DeathCertificateService {
         if(obituaries.iterator().next().getDeathCertificate() != null){
             throw new CertificateAssociationException("El certificado de este cliente ya ha sido subido");
         }
-        DeathCertificate certificate = createDeathCertificate(request);
-
-        for (Obituary obituary : obituaries) {
-            obituary.setDeathCertificate(certificate);
-            obituaryRepository.save(obituary);
-        }
-        return certificate;
     }
 
     @Transactional
