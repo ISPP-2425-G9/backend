@@ -119,7 +119,7 @@ public class ObituaryService {
             throw new IllegalArgumentException("You can't change IsMine property");
         }
 
-        if(!isMine && obituary.getDeathCertificate().getIsVerified() == true){
+        if(!isMine && obituary.getDeathCertificate().getIsVerified()){
             throw new IllegalArgumentException("You can't upload the obituary since the death certificate is verified");
         } 
 
