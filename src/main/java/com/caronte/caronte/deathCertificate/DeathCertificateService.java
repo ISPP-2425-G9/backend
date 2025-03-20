@@ -41,7 +41,7 @@ public class DeathCertificateService {
         }
         Iterable<Obituary> obituaries = obituaryRepository.findByCustomerDni(request.getDni());
         if (!obituaries.iterator().hasNext()) {
-            throw new IllegalArgumentException("There are no obituaries with that DNI number.");        
+            throw new IllegalArgumentException("No hay esquelas creadas asociadas a ese DNI");        
         }
         if(obituaries.iterator().next().getDeathCertificate() != null){
             throw new CertificateAssociationException("The death certificate has already been uploaded.");
