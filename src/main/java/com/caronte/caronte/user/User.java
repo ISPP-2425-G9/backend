@@ -1,11 +1,9 @@
 package com.caronte.caronte.user;
 
+import com.caronte.caronte.plan.Plan;
 import com.caronte.caronte.util.BaseEntity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Inheritance;
-import jakarta.persistence.InheritanceType;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -26,5 +24,9 @@ public class User extends BaseEntity{
 
     @Column(nullable = false, length = 15)
     private String telephone;
+
+    // Relationships
+    @OneToOne(cascade = CascadeType.ALL)
+    private Plan plan;
 
 }

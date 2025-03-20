@@ -33,6 +33,5 @@ public class Company extends User {
     @Column(unique = true, nullable = false, length = 20)
     private String nif;
 
-    @OneToOne(cascade = CascadeType.ALL)
-    private Plan plan;
+
 }

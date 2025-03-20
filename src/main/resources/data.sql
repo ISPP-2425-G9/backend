@@ -1,28 +1,32 @@
-INSERT INTO user (id, name, email, password, telephone) VALUES
-(1, 'admin1', 'admin1@caronte.site', '$2a$10$EJ7goCEpyl.XTDXDf/jeVOz1Mfwn24Q4jbIXnwY9yLh9gJSghZecm', '626077466'),
-(2, 'admin2', 'admin2@caronte.site', '$2a$10$EJ7goCEpyl.XTDXDf/jeVOz1Mfwn24Q4jbIXnwY9yLh9gJSghZecm', '626077466'),
-(3, 'empresa1','empresa1@caronte.site', '$2a$10$7vxcruASLb/pJhbG1uJGgeb6RqSIBeHJub0UGXSzwJAYBd0LHPoGu', '645384175'),
-(4, 'empresa2','empresa2@caronte.site', '$2a$10$7vxcruASLb/pJhbG1uJGgeb6RqSIBeHJub0UGXSzwJAYBd0LHPoGu', '957501307'),
-(5, 'cliente1', 'cliente1@caronte.site', '$2a$10$.qePDyM..BhRQr829JMtGOuRLM7i0K6/im0tgGUWxHvoLQRTs9956', '637892263'),
-(6, 'cliente2', 'cliente2@caronte.site', '$2a$10$.qePDyM..BhRQr829JMtGOuRLM7i0K6/im0tgGUWxHvoLQRTs9956', '643287465');
+INSERT INTO plan (id, subscription_id, plan_type) VALUES
+(1, NULL, 'FREE'),
+(2, NULL, 'PREMIUM'),
+(3, NULL, 'FREE'),
+(4, NULL, 'PREMIUM'),
+(5, NULL, 'FREE'),
+(6, NULL, 'FREE');
+
+
+INSERT INTO user (id, name, email, password, telephone, plan_id) VALUES
+(1, 'admin1', 'admin1@caronte.site', '$2a$10$EJ7goCEpyl.XTDXDf/jeVOz1Mfwn24Q4jbIXnwY9yLh9gJSghZecm', '626077466', 5),
+(2, 'admin2', 'admin2@caronte.site', '$2a$10$EJ7goCEpyl.XTDXDf/jeVOz1Mfwn24Q4jbIXnwY9yLh9gJSghZecm', '626077466', 6),
+(3, 'empresa1','empresa1@caronte.site', '$2a$10$7vxcruASLb/pJhbG1uJGgeb6RqSIBeHJub0UGXSzwJAYBd0LHPoGu', '645384175', 3),
+(4, 'empresa2','empresa2@caronte.site', '$2a$10$7vxcruASLb/pJhbG1uJGgeb6RqSIBeHJub0UGXSzwJAYBd0LHPoGu', '957501307', 4),
+(5, 'cliente1', 'cliente1@caronte.site', '$2a$10$.qePDyM..BhRQr829JMtGOuRLM7i0K6/im0tgGUWxHvoLQRTs9956', '637892263', 1),
+(6, 'cliente2', 'cliente2@caronte.site', '$2a$10$.qePDyM..BhRQr829JMtGOuRLM7i0K6/im0tgGUWxHvoLQRTs9956', '643287465', 2);
 
 INSERT INTO admin (id) VALUES 
 (1),
 (2);
 
-INSERT INTO plan (id, billing_address, expire_date, plan_type) VALUES 
-(1, NULL, NULL, 'FREE'),
-(2, 'ES7921000813610123456789', '2027-12-31', 'PREMIUM'),
-(3, NULL, NULL, 'FREE'),
-(4, 'DE89370400440532013000', '2025-10-25', 'PREMIUM');
 
-INSERT INTO company (id, address, city, description, image_url, nif, zip_code, plan_id) VALUES 
-(3, 'Calle Tarfia, 67', 'Sevilla', 'Descripción de Empresa Uno', NULL, 'A12345678', '41001', 1),
-(4, 'Calle Mirador de Montepinar, 4', 'Madrid', 'Descripción de Empresa Dos', NULL, 'B87654321', '28001', 2);
+INSERT INTO company (id, address, city, description, image_url, nif, zip_code) VALUES 
+(3, 'Calle Tarfia, 67', 'Sevilla', 'Descripción de Empresa Uno', NULL, 'A12345678', '41001'),
+(4, 'Calle Mirador de Montepinar, 4', 'Madrid', 'Descripción de Empresa Dos', NULL, 'B87654321', '28001');
 
-INSERT INTO customer (id, dni, is_active, plan_id) VALUES 
-(5, '26745987T', 0, 3),
-(6, '24072003L', 1, 4);
+INSERT INTO customer (id, dni, is_active) VALUES 
+(5, '26745987T', 0),
+(6, '24072003L', 1);
 
 INSERT INTO emergency_contact (id, email, name, telephone, customer_id) VALUES 
 (1, 'contacto1@caronte.site', 'Contacto Uno', '678945638', 5),

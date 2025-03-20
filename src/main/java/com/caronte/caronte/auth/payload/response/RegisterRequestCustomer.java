@@ -49,8 +49,7 @@ public class RegisterRequestCustomer {
 
         Plan plan = new Plan();
         plan.setPlanType(PlanType.FREE);
-        plan.setExpireDate(null);
-        plan.setBillingAddress(null);
+        plan.setSubscriptionId(null);
         customer.setPlan(plan);
         return customer;
     }

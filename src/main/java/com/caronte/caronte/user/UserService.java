@@ -11,6 +11,8 @@ import org.springframework.web.server.ResponseStatusException;
 import com.caronte.caronte.auth.payload.response.UserChangePasswordRequest;
 import com.caronte.caronte.configuration.services.UserDetailsImpl;
 
+import java.util.Optional;
+
 @Service
 public class UserService {
 
@@ -40,6 +42,12 @@ public class UserService {
         userRepository.deleteById(id);
     }
 
+    public Long getPlanId(Long userId){
+        Optional<User> user = userRepository.findById(userId);
+        if (user.isPresent()){
+            return user.get().getPlan().getId();
+        }throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User con ID " + userId + " no encontrado");
+    }
     @Transactional
     public User changePassword(Long id, UserChangePasswordRequest request) {
         User user = userRepository.findById(id)
