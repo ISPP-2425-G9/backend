@@ -7,7 +7,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.caronte.caronte.company.Company;
-import com.caronte.caronte.plan.Plan;
 import com.caronte.caronte.user.User;
 import com.caronte.caronte.user.UserRepository;
 import com.stripe.exception.StripeException;
@@ -36,7 +35,7 @@ public class StripeService {
 
 
     @Transactional
-    public void subscription(String paymentMethodId, User user) throws StripeException {
+    public String subscription(String paymentMethodId, User user) throws StripeException {
         List<Customer> customers = Customer.list(CustomerListParams.builder()
                 .setEmail(user.getEmail())
                 .setLimit(1L)
@@ -60,8 +59,6 @@ public class StripeService {
                 .build();
 
         Subscription subscription = Subscription.create(params);
-        Plan plan = Plan.newPlanPremium(subscription.getId());
-        user.setPlan(plan);
-        userRepository.save(user);
+        return subscription.getId();
     }
 }

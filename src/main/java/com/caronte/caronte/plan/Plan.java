@@ -30,4 +30,12 @@ public class Plan extends BaseEntity {
         return new Plan(PlanType.PREMIUM, subscriptionId);
     }
 
+    public boolean isFree() {
+        return this.planType == PlanType.FREE;
+    }
+
+    public boolean isPremium() {
+        return this.planType == PlanType.PREMIUM;
+    }
+
 }
