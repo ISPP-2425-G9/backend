@@ -37,14 +37,14 @@ public class DeathCertificateService {
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "The customer has not been found"));
         }
         if(customerLogged != null && customerLogged.getDni().equals(request.getDni())){
-            throw new IllegalArgumentException("You can't upload a death certificate for yourself. Revise the DNI.");
+            throw new IllegalArgumentException("No puedes subir un certificado de defunción para tu propio DNI");
         }
         Iterable<Obituary> obituaries = obituaryRepository.findByCustomerDni(request.getDni());
         if (!obituaries.iterator().hasNext()) {
             throw new IllegalArgumentException("No hay esquelas creadas asociadas a ese DNI");        
         }
         if(obituaries.iterator().next().getDeathCertificate() != null){
-            throw new CertificateAssociationException("The death certificate has already been uploaded.");
+            throw new CertificateAssociationException("El certificado de este cliente ya ha sido subido");
         }
         DeathCertificate certificate = createDeathCertificate(request);
 
