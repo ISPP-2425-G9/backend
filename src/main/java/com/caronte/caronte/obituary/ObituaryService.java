@@ -61,7 +61,7 @@ public class ObituaryService {
         String farewellMessage = request.getFarewellMessage();
         String farewellPhrase = request.getFarewellPhrase();
         Long imageTemplateId = request.getImageTemplate_id();
-        Boolean isMine = Boolean.parseBoolean(request.getIsMine());
+        Boolean isMine = request.getIsMine();
 
         Customer customer = customerRepository.findById(customerId)
                 .orElseThrow(() -> new RuntimeException("Customer not found"));
@@ -114,12 +114,12 @@ public class ObituaryService {
             throw new IllegalArgumentException("You are not allowed to update this obituary");
         }
 
-        Boolean isMine = Boolean.parseBoolean(request.getIsMine());
+        Boolean isMine = request.getIsMine();
         if(obituary.getIsMine() && !isMine || !obituary.getIsMine() && isMine){
             throw new IllegalArgumentException("You can't change IsMine property");
         }
 
-        if(obituary.getDeathCertificate().getIsVerified() == true){
+        if(!isMine && obituary.getDeathCertificate().getIsVerified() == true){
             throw new IllegalArgumentException("You can't upload the obituary since the death certificate is verified");
         } 
 

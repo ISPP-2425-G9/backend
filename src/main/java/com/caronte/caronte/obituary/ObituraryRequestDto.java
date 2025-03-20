@@ -32,8 +32,7 @@ public class ObituraryRequestDto {
     private Long imageTemplate_id;
 
     @NotNull(message = "The 'isMine' field cannot be null")
-    @Pattern(regexp = "^(true|false)$", message = "The 'isMine' field must be either 'true' or 'false'")
-    private String isMine;
+    private Boolean isMine;
 
     private DeathCertificateRequestDTO deathCertificate;
 
