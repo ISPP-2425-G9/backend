@@ -35,7 +35,8 @@ public class ObituraryRequestDto {
     private Boolean isMine;
 
     @NotBlank(message = "The wordColor field cannot be empty")
-    @Size(max = 5, message = "The wordColor must be at most 5 characters long (RGB)")
+    @Pattern(regexp = "^(25[0-5]|2[0-4]\\d|1\\d{2}|\\d{1,2}),(25[0-5]|2[0-4]\\d|1\\d{2}|\\d{1,2}),(25[0-5]|2[0-4]\\d|1\\d{2}|\\d{1,2})$", 
+    message = "Color must be in the format 'r,g,b' where r, g and b are integers between 0 and 255")
     private String  wordColor; 
 
     private DeathCertificateRequestDTO deathCertificate;
@@ -46,7 +47,6 @@ public class ObituraryRequestDto {
     }
 
     private List<@Valid ContactDto> contacts;
-
     @Getter
     @Setter
     public static class ContactDto {

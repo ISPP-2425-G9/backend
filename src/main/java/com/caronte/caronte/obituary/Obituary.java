@@ -14,6 +14,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.validation.constraints.Pattern;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -38,7 +39,7 @@ public class Obituary extends BaseEntity {
     @Column(length = 90)
     private String farewellPhrase;
 
-    @Column(nullable = false, length = 5)
+    @Column(nullable = false, length = 11)
     private String wordColor;
 
     @Column(nullable = false)
