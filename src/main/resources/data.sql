@@ -1,10 +1,11 @@
-INSERT INTO plan (id, billing_address, expire_date, plan_type) VALUES 
-(1, NULL, NULL, 'FREE'),
-(2, 'ES7921000813610123456789', '2027-12-31', 'PREMIUM'),
-(3, NULL, NULL, 'FREE'),
-(4, 'DE89370400440532013000', '2025-10-25', 'PREMIUM'),
-(5, NULL, NULL, 'FREE'),
-(6, NULL, NULL, 'FREE');
+INSERT INTO plan (id, subscription_id, plan_type) VALUES
+(1, NULL, 'FREE'),
+(2, NULL, 'PREMIUM'),
+(3, NULL, 'FREE'),
+(4, NULL, 'PREMIUM'),
+(5, NULL, 'FREE'),
+(6, NULL, 'FREE');
+
 
 INSERT INTO user (id, name, email, password, telephone, plan_id) VALUES
 (1, 'admin1', 'admin1@caronte.site', '$2a$10$EJ7goCEpyl.XTDXDf/jeVOz1Mfwn24Q4jbIXnwY9yLh9gJSghZecm', '626077466', 5),
