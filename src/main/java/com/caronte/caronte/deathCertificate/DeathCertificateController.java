@@ -32,14 +32,23 @@ public DeathCertificateController(DeathCertificateService deathCertificateServic
 }
 
 @PostMapping("/upload")
+public ResponseEntity<?> uploadDeathCertificate(@RequestBody @Valid DeathCertificateRequestDTO deathCertificateRequestDTO){ 
+    try {
+        deathCertificateService.createDeathCertificateAndRelations(deathCertificateRequestDTO, null);
+        return ResponseEntity.ok("Death Certificate uploaded successfully");
+    } catch (Exception e) {
+        e.printStackTrace();
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(Map.of("error", e.getMessage()));
+    }
+
+}
+@PostMapping("/upload/loggedInUser")
 public ResponseEntity<?> uploadDeathCertificate(@RequestBody @Valid DeathCertificateRequestDTO deathCertificateRequestDTO,
         Authentication authentication){ 
     try {
-        Long customerId = null;
-        if (authentication != null) {
-            UserDetailsImpl userPrincipal = (UserDetailsImpl) authentication.getPrincipal();
-            customerId = userPrincipal.getId();
-        }
+        UserDetailsImpl userPrincipal = (UserDetailsImpl) authentication.getPrincipal();
+        Long customerId = userPrincipal.getId();
         deathCertificateService.createDeathCertificateAndRelations(deathCertificateRequestDTO, customerId);
         return ResponseEntity.ok("Death Certificate uploaded successfully");
     } catch (Exception e) {
