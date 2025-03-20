@@ -36,7 +36,7 @@ public class ObituaryController {
         this.obituaryService = obituaryService;
     }
 
-    @PostMapping("/create")
+    @PostMapping()
     public ResponseEntity<?> createObituary(@RequestBody @Valid ObituraryRequestDto request,
             Authentication authentication) {
         try {
