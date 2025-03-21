@@ -220,6 +220,9 @@ public class ObituaryService {
         Iterable<Obituary> obituaries = obituaryRepository.findByCustomerId(customerId);
         for (Obituary obituary : obituaries) {
             obituary.setCustomer(null);
+            if(obituary.getWordColor() == null){
+                obituary.setWordColor("0,0,0");
+            }
         }
         return obituaries;
 
@@ -229,6 +232,10 @@ public class ObituaryService {
     public Obituary getObituaryById(Long obituaryId) {
         Obituary obituary = obituaryRepository.findById(obituaryId)
                 .orElseThrow(() -> new IllegalArgumentException("Obituary not found"));
+        if(obituary.getWordColor() == null){
+            obituary.setWordColor("0,0,0");
+
+        }
         return obituary;
 
     }
