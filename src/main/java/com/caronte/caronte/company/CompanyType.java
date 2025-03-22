@@ -1,5 +1,5 @@
 package com.caronte.caronte.company;
 
 public enum CompanyType {
-    FLORIST, OTHER
+    FLORIST, NOTARIES, FUNERAL_HOMES, LAW_FIRMS, OTHER
 }
