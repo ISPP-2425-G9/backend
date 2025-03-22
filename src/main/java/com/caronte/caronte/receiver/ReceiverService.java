@@ -6,6 +6,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.caronte.caronte.message.Message;
 import com.caronte.caronte.obituary.Obituary;
 
 @Service
@@ -47,7 +48,15 @@ public class ReceiverService {
         return receivers;
     }
 
-
-
+    @Transactional
+    public Receiver saveMessageReceiver(String name, String telephone, String email, Message message) {
+        Receiver receiver = new Receiver();
+        receiver.setName(name);
+        receiver.setTelephone(telephone);
+        receiver.setEmail(email);
+        receiver.setMessage(message);
+        return receiverRepository.save(receiver);
+    }
+    
     
 }

@@ -174,7 +174,8 @@ public class AuthController {
 			@PathVariable Long userId,
 			@RequestBody @Valid UserChangePasswordRequest request) {
 		try {
-			if (userService.findCurrentUser().getId() != userId) {
+			Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+			if (userService.findCurrentUser().getId() != userId & !auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ADMIN"))) {
 				throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You can't modify this data");
 			}
 			User user = userService.changePassword(userId, request);

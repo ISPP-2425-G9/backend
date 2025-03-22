@@ -25,5 +25,5 @@ public class Plan extends BaseEntity {
         plan.setPlanType(PlanType.FREE);
         return plan;
     }
-
+  
 }
