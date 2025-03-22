@@ -8,7 +8,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.caronte.caronte.company.Company;
 import com.caronte.caronte.user.User;
-import com.caronte.caronte.user.UserRepository;
 import com.stripe.exception.StripeException;
 import com.stripe.model.Customer;
 import com.stripe.model.Subscription;
@@ -19,20 +18,11 @@ import com.stripe.param.SubscriptionCreateParams;
 @Service
 public class StripeService {
 
-    private final UserRepository userRepository;
-
-
     @Value("${stripe.customer.premium.price.id}")
     private String customerPremiumPriceId;
 
     @Value("${stripe.company.premium.price.id}")
     private String companyPremiumPriceId;
-
-
-    StripeService(UserRepository userRepository) {
-        this.userRepository = userRepository;
-    }
-
 
     @Transactional
     public String subscription(String paymentMethodId, User user) throws StripeException {
