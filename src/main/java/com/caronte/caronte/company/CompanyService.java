@@ -2,6 +2,8 @@ package com.caronte.caronte.company;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -52,19 +54,21 @@ public class CompanyService {
     }
 
     @Transactional
-    public List<CompanyDTO> findAllCompaniesPublicInformation(){
-        List<Company> companiesWithPlan = companyRepository.findByPlan_PlanType(PlanType.PREMIUM);
-        return companiesWithPlan.stream().map(company -> new CompanyDTO(
-            company.getName(), 
-            company.getEmail(), 
-            company.getTelephone(), 
-            company.getAddress(), 
-            company.getCity(), 
-            company.getZipCode(), 
-            company.getImageUrl(), 
-            company.getDescription(),
-            company.getNif()))
-            .toList();
+    public Page<CompanyDTO> findAllCompaniesPublicInformation(String city, String name, Pageable pageable) {
+        Page<Company> companiesWithPlan = companyRepository.findPremiumCompaniesFiltered(city, name, pageable);
+        return companiesWithPlan.map(company -> new CompanyDTO(
+                company.getName(),
+                company.getEmail(),
+                company.getTelephone(),
+                company.getAddress(),
+                company.getCity(),
+                company.getZipCode(),
+                company.getImageUrl(),
+                company.getDescription(),
+                company.getNif(),
+                company.getCompanyType()
+        ));
     }
+
 
 }

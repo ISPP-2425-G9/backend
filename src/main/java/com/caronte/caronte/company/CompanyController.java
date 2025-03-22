@@ -1,6 +1,8 @@
 package com.caronte.caronte.company;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -12,9 +14,13 @@ public class CompanyController {
     @Autowired
     private CompanyService companyService;
 
-    // Obtener compañías con plan PREMIUM
     @GetMapping("/premium")
-    public List<CompanyDTO> getPremiumCompanies() {
-        return companyService.findAllCompaniesPublicInformation();
+    public Page<CompanyDTO> getPremiumCompanies(
+            @RequestParam(required = false) String city,
+            @RequestParam(required = false) String name,
+            Pageable pageable
+    ) {
+        return companyService.findAllCompaniesPublicInformation(city, name, pageable);
     }
+
 }
