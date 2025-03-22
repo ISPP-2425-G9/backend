@@ -21,7 +21,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.caronte.caronte.configuration.services.UserDetailsImpl;
-import com.caronte.caronte.user.UserService;
 
 import jakarta.validation.Valid;
 
@@ -33,11 +32,9 @@ public class ObituaryController {
     private String obituaryPriceId;
 
     private final ObituaryService obituaryService;
-    private final UserService userService;
 
-    public ObituaryController(ObituaryService obituaryService, UserService userService) {
+    public ObituaryController(ObituaryService obituaryService) {
         this.obituaryService = obituaryService;
-        this.userService = userService;
     }
 
     @PostMapping("/create")
