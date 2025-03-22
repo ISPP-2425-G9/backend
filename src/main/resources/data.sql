@@ -20,9 +20,9 @@ INSERT INTO admin (id) VALUES
 (2);
 
 
-INSERT INTO company (id, address, city, description, image_url, nif, zip_code) VALUES 
-(3, 'Calle Tarfia, 67', 'Sevilla', 'Descripción de Empresa Uno', NULL, 'A12345678', '41001'),
-(4, 'Calle Mirador de Montepinar, 4', 'Madrid', 'Descripción de Empresa Dos', NULL, 'B87654321', '28001');
+INSERT INTO company (id, address, city, description, image_url, nif, zip_code, company_type) VALUES
+(3, 'Calle Tarfia, 67', 'Sevilla', 'Descripción de Empresa Uno', NULL, 'A12345678', '41001', 'OTHER'),
+(4, 'Calle Mirador de Montepinar, 4', 'Madrid', 'Descripción de Empresa Dos', NULL, 'B87654321', '28001', 'OTHER');
 
 INSERT INTO customer (id, dni, is_active) VALUES 
 (5, '26745987T', 0),
