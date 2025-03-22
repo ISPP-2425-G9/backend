@@ -37,7 +37,7 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
-    public User checkIsCurrentUser(Long userId, String message){
+    public User authorizeUserOrAdmin(Long userId, String message){
         User user = findCurrentUser();
         UserDetailsImpl auth =  (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         ResponseThrow.checkOrBadRequest(user.getId() == userId || auth.isAdmin(), message);
@@ -45,8 +45,8 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
-    public User checkIsCurrentUser(Long id){
-        return checkIsCurrentUser(id, "No puedes realizar acciones en la cuenta de otro usuario");
+    public User authorizeUserOrAdmin(Long id){
+        return authorizeUserOrAdmin(id, "No puedes realizar acciones en la cuenta de otro usuario");
     }
 
     @Transactional

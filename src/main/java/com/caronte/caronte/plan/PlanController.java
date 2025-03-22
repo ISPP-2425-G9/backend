@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.caronte.caronte.configuration.services.StripeService;
 import com.caronte.caronte.user.User;
@@ -28,15 +29,16 @@ public class PlanController {
     @PutMapping("/{userId}")
     public ResponseEntity<?> changePlan(@PathVariable Long userId, @RequestBody ChangePlanRequest changePlanRequest) {
         try {
-            User user = userService.checkIsCurrentUser(userId);
+            User user = userService.authorizeUserOrAdmin(userId);
             String subscriptionId = changePlanRequest.isPremium() ?
                     stripeService.subscription(changePlanRequest.getPaymentMethodId(), user): null;
             Plan plan = planService.changePlan(user, changePlanRequest.getPlanType(), subscriptionId);
             return ResponseEntity.ok(plan);
+        } catch (ResponseStatusException e) {
+            return ResponseEntity.status(e.getStatusCode()).body(e.getBody());
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
-
     }
 
 }
