@@ -18,9 +18,10 @@ public class CompanyController {
     public Page<CompanyDTO> getPremiumCompanies(
             @RequestParam(required = false) String city,
             @RequestParam(required = false) String name,
+            @RequestParam(required = false) CompanyType companyType,
             Pageable pageable
     ) {
-        return companyService.findAllCompaniesPublicInformation(city, name, pageable);
+        return companyService.findAllCompaniesPublicInformation(city, name, companyType, pageable);
     }
 
 }

@@ -19,16 +19,19 @@ public interface CompanyRepository extends LongRepository<Company> {
     List<Company> findByPlan_PlanType(com.caronte.caronte.plan.PlanType planType);
 
     @Query("""
-        SELECT c FROM Company c 
-        WHERE c.plan.planType = 'PREMIUM'
-        AND (:city IS NULL OR LOWER(c.city) LIKE LOWER(CONCAT('%', :city, '%')))
-        AND (:name IS NULL OR LOWER(c.name) LIKE LOWER(CONCAT('%', :name, '%')))
-    """)
+    SELECT c FROM Company c
+    WHERE c.plan.planType = 'PREMIUM'
+    AND (:city IS NULL OR LOWER(c.city) LIKE LOWER(CONCAT('%', :city, '%')))
+    AND (:name IS NULL OR LOWER(c.name) LIKE LOWER(CONCAT('%', :name, '%')))
+    AND (:companyType IS NULL OR c.companyType = :companyType)
+""")
     Page<Company> findPremiumCompaniesFiltered(
             @Param("city") String city,
             @Param("name") String name,
+            @Param("companyType") CompanyType companyType,
             Pageable pageable
     );
+
 }
 
 

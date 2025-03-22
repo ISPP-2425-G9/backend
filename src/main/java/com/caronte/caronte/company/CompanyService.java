@@ -54,9 +54,9 @@ public class CompanyService {
     }
 
     @Transactional
-    public Page<CompanyDTO> findAllCompaniesPublicInformation(String city, String name, Pageable pageable) {
-        Page<Company> companiesWithPlan = companyRepository.findPremiumCompaniesFiltered(city, name, pageable);
-        return companiesWithPlan.map(company -> new CompanyDTO(
+    public Page<CompanyDTO> findAllCompaniesPublicInformation(String city, String name, CompanyType companyType, Pageable pageable) {
+        Page<Company> companies = companyRepository.findPremiumCompaniesFiltered(city, name, companyType, pageable);
+        return companies.map(company -> new CompanyDTO(
                 company.getName(),
                 company.getEmail(),
                 company.getTelephone(),
@@ -69,6 +69,7 @@ public class CompanyService {
                 company.getCompanyType()
         ));
     }
+
 
 
 }
