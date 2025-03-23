@@ -40,11 +40,10 @@ public class ReceiverController {
             UserDetailsImpl userPrincipal = (UserDetailsImpl) authentication.getPrincipal();
             Long customerId = userPrincipal.getId();
             Obituary obituary = obituaryService.getObituaryById(obituaryId);
-            List<ReceiverResponseDTO> receivers = receiverService.getReceiversByObituaryId(obituary);
             if (!obituary.getCustomer().getId().equals(customerId)) {
                 throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You can't access this data");
             }
-            obituary.setCustomer(null);
+            List<ReceiverResponseDTO> receivers = receiverService.getReceiversByObituaryId(obituary);
             return ResponseEntity.ok().body(receivers);
         } catch (IllegalArgumentException exception) {
             return ResponseEntity.badRequest().body(exception.getMessage());
@@ -69,5 +68,5 @@ public class ReceiverController {
 
 
 
-    
+
 }

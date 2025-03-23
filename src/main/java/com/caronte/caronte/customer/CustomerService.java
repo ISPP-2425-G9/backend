@@ -9,13 +9,11 @@ import com.caronte.caronte.auth.payload.response.CustomerUpdateRequest;
 
 @Service
 public class CustomerService {
-    
+
     private final CustomerRepository customerRepository;
-    private final PasswordEncoder passwordEncoder;
 
     public CustomerService(CustomerRepository customerRepository, PasswordEncoder passwordEncoder) {
         this.customerRepository = customerRepository;
-        this.passwordEncoder = passwordEncoder;
     }
 
     @Transactional
@@ -25,14 +23,13 @@ public class CustomerService {
 
     @Transactional(readOnly = true)
     public Customer findById(Long id){
-        Customer customer = customerRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Customer not found"));
-        return customer;
+        return customerRepository.findById(id)
+                                 .orElseThrow(() -> new IllegalArgumentException("Customer not found"));
     }
 
     @Transactional
     public Customer update(Long id, CustomerUpdateRequest request) {
         Customer customerToUpdate = customerRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Customer not found"));
-        
         customerToUpdate.setEmail(request.getEmail());
         customerToUpdate.setName(request.getFullName());
         customerToUpdate.setTelephone(request.getTelephone());

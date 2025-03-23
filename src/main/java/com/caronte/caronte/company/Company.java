@@ -1,12 +1,9 @@
 package com.caronte.caronte.company;
 
-import com.caronte.caronte.plan.Plan;
 import com.caronte.caronte.user.User;
 
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.OneToOne;
 import lombok.Getter;
 import lombok.Setter;
 
