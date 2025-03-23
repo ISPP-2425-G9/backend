@@ -18,6 +18,11 @@ public class CustomerService {
         this.passwordEncoder = passwordEncoder;
     }
 
+    @Transactional
+    public Iterable<Customer> findAll(){
+        return customerRepository.findAll();
+    }
+
     @Transactional(readOnly = true)
     public Customer findById(Long id){
         Customer customer = customerRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Customer not found"));
@@ -31,11 +36,6 @@ public class CustomerService {
         customerToUpdate.setEmail(request.getEmail());
         customerToUpdate.setName(request.getFullName());
         customerToUpdate.setTelephone(request.getTelephone());
-        customerToUpdate.setPassword(this.passwordEncoder.encode(request.getPassword()));
         return customerRepository.save(customerToUpdate);
     }
-
-
-    
-
 }

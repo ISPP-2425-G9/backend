@@ -60,4 +60,10 @@ public class AuthService {
     public void save(User user){
         userRepository.save(user);
     }
+
+    public String getNameById(Long userId) {
+        return userRepository.findById(userId)
+                             .map(User::getName)
+                             .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+    }
 }
