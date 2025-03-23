@@ -5,7 +5,6 @@ INSERT INTO plan (id, subscription_id, plan_type) VALUES
 (4, 'sub_1R4QQbGa0d4217RGFKZprtnL', 'PREMIUM'),
 (5, NULL, 'FREE'),
 (6, NULL, 'FREE'),
--- The following plans are for testing purposes (filter and pagination)
 (7, NULL, 'PREMIUM'),
 (8, NULL, 'PREMIUM'),
 (9, NULL, 'PREMIUM'),
