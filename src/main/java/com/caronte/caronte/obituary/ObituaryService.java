@@ -10,11 +10,12 @@ import org.springframework.transaction.annotation.Transactional;
 import com.caronte.caronte.customer.Customer;
 import com.caronte.caronte.customer.CustomerRepository;
 import com.caronte.caronte.deathCertificate.DeathCertificate;
+import com.caronte.caronte.deathCertificate.DeathCertificateService;
 import com.caronte.caronte.imageTemplate.ImageTemplate;
 import com.caronte.caronte.imageTemplate.ImageTemplateService;
 import com.caronte.caronte.receiver.ReceiverService;
 import com.caronte.caronte.util.MediaHandler;
-import com.caronte.caronte.deathCertificate.DeathCertificateService;
+import com.caronte.caronte.util.exceptions.ResponseThrow;
 
 @Service
 public class ObituaryService {
@@ -229,12 +230,12 @@ public class ObituaryService {
     }
 
     @Transactional(readOnly = true)
-    public Obituary getObituaryById(Long obituaryId) {
+    public Obituary getObituaryById(Long obituaryId, Long userId) {
         Obituary obituary = obituaryRepository.findById(obituaryId)
                 .orElseThrow(() -> new IllegalArgumentException("Obituary not found"));
+        ResponseThrow.checkOrForbidden(!obituary.getCustomer().getId().equals(userId), "You can't access this data");
         if(obituary.getWordColor() == null){
             obituary.setWordColor("0,0,0");
-
         }
         return obituary;
 

@@ -1,13 +1,13 @@
 package com.caronte.caronte.plan.dtos;
 
+import java.time.LocalDate;
+
 import com.caronte.caronte.plan.Plan;
 import com.caronte.caronte.plan.PlanType;
+
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
-
-import java.time.LocalDate;
-import java.util.Date;
 
 @Getter
 @Setter

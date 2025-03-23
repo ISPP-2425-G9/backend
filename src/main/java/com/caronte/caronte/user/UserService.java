@@ -37,6 +37,11 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
+    public Long findCurrentUserId() {
+        return findCurrentUser().getId();
+    }
+
+    @Transactional(readOnly = true)
     public User authorizeUserOrAdmin(Long userId, String message){
         User user = findCurrentUser();
         UserDetailsImpl auth =  (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();

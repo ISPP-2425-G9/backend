@@ -1,8 +1,12 @@
 package com.caronte.caronte.util.exceptions;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -24,6 +28,21 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<String> handleResourceBadCrendentials(BadCredentialsException ex) {
         return ResponseEntity.badRequest().body("Credenciales incorrectas");
+    }
+
+    
+    @ExceptionHandler({ MethodArgumentNotValidException.class, IllegalArgumentException.class })
+    public ResponseEntity<Map<String, String>> handleValidationExceptions(Exception ex) {
+        Map<String, String> errors = new HashMap<>();
+
+        if (ex instanceof MethodArgumentNotValidException) {
+            ((MethodArgumentNotValidException) ex).getBindingResult().getFieldErrors()
+                    .forEach(error -> errors.put(error.getField(), error.getDefaultMessage()));
+        } else {
+            errors.put("error", ex.getMessage());
+        }
+
+        return ResponseEntity.badRequest().body(errors);
     }
 
 }

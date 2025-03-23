@@ -19,4 +19,8 @@ public class ResponseThrow {
     public static void checkOrBadRequest(boolean condition, String reason) {
         check(condition, HttpStatus.BAD_REQUEST, reason);
     }
+
+    public static void checkOrForbidden(boolean condition, String reason) {
+        check(condition, HttpStatus.FORBIDDEN, reason);
+    }
 }
