@@ -3,6 +3,7 @@ package com.caronte.caronte.obituary;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -20,9 +21,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.caronte.caronte.configuration.services.UserDetailsImpl;
-import com.caronte.caronte.customer.CustomerRepository;
-import com.caronte.caronte.imageTemplate.ImageTemplateService;
-import com.caronte.caronte.receiver.ReceiverService;
 
 import jakarta.validation.Valid;
 
@@ -30,13 +28,13 @@ import jakarta.validation.Valid;
 @RequestMapping("api/obituary")
 public class ObituaryController {
 
-    private final ObituaryService obituaryService;
-    private final ReceiverService receiverService;
+    @Value("${stripe.obituary.price.id}")
+    private String obituaryPriceId;
 
-    public ObituaryController(ObituaryService obituaryService, CustomerRepository customerRepository,
-            ImageTemplateService imageTemplateService, ReceiverService receiverService) {
+    private final ObituaryService obituaryService;
+
+    public ObituaryController(ObituaryService obituaryService) {
         this.obituaryService = obituaryService;
-        this.receiverService = receiverService;
     }
 
     @PostMapping("/create")
@@ -46,9 +44,7 @@ public class ObituaryController {
             UserDetailsImpl userPrincipal = (UserDetailsImpl) authentication.getPrincipal();
             Long customerId = userPrincipal.getId();
 
-            Obituary obituary = obituaryService.createObituaryWithReceivers(request, customerId);
-
-            System.out.println(obituary);
+            obituaryService.createObituaryWithReceivers(request, customerId);
 
             return ResponseEntity.ok("Obituary created successfully");
 
