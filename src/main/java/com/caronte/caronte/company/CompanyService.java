@@ -2,7 +2,6 @@ package com.caronte.caronte.company;
 
 import java.util.List;
 
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -13,11 +12,9 @@ import com.caronte.caronte.plan.PlanType;
 public class CompanyService {
 
     private final CompanyRepository companyRepository;
-    private final PasswordEncoder passwordEncoder;
 
-    public CompanyService(CompanyRepository companyRepository, PasswordEncoder passwordEncoder) {
+    public CompanyService(CompanyRepository companyRepository) {
         this.companyRepository = companyRepository;
-        this.passwordEncoder = passwordEncoder;
     }
 
     @Transactional(readOnly = true)

@@ -1,6 +1,7 @@
 package com.caronte.caronte.deathCertificate;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import lombok.Getter;
 import lombok.Setter;
@@ -13,6 +14,7 @@ public class DeathCertificateRequestDTO {
     private String file;
 
     @Pattern(regexp = "^[\\d]{8}[A-Za-z]$", message = "The DNI must have 8 digits followed by a letter")
+    @NotNull
     private String dni;
 
     

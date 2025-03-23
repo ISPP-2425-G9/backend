@@ -1,12 +1,19 @@
 package com.caronte.caronte.obituary;
 
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.*;
-import lombok.Getter;
-import lombok.Setter;
+import java.time.LocalDate;
 import java.util.List;
 
 import com.caronte.caronte.deathCertificate.DeathCertificateRequestDTO;
+import com.fasterxml.jackson.annotation.JsonFormat;
+
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
+import lombok.Getter;
+import lombok.Setter;
 
 @Getter
 @Setter
@@ -15,10 +22,11 @@ public class ObituraryRequestDto {
     @Size(max = 37, message = "The name must be between 0 and 37 characters long")
     private String name;
 
-    @Pattern(regexp = "^(|\\d{2}/\\d{2}/\\d{4})$", message = "The date format must be dd/MM/yyyy or an empty string")
-    private String birthDate;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
+    private LocalDate birthDate;
 
-    private String deathDate;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
+    private LocalDate deathDate;
 
     private String customImage; 
 
@@ -41,11 +49,6 @@ public class ObituraryRequestDto {
 
     private DeathCertificateRequestDTO deathCertificate;
 
-    @AssertTrue(message = "The deathDate field must be null or empty")
-    public boolean isDeathDateValid() {
-        return deathDate == null || deathDate.trim().isEmpty();
-    }
-
     private List<@Valid ContactDto> contacts;
     @Getter
     @Setter
@@ -61,6 +64,16 @@ public class ObituraryRequestDto {
         private String email;
     }
 
-
+    public Obituary parse(){
+        Obituary obituary = new Obituary();
+        obituary.setName(this.name);
+        obituary.setBirthDate(this.birthDate);
+        obituary.setDeathDate(this.deathDate);
+        obituary.setFarewellMessage(this.farewellMessage);
+        obituary.setFarewellPhrase(this.farewellPhrase);
+        obituary.setIsMine(this.isMine);
+        obituary.setWordColor(this.wordColor);
+        return obituary;
+    }
 
 }
