@@ -53,7 +53,7 @@ public class AuthController {
 	private final CustomerService customerService;
 	private final CompanyService companyService;
 
-	public AuthController(AuthenticationManager authenticationManager, AuthService authService, UserService userService, 
+	public AuthController(AuthenticationManager authenticationManager, AuthService authService, UserService userService,
 			CustomerService customerService, CompanyService companyService, JwtUtils jwtUtils) {
 		this.authenticationManager = authenticationManager;
 		this.authService = authService;
@@ -79,7 +79,9 @@ public class AuthController {
 			UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
 			List<String> roles = userDetails.getAuthorities().stream().map(item -> item.getAuthority())
 					.collect(Collectors.toList());
-			JwtResponse jwtResponse = new JwtResponse(jwt, userDetails.getId(), userDetails.getUsername(), roles);
+			String name = authService.getUserNameById(userDetails
+					.getId());
+			JwtResponse jwtResponse = new JwtResponse(jwt, userDetails.getId(), userDetails.getUsername(), roles, name);
 			return ResponseEntity.ok().body(jwtResponse);
 		} catch (BadCredentialsException exception) {
 			errors.addError("*", "Credenciales incorrectas");
@@ -130,7 +132,6 @@ public class AuthController {
 
 	}
 
-
 	@GetMapping("/customers/{customerId}")
 	@ResponseStatus(HttpStatus.OK)
 	public ResponseEntity<?> getCustomer(@PathVariable Long customerId) {
@@ -159,12 +160,13 @@ public class AuthController {
 			String jwt = jwtUtils.generateJwtToken(userDetails);
 			List<String> roles = userDetails.getAuthorities().stream().map(item -> item.getAuthority())
 					.collect(Collectors.toList());
-			JwtResponse jwtResponse = new JwtResponse(jwt, userDetails.getId(), userDetails.getUsername(), roles);
+			String name = authService.getUserNameById(userDetails
+					.getId());
+			JwtResponse jwtResponse = new JwtResponse(jwt, userDetails.getId(), userDetails.getUsername(), roles, name);
 			return ResponseEntity.ok().body(jwtResponse);
 		} catch (Exception e) {
 			return ResponseEntity.badRequest().body(e.getMessage());
 		}
-
 
 	}
 
@@ -175,7 +177,8 @@ public class AuthController {
 			@RequestBody @Valid UserChangePasswordRequest request) {
 		try {
 			Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-			if (userService.findCurrentUser().getId() != userId & !auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ADMIN"))) {
+			if (userService.findCurrentUser().getId() != userId
+					& !auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ADMIN"))) {
 				throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You can't modify this data");
 			}
 			User user = userService.changePassword(userId, request);
@@ -183,12 +186,13 @@ public class AuthController {
 			String jwt = jwtUtils.generateJwtToken(userDetails);
 			List<String> roles = userDetails.getAuthorities().stream().map(item -> item.getAuthority())
 					.collect(Collectors.toList());
-			JwtResponse jwtResponse = new JwtResponse(jwt, userDetails.getId(), userDetails.getUsername(), roles);
+			String name = authService.getUserNameById(userDetails
+					.getId());
+			JwtResponse jwtResponse = new JwtResponse(jwt, userDetails.getId(), userDetails.getUsername(), roles, name);
 			return ResponseEntity.ok().body(jwtResponse);
 		} catch (Exception e) {
 			return ResponseEntity.badRequest().body(e.getMessage());
 		}
-
 
 	}
 
@@ -220,7 +224,9 @@ public class AuthController {
 			String jwt = jwtUtils.generateJwtToken(userDetails);
 			List<String> roles = userDetails.getAuthorities().stream().map(item -> item.getAuthority())
 					.collect(Collectors.toList());
-			JwtResponse jwtResponse = new JwtResponse(jwt, userDetails.getId(), userDetails.getUsername(), roles);
+			String name = authService.getUserNameById(userDetails
+					.getId());
+			JwtResponse jwtResponse = new JwtResponse(jwt, userDetails.getId(), userDetails.getUsername(), roles, name);
 			return ResponseEntity.ok().body(jwtResponse);
 		} catch (Exception e) {
 			return ResponseEntity.badRequest().body(e.getMessage());
@@ -312,13 +318,13 @@ public class AuthController {
 	}
 
 	@DeleteMapping("/admin/users/{userId}")
- 	@ResponseStatus(HttpStatus.NO_CONTENT)
- 	public void deleteAdmin(@PathVariable Long userId) {
- 		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
- 		if (!auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ADMIN"))) {
- 			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You can't access this data");
- 		}
- 		userService.delete(userId);
- 	}
+	@ResponseStatus(HttpStatus.NO_CONTENT)
+	public void deleteAdmin(@PathVariable Long userId) {
+		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+		if (!auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ADMIN"))) {
+			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You can't access this data");
+		}
+		userService.delete(userId);
+	}
 
 }

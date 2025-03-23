@@ -14,18 +14,20 @@ public class JwtResponse {
 	private Long id;
 	private String username;
 	private List<String> roles;
+	private String name;
 
-	public JwtResponse(String accessToken, Long id, String username, List<String> roles) {
+	public JwtResponse(String accessToken, Long id, String username, List<String> roles, String name) {
 		this.token = accessToken;
 		this.id = id;
 		this.username = username;
 		this.roles = roles;
+		this.name = name;
 	}
 
 	@Override
 	public String toString() {
 		return "JwtResponse [token=" + token + ", type=" + type + ", id=" + id + ", username=" + username
-				+ ", roles=" + roles + "]";
+				+ ", roles=" + roles + ", name=" + name + "]";
 	}
 
 }
