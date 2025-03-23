@@ -38,6 +38,4 @@ public class CustomerService {
         customerToUpdate.setTelephone(request.getTelephone());
         return customerRepository.save(customerToUpdate);
     }
-
-
 }

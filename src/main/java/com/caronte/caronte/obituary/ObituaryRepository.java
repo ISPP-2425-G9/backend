@@ -9,4 +9,7 @@ import com.caronte.caronte.util.LongRepository;
 public interface ObituaryRepository extends LongRepository<Obituary> {
     @Query("SELECT o FROM Obituary o WHERE o.customer.id = :customerId")
     Iterable<Obituary> findByCustomerId(Long customerId);
+
+    @Query("SELECT o FROM Obituary o WHERE o.customer.dni = :customerDni")
+    Iterable<Obituary> findByCustomerDni(String customerDni);
 }

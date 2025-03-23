@@ -77,6 +77,7 @@ public class RegisterRequestCompany {
         company.setPassword(passwordEncoder.encode(this.getPassword1()));
         company.setTelephone(this.getTelephone());
         company.setPlan(Plan.newPlanFree());
+
         return company;
 
     }

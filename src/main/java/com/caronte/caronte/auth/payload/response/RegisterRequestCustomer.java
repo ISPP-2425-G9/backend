@@ -46,6 +46,7 @@ public class RegisterRequestCustomer {
         customer.setPassword(passwordEncoder.encode(this.getPassword1()));
         customer.setTelephone(this.getTelephone());
         customer.setPlan(Plan.newPlanFree());
+
         return customer;
     }
 }
