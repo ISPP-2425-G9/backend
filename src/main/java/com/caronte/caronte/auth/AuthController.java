@@ -1,9 +1,9 @@
 package com.caronte.caronte.auth;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.server.ResponseStatusException;
 
 import com.caronte.caronte.auth.payload.response.CompanyUpdateRequest;
 import com.caronte.caronte.auth.payload.response.CustomerUpdateRequest;
@@ -108,33 +107,28 @@ public class AuthController {
 	@GetMapping("/customers/{customerId}")
 	public ResponseEntity<?> getCustomer(@PathVariable Long customerId) {
         userService.authorizeUserOrAdmin(customerId, "You can't access this data");
-
-		try {
-			Customer customer = customerService.findById(customerId);
-			return ResponseEntity.ok().body(customer);
-		} catch (IllegalArgumentException exception) {
-			return ResponseEntity.badRequest().body("Customer not found");
-		}
+		Customer customer = customerService.findById(customerId);
+		return ResponseEntity.ok().body(customer);
 	}
 
 	@PutMapping("/customers/{customerId}")
 	public ResponseEntity<?> updateCustomer(
 			@PathVariable Long customerId,
 			@RequestBody @Valid CustomerUpdateRequest request) {
-		try {
-            userService.authorizeUserOrAdmin(customerId);
-			Customer customer = customerService.update(customerId, request);
-			UserDetailsImpl userDetails = UserDetailsImpl.build(customer);
-			String jwt = jwtUtils.generateJwtToken(userDetails);
-			List<String> roles = userDetails.getAuthorities().stream().map(item -> item.getAuthority())
-					.collect(Collectors.toList());
-			String name = customer.getName();
-			JwtResponse jwtResponse = new JwtResponse(jwt, userDetails.getId(), userDetails.getUsername(), roles, name);
-			return ResponseEntity.ok().body(jwtResponse);
-		} catch (Exception e) {
-			return ResponseEntity.badRequest().body(e.getMessage());
-		}
-
+		userService.authorizeUserOrAdmin(customerId);
+		Optional<User> userWithEmail = userService.findByEmail(request.getEmail());
+		
+		if(userWithEmail.isPresent() && !userWithEmail.get().getId().equals(customerId)) 
+			throw new IllegalAccessError("This email is of other user");
+		
+		Customer customer = customerService.update(customerId, request);
+		UserDetailsImpl userDetails = UserDetailsImpl.build(customer);
+		String jwt = jwtUtils.generateJwtToken(userDetails);
+		List<String> roles = userDetails.getAuthorities().stream().map(item -> item.getAuthority())
+				.collect(Collectors.toList());
+		String name = customer.getName();
+		JwtResponse jwtResponse = new JwtResponse(jwt, userDetails.getId(), userDetails.getUsername(), roles, name);
+		return ResponseEntity.ok().body(jwtResponse);
 	}
 
 	@PutMapping("/password/{userId}")
@@ -153,25 +147,22 @@ public class AuthController {
 	}
 
 	@GetMapping("/companies/{companyId}")
-
 	public ResponseEntity<?> getCompany(@PathVariable Long companyId) {
-		if (userService.findCurrentUser().getId() != companyId) {
-			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You can't access this data");
-		}
-		try {
-			Company company = companyService.findById(companyId);
-			return ResponseEntity.ok().body(company);
-		} catch (IllegalArgumentException exception) {
-			return ResponseEntity.badRequest().body(exception.getMessage());
-		}
+		userService.authorizeUser(companyId);
+		Company company = companyService.findById(companyId);
+		return ResponseEntity.ok().body(company);
 	}
 
 	@PutMapping("/companies/{companyId}")
-
 	public ResponseEntity<?> updateCompany(
 			@PathVariable Long companyId,
 			@RequestBody @Valid CompanyUpdateRequest request) {
         userService.authorizeUser(companyId);
+		Optional<User> userWithEmail = userService.findByEmail(request.getEmail());
+		
+		if(userWithEmail.isPresent() && !userWithEmail.get().getId().equals(companyId)) 
+			throw new IllegalAccessError("This email is of other user");
+
         Company company = companyService.update(companyId, request);
         UserDetailsImpl userDetails = UserDetailsImpl.build(company);
         String jwt = jwtUtils.generateJwtToken(userDetails);
@@ -184,9 +175,7 @@ public class AuthController {
 
 	@DeleteMapping("/{userId}")
 	public ResponseEntity<?> deleteUser(@PathVariable Long userId) {
-		if (userService.findCurrentUser().getId() != userId) {
-			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You can only delete your own account");
-		}
+		userService.authorizeUser(userId);
 		userService.delete(userId);
 		return ResponseEntity.noContent().build();
 	}
@@ -199,12 +188,8 @@ public class AuthController {
 	@GetMapping("/admin/customers/{customerId}")
 
 	public ResponseEntity<?> getCustomerByAdmin(@PathVariable Long customerId) {
-		try {
-			Customer customer = customerService.findById(customerId);
-			return ResponseEntity.ok().body(customer);
-		} catch (IllegalArgumentException exception) {
-			return ResponseEntity.badRequest().body("Customer not found");
-		}
+		Customer customer = customerService.findById(customerId);
+		return ResponseEntity.ok().body(customer);
 	}
 
 	@PutMapping("/admin/customers/{customerId}")
@@ -221,12 +206,8 @@ public class AuthController {
 
 	@GetMapping("/admin/companies/{companyId}")
 	public ResponseEntity<?> getCompanyByAdmin(@PathVariable Long companyId) {
-		try {
-			Company company = companyService.findById(companyId);
-			return ResponseEntity.ok().body(company);
-		} catch (IllegalArgumentException exception) {
-			return ResponseEntity.badRequest().body("Company not found");
-		}
+		Company company = companyService.findById(companyId);
+		return ResponseEntity.ok().body(company);
 	}
 
 	@PutMapping("/admin/companies/{companyId}")

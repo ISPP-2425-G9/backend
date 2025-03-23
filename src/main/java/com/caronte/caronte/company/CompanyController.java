@@ -15,7 +15,6 @@ public class CompanyController {
     @Autowired
     private CompanyService companyService;
 
-    // Obtener compañías con plan PREMIUM
     @GetMapping("/premium")
     public ResponseEntity<List<CompanyDTO>> getPremiumCompanies() {
         return ResponseEntity.ok(companyService.findAllCompaniesPublicInformation());

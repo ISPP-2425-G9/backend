@@ -1,14 +1,7 @@
 package com.caronte.caronte.deathCertificate;
 
-import org.springframework.security.core.Authentication;
-
-import java.util.HashMap;
-import java.util.Map;
-
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -16,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.caronte.caronte.configuration.services.UserDetailsImpl;
+import com.caronte.caronte.user.UserService;
 
 import jakarta.validation.Valid;
 
@@ -25,76 +18,37 @@ import jakarta.validation.Valid;
 public class DeathCertificateController {
 
     private final DeathCertificateService deathCertificateService;
+    private final UserService userService;
 
-    public DeathCertificateController(DeathCertificateService deathCertificateService) {
+    public DeathCertificateController(DeathCertificateService deathCertificateService, UserService userService) {
         this.deathCertificateService = deathCertificateService;
+        this.userService = userService;
     }
 
     @PostMapping("/upload")
     public ResponseEntity<?> uploadDeathCertificate(
             @RequestBody @Valid DeathCertificateRequestDTO deathCertificateRequestDTO) {
-        try {
-            deathCertificateService.createDeathCertificateAndRelations(deathCertificateRequestDTO, null);
-            return ResponseEntity.ok("Death Certificate uploaded successfully");
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Map.of("error", e.getMessage()));
-        }
-
+        deathCertificateService.createDeathCertificateAndRelations(deathCertificateRequestDTO, null);
+        return ResponseEntity.ok("Death Certificate uploaded successfully");
     }
 
     @PostMapping("/upload/loggedInUser")
     public ResponseEntity<?> uploadDeathCertificate(
             @RequestBody @Valid DeathCertificateRequestDTO deathCertificateRequestDTO,
             Authentication authentication) {
-        try {
-            UserDetailsImpl userPrincipal = (UserDetailsImpl) authentication.getPrincipal();
-            Long customerId = userPrincipal.getId();
-            deathCertificateService.createDeathCertificateAndRelations(deathCertificateRequestDTO, customerId);
-            return ResponseEntity.ok("Death Certificate uploaded successfully");
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Map.of("error", e.getMessage()));
-        }
-
+        Long customerId = userService.findCurrentUserId();
+        deathCertificateService.createDeathCertificateAndRelations(deathCertificateRequestDTO, customerId);
+        return ResponseEntity.ok("Death Certificate uploaded successfully");
     }
 
     @GetMapping("/all")
     public ResponseEntity<?> getAllDeathCertificates() {
-        try {
-            return ResponseEntity.ok(deathCertificateService.getAllDeathCertificates());
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Map.of("error", e.getMessage()));
-        }
+        return ResponseEntity.ok(deathCertificateService.getAllDeathCertificates());
     }
 
     @GetMapping("/obituary/{obituaryId}")
     public ResponseEntity<?> getDeathCertificateByObituaryId(@PathVariable Long obituaryId) {
-        try {
-            return ResponseEntity.ok(deathCertificateService.getDeathCertificateByObituaryId(obituaryId));
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Map.of("error", e.getMessage()));
-        }
-    }
-
-    @ExceptionHandler({ MethodArgumentNotValidException.class, IllegalArgumentException.class })
-    public ResponseEntity<Map<String, String>> handleValidationExceptions(Exception ex) {
-        Map<String, String> errors = new HashMap<>();
-
-        if (ex instanceof MethodArgumentNotValidException) {
-            ((MethodArgumentNotValidException) ex).getBindingResult().getFieldErrors()
-                    .forEach(error -> errors.put(error.getField(), error.getDefaultMessage()));
-        } else {
-            errors.put("error", ex.getMessage());
-        }
-
-        return ResponseEntity.badRequest().body(errors);
+        return ResponseEntity.ok(deathCertificateService.getDeathCertificateByObituaryId(obituaryId));
     }
 
 }
