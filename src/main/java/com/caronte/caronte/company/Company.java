@@ -30,7 +30,6 @@ public class Company extends User {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private CompanyType companyType = CompanyType.OTHER;
-
+    private CompanyType companyType = CompanyType.OTRO;
 
 }
