@@ -6,18 +6,19 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-
 import com.caronte.caronte.company.Company;
 import com.caronte.caronte.user.User;
 import com.stripe.exception.StripeException;
 import com.stripe.model.Customer;
+import com.stripe.model.PaymentIntent;
+import com.stripe.model.PaymentMethod;
+import com.stripe.model.Price;
 import com.stripe.model.Subscription;
 import com.stripe.param.CustomerCreateParams;
 import com.stripe.param.CustomerListParams;
-import com.stripe.param.SubscriptionCreateParams;
-import com.stripe.model.PaymentIntent;
-import com.stripe.model.Price;
 import com.stripe.param.PaymentIntentCreateParams;
+import com.stripe.param.PaymentMethodAttachParams;
+import com.stripe.param.SubscriptionCreateParams;
 
 @Service
 public class StripeService {
@@ -78,17 +79,23 @@ public class StripeService {
                                 .setEmail(user.getEmail())
                                 .build());
 
+        String customerId = customer.getId();
+
+        PaymentMethodAttachParams attachParams = PaymentMethodAttachParams.builder()
+                .setCustomer(customerId)
+                .build();
+
+        PaymentMethod paymentMethod = PaymentMethod.retrieve(paymentMethodId);
+        paymentMethod.attach(attachParams);
+
         String priceId = user instanceof Company ? companyPremiumPriceId : customerPremiumPriceId;
         SubscriptionCreateParams params = SubscriptionCreateParams.builder()
-                .setCustomer(customer.getId())
+                .setCustomer(customerId)
                 .addItem(
                         SubscriptionCreateParams.Item.builder()
                                 .setPrice(priceId)
                                 .build())
-                .setPaymentSettings(
-                    SubscriptionCreateParams.PaymentSettings.builder()
-                            .setSaveDefaultPaymentMethod(SubscriptionCreateParams.PaymentSettings.SaveDefaultPaymentMethod.ON_SUBSCRIPTION)
-                            .build())
+                .setDefaultPaymentMethod(paymentMethodId)
                 .build();
 
         Subscription subscription = Subscription.create(params);
