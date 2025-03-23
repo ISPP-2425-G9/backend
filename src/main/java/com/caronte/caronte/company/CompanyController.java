@@ -1,8 +1,11 @@
 package com.caronte.caronte.company;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -30,9 +33,13 @@ public class CompanyController {
             @RequestParam(required = false) String city,
             @RequestParam(required = false) String name,
             @RequestParam(required = false) CompanyType companyType,
-            Pageable pageable
-    ) {
+            Pageable pageable) {
         return companyService.findAllCompaniesPublicInformation(city, name, companyType, pageable);
+    }
+
+    @GetMapping("/companiesTypes")
+    public ResponseEntity<List<CompanyType>> getCompanyTypes() {
+        return ResponseEntity.ok(List.of(CompanyType.values()));
     }
 
 }
