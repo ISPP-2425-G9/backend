@@ -106,6 +106,12 @@
 			<artifactId>cloudinary-taglib</artifactId>
 			<version>2.0.0</version>
 		</dependency>
+		<dependency>
+			<groupId>com.stripe</groupId>
+			<artifactId>stripe-java</artifactId>
+			<version>28.4.0</version>
+		</dependency>
+
 	</dependencies>
 
 	<build>
