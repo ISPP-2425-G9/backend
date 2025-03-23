@@ -1,7 +1,5 @@
 package com.caronte.caronte.company;
 
-import java.util.List;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -9,7 +7,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.caronte.caronte.auth.payload.response.CompanyUpdateRequest;
-import com.caronte.caronte.plan.PlanType;
 
 @Service
 public class CompanyService {
