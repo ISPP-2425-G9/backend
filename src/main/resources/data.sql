@@ -5,7 +5,6 @@ INSERT INTO plan (id, subscription_id, plan_type) VALUES
 (4, 'sub_1R4QQbGa0d4217RGFKZprtnL', 'PREMIUM'),
 (5, NULL, 'FREE'),
 (6, NULL, 'FREE'),
--- The following plans are for testing purposes (filter and pagination)
 (7, NULL, 'PREMIUM'),
 (8, NULL, 'PREMIUM'),
 (9, NULL, 'PREMIUM'),
@@ -139,18 +138,9 @@ INSERT INTO video (id, video_url, message_id) VALUES
 (1, 'https://www.youtube.com/watch?v=9bZkp7q19f0', 1),
 (2, 'https://www.youtube.com/watch?v=9bZkp7q19f0', 2);
 
-<<<<<<< HEAD
-
 INSERT INTO image_template (id , image_url) VALUES (1 ,'https://res.cloudinary.com/ds02duuid/image/upload/v1741707864/images/obituaries/templates/fbrpmmujaksc5dbbrbbi.jpg'),
  (2 ,'https://res.cloudinary.com/ds02duuid/image/upload/v1741707864/images/obituaries/templates/jqqcvnp28w3adaymwkcr.jpg'),
  (3, 'https://res.cloudinary.com/ds02duuid/image/upload/v1741707864/images/obituaries/templates/pl6ual71zcpcsfiv8n3q.jpg');
-
-
-=======
-INSERT INTO image_template (id , image_url) VALUES (1 ,'https://res.cloudinary.com/ds02duuid/image/upload/v1741707864/images/obituaries/templates/fbrpmmujaksc5dbbrbbi.jpg'),
- (2 ,'https://res.cloudinary.com/ds02duuid/image/upload/v1741707864/images/obituaries/templates/jqqcvnp28w3adaymwkcr.jpg'),
- (3, 'https://res.cloudinary.com/ds02duuid/image/upload/v1741707864/images/obituaries/templates/pl6ual71zcpcsfiv8n3q.jpg');
->>>>>>> develop
 
 INSERT INTO death_certificate(id, url, is_verified) VALUES (1, 'https://res.cloudinary.com/ds02duuid/image/upload/v1741707864/images/obituaries/death_certificates/1.jpg',0); 
 INSERT INTO obituary (id, name, birth_date, death_date, custom_image_url, farewell_message, farewell_phrase, is_mine, customer_id, image_template_id, death_certificate_id, word_color) VALUES 
