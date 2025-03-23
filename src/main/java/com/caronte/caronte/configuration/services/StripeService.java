@@ -45,7 +45,10 @@ public class StripeService {
                         SubscriptionCreateParams.Item.builder()
                                 .setPrice(priceId)
                                 .build())
-                .setDefaultPaymentMethod(paymentMethodId)
+                .setPaymentSettings(
+                    SubscriptionCreateParams.PaymentSettings.builder()
+                            .setSaveDefaultPaymentMethod(SubscriptionCreateParams.PaymentSettings.SaveDefaultPaymentMethod.ON_SUBSCRIPTION)
+                            .build())
                 .build();
 
         Subscription subscription = Subscription.create(params);
