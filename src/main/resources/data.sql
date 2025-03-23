@@ -19,6 +19,12 @@ INSERT INTO admin (id) VALUES
 (1),
 (2);
 
+INSERT INTO plan (id, subscription_id, plan_type) VALUES 
+(1, NULL, 'FREE'),
+(2, 'sub_1R4QNiGa0d4217RGhH5rCRHl', 'PREMIUM'),
+(3, NULL, 'FREE'),
+(4, 'sub_1R4QQbGa0d4217RGFKZprtnL', 'PREMIUM');
+
 
 INSERT INTO company (id, address, city, description, image_url, nif, zip_code) VALUES 
 (3, 'Calle Tarfia, 67', 'Sevilla', 'Descripción de Empresa Uno', NULL, 'A12345678', '41001'),
