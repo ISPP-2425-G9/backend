@@ -28,7 +28,7 @@ public class MessageController {
     }
 
     @PostMapping
-    public ResponseEntity<?> createMessage(
+    public ResponseEntity<Map<String, Long>> createMessage(
             @Valid @RequestBody CreateMessageRequestDto request,
             BindingResult bindingResult) {
 

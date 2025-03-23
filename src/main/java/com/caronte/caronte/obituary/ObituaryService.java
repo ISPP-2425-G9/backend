@@ -217,8 +217,8 @@ public class ObituaryService {
     }
 
     @Transactional(readOnly = true)
-    public Iterable<Obituary> getAllObituariesByCustomer(Long customerId) {
-        Iterable<Obituary> obituaries = obituaryRepository.findByCustomerId(customerId);
+    public List<Obituary> getAllObituariesByCustomer(Long customerId) {
+        List<Obituary> obituaries = obituaryRepository.findByCustomerId(customerId);
         for (Obituary obituary : obituaries) {
             obituary.setCustomer(null);
             if(obituary.getWordColor() == null){
@@ -226,7 +226,6 @@ public class ObituaryService {
             }
         }
         return obituaries;
-
     }
 
     @Transactional(readOnly = true)
@@ -242,7 +241,7 @@ public class ObituaryService {
     }
 
     @Transactional(readOnly = true)
-    public Iterable<Obituary> findObituaryByCustomerDni(String dni) {
+    public List<Obituary> findObituaryByCustomerDni(String dni) {
         return obituaryRepository.findByCustomerDni(dni);
     }
 

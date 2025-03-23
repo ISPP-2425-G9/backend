@@ -1,5 +1,7 @@
 package com.caronte.caronte.deathCertificate;
 
+import java.util.List;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,14 +28,14 @@ public class DeathCertificateController {
     }
 
     @PostMapping("/upload")
-    public ResponseEntity<?> uploadDeathCertificate(
+    public ResponseEntity<String> uploadDeathCertificate(
             @RequestBody @Valid DeathCertificateRequestDTO deathCertificateRequestDTO) {
         deathCertificateService.createDeathCertificateAndRelations(deathCertificateRequestDTO, null);
         return ResponseEntity.ok("Death Certificate uploaded successfully");
     }
 
     @PostMapping("/upload/loggedInUser")
-    public ResponseEntity<?> uploadDeathCertificate(
+    public ResponseEntity<String> uploadDeathCertificate(
             @RequestBody @Valid DeathCertificateRequestDTO deathCertificateRequestDTO,
             Authentication authentication) {
         Long customerId = userService.findCurrentUserId();
@@ -42,12 +44,12 @@ public class DeathCertificateController {
     }
 
     @GetMapping("/all")
-    public ResponseEntity<?> getAllDeathCertificates() {
+    public ResponseEntity<List<DeathCertificate>> getAllDeathCertificates() {
         return ResponseEntity.ok(deathCertificateService.getAllDeathCertificates());
     }
 
     @GetMapping("/obituary/{obituaryId}")
-    public ResponseEntity<?> getDeathCertificateByObituaryId(@PathVariable Long obituaryId) {
+    public ResponseEntity<DeathCertificateWithObituaryDniDTO> getDeathCertificateByObituaryId(@PathVariable Long obituaryId) {
         return ResponseEntity.ok(deathCertificateService.getDeathCertificateByObituaryId(obituaryId));
     }
 

@@ -60,7 +60,7 @@ public class AuthController {
 	}
 
 	@PostMapping("/login")
-	public ResponseEntity<?> authenticateUser(
+	public ResponseEntity<JwtResponse> authenticateUser(
 			@Valid @RequestBody LoginRequest loginRequest,
 			BindingResult bindingResult) {
 		ErrorHandler errors = ErrorHandler.catchError(bindingResult);
@@ -79,7 +79,7 @@ public class AuthController {
 	}
 
 	@PostMapping("/customers/signup")
-	public ResponseEntity<?> registerCustomer(
+	public ResponseEntity<JwtResponse> registerCustomer(
 			@Valid @RequestBody RegisterRequestCustomer registerRequest,
 			BindingResult bindingResult) {
 		ErrorHandler errors = ErrorHandler.catchError(bindingResult);
@@ -92,7 +92,7 @@ public class AuthController {
 	}
 
 	@PostMapping("/companies/signup")
-	public ResponseEntity<?> registerCompany(
+	public ResponseEntity<JwtResponse> registerCompany(
 			@Valid @RequestBody RegisterRequestCompany registerRequest,
 			BindingResult bindingResult) {
 		ErrorHandler errors = ErrorHandler.catchError(bindingResult);
@@ -105,14 +105,14 @@ public class AuthController {
 	}
 
 	@GetMapping("/customers/{customerId}")
-	public ResponseEntity<?> getCustomer(@PathVariable Long customerId) {
+	public ResponseEntity<Customer> getCustomer(@PathVariable Long customerId) {
         userService.authorizeUserOrAdmin(customerId, "You can't access this data");
 		Customer customer = customerService.findById(customerId);
 		return ResponseEntity.ok().body(customer);
 	}
 
 	@PutMapping("/customers/{customerId}")
-	public ResponseEntity<?> updateCustomer(
+	public ResponseEntity<JwtResponse> updateCustomer(
 			@PathVariable Long customerId,
 			@RequestBody @Valid CustomerUpdateRequest request) {
 		userService.authorizeUserOrAdmin(customerId);
@@ -132,7 +132,7 @@ public class AuthController {
 	}
 
 	@PutMapping("/password/{userId}")
-	public ResponseEntity<?> updateCustomer(
+	public ResponseEntity<JwtResponse> updateCustomer(
 			@PathVariable Long userId,
 			@RequestBody @Valid UserChangePasswordRequest request) {
         userService.authorizeUserOrAdmin(userId);
@@ -147,14 +147,14 @@ public class AuthController {
 	}
 
 	@GetMapping("/companies/{companyId}")
-	public ResponseEntity<?> getCompany(@PathVariable Long companyId) {
+	public ResponseEntity<Company> getCompany(@PathVariable Long companyId) {
 		userService.authorizeUser(companyId);
 		Company company = companyService.findById(companyId);
 		return ResponseEntity.ok().body(company);
 	}
 
 	@PutMapping("/companies/{companyId}")
-	public ResponseEntity<?> updateCompany(
+	public ResponseEntity<JwtResponse> updateCompany(
 			@PathVariable Long companyId,
 			@RequestBody @Valid CompanyUpdateRequest request) {
         userService.authorizeUser(companyId);
@@ -181,31 +181,30 @@ public class AuthController {
 	}
 
 	@GetMapping("/admin/customers")
-	public ResponseEntity<?> getCustomers() {
+	public ResponseEntity<List<Customer>> getCustomers() {
 		return ResponseEntity.ok().body(customerService.findAll());
 	}
 
 	@GetMapping("/admin/customers/{customerId}")
-
-	public ResponseEntity<?> getCustomerByAdmin(@PathVariable Long customerId) {
+	public ResponseEntity<Customer> getCustomerByAdmin(@PathVariable Long customerId) {
 		Customer customer = customerService.findById(customerId);
 		return ResponseEntity.ok().body(customer);
 	}
 
 	@PutMapping("/admin/customers/{customerId}")
-	public ResponseEntity<?> updateCustomerByAdmin(@PathVariable Long customerId,
+	public ResponseEntity<Customer> updateCustomerByAdmin(@PathVariable Long customerId,
 			@RequestBody @Valid CustomerUpdateRequest request) {
 		Customer customer = customerService.update(customerId, request);
 		return ResponseEntity.ok(customer);
 	}
 
 	@GetMapping("/admin/companies")
-	public ResponseEntity<?> getCompanies() {
+	public ResponseEntity<List<Company>> getCompanies() {
 		return ResponseEntity.ok().body(companyService.findAll());
 	}
 
 	@GetMapping("/admin/companies/{companyId}")
-	public ResponseEntity<?> getCompanyByAdmin(@PathVariable Long companyId) {
+	public ResponseEntity<Company> getCompanyByAdmin(@PathVariable Long companyId) {
 		Company company = companyService.findById(companyId);
 		return ResponseEntity.ok().body(company);
 	}

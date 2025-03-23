@@ -27,7 +27,7 @@ public class ReceiverController {
     }
 
     @GetMapping("/getReceivers/obituary/{obituaryId}")
-    public ResponseEntity<?> getReceiversByObituaryId(@PathVariable Long obituaryId) {
+    public ResponseEntity<List<ReceiverResponseDTO>> getReceiversByObituaryId(@PathVariable Long obituaryId) {
         Long userId = userService.findCurrentUser().getId();
         Obituary obituary = obituaryService.getObituaryById(obituaryId, userId);
         List<ReceiverResponseDTO> receivers = receiverService.getReceiversByObituaryId(obituary);

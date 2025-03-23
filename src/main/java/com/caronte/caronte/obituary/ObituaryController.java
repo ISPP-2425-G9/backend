@@ -1,5 +1,7 @@
 package com.caronte.caronte.obituary;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -34,7 +36,7 @@ public class ObituaryController {
     }
 
     @PostMapping("/create")
-    public ResponseEntity<?> createObituary(@RequestBody @Valid ObituraryRequestDto request,
+    public ResponseEntity<String> createObituary(@RequestBody @Valid ObituraryRequestDto request,
             Authentication authentication) {
         Long customerId = userService.findCurrentUserId();
         obituaryService.createObituaryWithReceivers(request, customerId);
@@ -42,7 +44,7 @@ public class ObituaryController {
     }
 
     @PutMapping("/update/{obituaryId}")
-    public ResponseEntity<?> updateObituary(@RequestBody @Valid ObituraryRequestDto request,
+    public ResponseEntity<String> updateObituary(@RequestBody @Valid ObituraryRequestDto request,
             @PathVariable Long obituaryId) {
         Long customerId = userService.findCurrentUserId();
         obituaryService.updateObituaryWithReceivers(customerId, obituaryId, request);
@@ -58,14 +60,14 @@ public class ObituaryController {
 
     @GetMapping("/myObituaries")
     @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<?> getAllObituariesByCustomer() {
+    public ResponseEntity<List<Obituary>> getAllObituariesByCustomer() {
         Long customerId = userService.findCurrentUserId();
-        Iterable<Obituary> obituaries = obituaryService.getAllObituariesByCustomer(customerId);
+        List<Obituary> obituaries = obituaryService.getAllObituariesByCustomer(customerId);
         return ResponseEntity.ok().body(obituaries);
     }
 
     @GetMapping("/myObituaries/{obituaryId}")
-    public ResponseEntity<?> getObituaryById(@PathVariable Long obituaryId, Authentication authentication) {
+    public ResponseEntity<Obituary> getObituaryById(@PathVariable Long obituaryId, Authentication authentication) {
         Long userId = userService.findCurrentUserId();
         Obituary obituary = obituaryService.getObituaryById(obituaryId, userId);
         obituary.setCustomer(null);

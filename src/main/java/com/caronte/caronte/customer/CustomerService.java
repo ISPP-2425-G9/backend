@@ -1,4 +1,6 @@
 package com.caronte.caronte.customer;
+import java.util.List;
+
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,7 +26,7 @@ public class CustomerService {
     }
 
     @Transactional
-    public Iterable<Customer> findAll(){
+    public List<Customer> findAll(){
         return customerRepository.findAll();
     }
 
