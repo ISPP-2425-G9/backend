@@ -27,7 +27,7 @@ public class StripeService {
                 .setLimit(1L)
                 .build()).getData();
 
-        // Este "Customer" es referido a la clase Customer de Stripe, no el de Caronte
+        // This "Customer" refers to Stripe's Customer class, not Caronte's.
         Customer customer = !customers.isEmpty() ? customers.getFirst()
                 : Customer.create(
                         CustomerCreateParams.builder()
@@ -39,9 +39,9 @@ public class StripeService {
         PaymentIntentCreateParams params = PaymentIntentCreateParams.builder()
                 .setAmount(price.getUnitAmount())
                 .setCurrency(price.getCurrency())
-                .setCustomer(customer.getId()) // ID del cliente
-                .setPaymentMethod(paymentMethodId) // ID del método de pago (debe venir del frontend o generado antes)
-                .setConfirm(true) // Confirma el pago inmediatamente
+                .setCustomer(customer.getId()) 
+                .setPaymentMethod(paymentMethodId)
+                .setConfirm(true) 
                 .setAutomaticPaymentMethods(
                         PaymentIntentCreateParams.AutomaticPaymentMethods.builder()
                                 .setEnabled(true)
