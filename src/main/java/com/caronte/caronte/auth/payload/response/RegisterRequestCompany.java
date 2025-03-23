@@ -10,7 +10,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.caronte.caronte.company.Company;
 import com.caronte.caronte.plan.Plan;
-import com.caronte.caronte.plan.PlanType;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import jakarta.validation.constraints.NotBlank;
@@ -77,12 +76,7 @@ public class RegisterRequestCompany {
         company.setEmail(this.getEmail());
         company.setPassword(passwordEncoder.encode(this.getPassword1()));
         company.setTelephone(this.getTelephone());
-        
-        Plan plan = new Plan();
-        plan.setPlanType(PlanType.FREE);
-        plan.setSubscriptionId(null);
-        company.setPlan(plan);
-
+        company.setPlan(Plan.newFreePlan());
         return company;
 
     }

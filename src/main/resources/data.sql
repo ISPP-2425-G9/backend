@@ -1,24 +1,22 @@
-INSERT INTO plan (id, subscription_id, plan_type) VALUES
+INSERT INTO plan (id, subscription_id, plan_type) VALUES 
 (1, NULL, 'FREE'),
-(2, NULL, 'PREMIUM'),
+(2, NULL, 'FREE'),
 (3, NULL, 'FREE'),
-(4, NULL, 'PREMIUM'),
+(4, 'sub_1R4QQbGa0d4217RGFKZprtnL', 'PREMIUM'),
 (5, NULL, 'FREE'),
-(6, NULL, 'FREE');
-
+(6, 'sub_1R4QNiGa0d4217RGhH5rCRHl', 'PREMIUM');
 
 INSERT INTO user (id, name, email, password, telephone, plan_id) VALUES
-(1, 'admin1', 'admin1@caronte.site', '$2a$10$EJ7goCEpyl.XTDXDf/jeVOz1Mfwn24Q4jbIXnwY9yLh9gJSghZecm', '626077466', 5),
-(2, 'admin2', 'admin2@caronte.site', '$2a$10$EJ7goCEpyl.XTDXDf/jeVOz1Mfwn24Q4jbIXnwY9yLh9gJSghZecm', '626077466', 6),
+(1, 'admin1', 'admin1@caronte.site', '$2a$10$EJ7goCEpyl.XTDXDf/jeVOz1Mfwn24Q4jbIXnwY9yLh9gJSghZecm', '626077466', 1),
+(2, 'admin2', 'admin2@caronte.site', '$2a$10$EJ7goCEpyl.XTDXDf/jeVOz1Mfwn24Q4jbIXnwY9yLh9gJSghZecm', '626077466', 2),
 (3, 'empresa1','empresa1@caronte.site', '$2a$10$7vxcruASLb/pJhbG1uJGgeb6RqSIBeHJub0UGXSzwJAYBd0LHPoGu', '645384175', 3),
 (4, 'empresa2','empresa2@caronte.site', '$2a$10$7vxcruASLb/pJhbG1uJGgeb6RqSIBeHJub0UGXSzwJAYBd0LHPoGu', '957501307', 4),
-(5, 'cliente1', 'cliente1@caronte.site', '$2a$10$.qePDyM..BhRQr829JMtGOuRLM7i0K6/im0tgGUWxHvoLQRTs9956', '637892263', 1),
-(6, 'cliente2', 'cliente2@caronte.site', '$2a$10$.qePDyM..BhRQr829JMtGOuRLM7i0K6/im0tgGUWxHvoLQRTs9956', '643287465', 2);
+(5, 'cliente1', 'cliente1@caronte.site', '$2a$10$.qePDyM..BhRQr829JMtGOuRLM7i0K6/im0tgGUWxHvoLQRTs9956', '637892263', 5),
+(6, 'cliente2', 'cliente2@caronte.site', '$2a$10$.qePDyM..BhRQr829JMtGOuRLM7i0K6/im0tgGUWxHvoLQRTs9956', '643287465', 6);
 
 INSERT INTO admin (id) VALUES 
 (1),
 (2);
-
 
 INSERT INTO company (id, address, city, description, image_url, nif, zip_code) VALUES 
 (3, 'Calle Tarfia, 67', 'Sevilla', 'Descripción de Empresa Uno', NULL, 'A12345678', '41001'),

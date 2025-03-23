@@ -33,4 +33,5 @@ build/
 .vscode/
 
 logs
+.env
 .editorconfig
