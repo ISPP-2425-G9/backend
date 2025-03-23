@@ -1,6 +1,4 @@
 package com.caronte.caronte.company;
-
-import com.caronte.caronte.plan.Plan;
 import com.caronte.caronte.user.User;
 
 import jakarta.persistence.*;
