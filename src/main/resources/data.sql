@@ -1,8 +1,8 @@
-INSERT INTO plan (id, subscription_id, plan_type) VALUES
+INSERT INTO plan (id, subscription_id, plan_type) VALUES 
 (1, NULL, 'FREE'),
-(2, NULL, 'PREMIUM'),
+(2, NULL, 'FREE'),
 (3, NULL, 'FREE'),
-(4, NULL, 'PREMIUM'),
+(4, 'sub_1R4QQbGa0d4217RGFKZprtnL', 'PREMIUM'),
 (5, NULL, 'FREE'),
 (6, NULL, 'FREE'),
 (7, NULL, 'PREMIUM'),
@@ -38,26 +38,25 @@ INSERT INTO plan (id, subscription_id, plan_type) VALUES
 (37, NULL, 'PREMIUM'),
 (38, NULL, 'PREMIUM');;
 
-
 INSERT INTO user (id, name, email, password, telephone, plan_id) VALUES
-(1, 'admin1', 'admin1@caronte.site', '$2a$10$EJ7goCEpyl.XTDXDf/jeVOz1Mfwn24Q4jbIXnwY9yLh9gJSghZecm', '626077466', 5),
-(2, 'admin2', 'admin2@caronte.site', '$2a$10$EJ7goCEpyl.XTDXDf/jeVOz1Mfwn24Q4jbIXnwY9yLh9gJSghZecm', '626077466', 6),
+(1, 'admin1', 'admin1@caronte.site', '$2a$10$EJ7goCEpyl.XTDXDf/jeVOz1Mfwn24Q4jbIXnwY9yLh9gJSghZecm', '626077466', 1),
+(2, 'admin2', 'admin2@caronte.site', '$2a$10$EJ7goCEpyl.XTDXDf/jeVOz1Mfwn24Q4jbIXnwY9yLh9gJSghZecm', '626077466', 2),
 (3, 'empresa1','empresa1@caronte.site', '$2a$10$7vxcruASLb/pJhbG1uJGgeb6RqSIBeHJub0UGXSzwJAYBd0LHPoGu', '645384175', 3),
 (4, 'empresa2','empresa2@caronte.site', '$2a$10$7vxcruASLb/pJhbG1uJGgeb6RqSIBeHJub0UGXSzwJAYBd0LHPoGu', '957501307', 4),
-(5, 'cliente1', 'cliente1@caronte.site', '$2a$10$.qePDyM..BhRQr829JMtGOuRLM7i0K6/im0tgGUWxHvoLQRTs9956', '637892263', 1),
-(6, 'cliente2', 'cliente2@caronte.site', '$2a$10$.qePDyM..BhRQr829JMtGOuRLM7i0K6/im0tgGUWxHvoLQRTs9956', '643287465', 2),
-(7, 'Funeraria El Descanso', 'descanso@caronte.site', '$2a$10$pw1pass123456789u8ZpXnZn', '600000001', 7),
-(8, 'Floristería Rosas Blancas', 'rosasblancas@caronte.site', '$2a$10$pw2pass123456789u8ZpXnZn', '600000002', 8),
-(9, 'Funeraria Paz Eterna', 'pazeterna@caronte.site', '$2a$10$pw3pass123456789u8ZpXnZn', '600000003', 9),
-(10, 'Floristería El Jazmín', 'jazmin@caronte.site', '$2a$10$pw4pass123456789u8ZpXnZn', '600000004', 10),
-(11, 'Funeraria Camino de Luz', 'caminoluz@caronte.site', '$2a$10$pw5pass123456789u8ZpXnZn', '600000005', 11),
-(12, 'Floristería Aroma Floral', 'aromafloral@caronte.site', '$2a$10$pw6pass123456789u8ZpXnZn', '600000006', 12),
-(13, 'Funeraria Vida Serena', 'vidaserena@caronte.site', '$2a$10$pw7pass123456789u8ZpXnZn', '600000007', 13),
-(14, 'Floristería Petalos de Vida', 'petalos@caronte.site', '$2a$10$pw8pass123456789u8ZpXnZn', '600000008', 14),
-(15, 'Funeraria Luz Celestial', 'luzcelestial@caronte.site', '$2a$10$pw9pass123456789u8ZpXnZn', '600000009', 15),
-(16, 'Floristería El Ramo Perfecto', 'ramoperfecto@caronte.site', '$2a$10$pw10pass123456789u8ZpXnZn', '600000010', 16),
-(17, 'Funeraria Último Adiós', 'ultimoadios@caronte.site', '$2a$10$pw11pass123456789u8ZpXnZn', '600000011', 17),
-(18, 'Floristería Naturaleza Viva', 'naturalezaviva@caronte.site', '$2a$10$pw12pass123456789u8ZpXnZn', '600000012', 18),
+(5, 'cliente1', 'cliente1@caronte.site', '$2a$10$.qePDyM..BhRQr829JMtGOuRLM7i0K6/im0tgGUWxHvoLQRTs9956', '637892263', 5),
+(6, 'cliente2', 'cliente2@caronte.site', '$2a$10$.qePDyM..BhRQr829JMtGOuRLM7i0K6/im0tgGUWxHvoLQRTs9956', '643287465', 6),
+(7, 'Funeraria El Descanso', 'descanso@caronte.site', 'pass', '600000001', 7),
+(8, 'Floristería Rosas Blancas', 'rosasblancas@caronte.site', 'pass', '600000002', 8),
+(9, 'Funeraria Paz Eterna', 'pazeterna@caronte.site', 'pass', '600000003', 9),
+(10, 'Floristería El Jazmín', 'jazmin@caronte.site', 'pass', '600000004', 10),
+(11, 'Funeraria Camino de Luz', 'caminoluz@caronte.site', 'pass', '600000005', 11),
+(12, 'Floristería Aroma Floral', 'aromafloral@caronte.site', 'pass', '600000006', 12),
+(13, 'Funeraria Vida Serena', 'vidaserena@caronte.site', 'pass', '600000007', 13),
+(14, 'Floristería Petalos de Vida', 'petalos@caronte.site', 'pass', '600000008', 14),
+(15, 'Funeraria Luz Celestial', 'luzcelestial@caronte.site', 'pass', '600000009', 15),
+(16, 'Floristería El Ramo Perfecto', 'ramoperfecto@caronte.site', 'pass', '600000010', 16),
+(17, 'Funeraria Último Adiós', 'ultimoadios@caronte.site', 'pass', '600000011', 17),
+(18, 'Floristería Naturaleza Viva', 'naturalezaviva@caronte.site', 'pass', '600000012', 18),
 (19, 'Floristería Primavera', 'primavera@caronte.site', 'pass', '600001001', 19),
 (20, 'Floristería Tulipán', 'tulipan@caronte.site', 'pass', '600001002', 20),
 (21, 'Floristería El Trébol', 'trebol@caronte.site', 'pass', '600001003', 21),
@@ -82,12 +81,6 @@ INSERT INTO user (id, name, email, password, telephone, plan_id) VALUES
 INSERT INTO admin (id) VALUES 
 (1),
 (2);
-
-INSERT INTO plan (id, subscription_id, plan_type) VALUES 
-(1, NULL, 'FREE'),
-(2, 'sub_1R4QNiGa0d4217RGhH5rCRHl', 'PREMIUM'),
-(3, NULL, 'FREE'),
-(4, 'sub_1R4QQbGa0d4217RGFKZprtnL', 'PREMIUM');
 
 
 INSERT INTO company (id, address, city, description, image_url, nif, zip_code, company_type) VALUES
@@ -159,5 +152,3 @@ INSERT INTO receiver (id, message_id, obituary_id, telephone, name, email) VALUE
 (1, 1, NULL, '678945638', 'Reciver Uno', 'reciver1@caronte.site'),
 (3, 2, NULL, '678945638', 'Reciver Uno', 'reciver1@caronte.site'),
 (2, NULL, 1, '643767999', 'Reciver Dos', 'reciver2@caronte.site');
-
-
