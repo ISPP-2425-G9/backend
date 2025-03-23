@@ -83,6 +83,12 @@ INSERT INTO admin (id) VALUES
 (1),
 (2);
 
+INSERT INTO plan (id, subscription_id, plan_type) VALUES 
+(1, NULL, 'FREE'),
+(2, 'sub_1R4QNiGa0d4217RGhH5rCRHl', 'PREMIUM'),
+(3, NULL, 'FREE'),
+(4, 'sub_1R4QQbGa0d4217RGFKZprtnL', 'PREMIUM');
+
 
 INSERT INTO company (id, address, city, description, image_url, nif, zip_code, company_type) VALUES
 (3, 'Calle Tarfia, 67', 'Sevilla', 'Descripción de Empresa Uno', NULL, 'A12345678', '41001', 'OTHER'),
@@ -145,9 +151,9 @@ INSERT INTO image_template (id , image_url) VALUES (1 ,'https://res.cloudinary.c
  (3, 'https://res.cloudinary.com/ds02duuid/image/upload/v1741707864/images/obituaries/templates/pl6ual71zcpcsfiv8n3q.jpg');
 
 INSERT INTO death_certificate(id, url, is_verified) VALUES (1, 'https://res.cloudinary.com/ds02duuid/image/upload/v1741707864/images/obituaries/death_certificates/1.jpg',0); 
-INSERT INTO obituary (id, name, birth_date, death_date, custom_image_url, farewell_message, farewell_phrase, is_mine, customer_id, image_template_id, death_certificate_id) VALUES 
-(1, 'Nombre Ejemplo 1', '1980-01-01', '2023-01-01', 'https://static.nationalgeographicla.com/files/styles/image_3200/public/comedy-wildlife-awards-squirel-stop.jpg', 'Mensaje de despedida 1', 'Frase de despedida 1', 1, 5, 1, NULL),
-(2, 'Nombre Ejemplo 2', '1975-05-15', '2022-12-20', 'https://static.nationalgeographicla.com/files/styles/image_3200/public/comedy-wildlife-awards-squirel-stop.jpg', 'Mensaje de despedida 2', 'Frase de despedida 2', 0, 6, 1, NULL);
+INSERT INTO obituary (id, name, birth_date, death_date, custom_image_url, farewell_message, farewell_phrase, is_mine, customer_id, image_template_id, death_certificate_id, word_color) VALUES 
+(1, 'Nombre Ejemplo 1', '1980-01-01', '2023-01-01', 'https://static.nationalgeographicla.com/files/styles/image_3200/public/comedy-wildlife-awards-squirel-stop.jpg', 'Mensaje de despedida 1', 'Frase de despedida 1', 1, 5, 1, NULL, NULL),
+(2, 'Nombre Ejemplo 2', '1975-05-15', '2022-12-20', 'https://static.nationalgeographicla.com/files/styles/image_3200/public/comedy-wildlife-awards-squirel-stop.jpg', 'Mensaje de despedida 2', 'Frase de despedida 2', 0, 6, 1, NULL, NULL);
 
 INSERT INTO receiver (id, message_id, obituary_id, telephone, name, email) VALUES 
 (1, 1, NULL, '678945638', 'Reciver Uno', 'reciver1@caronte.site'),

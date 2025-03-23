@@ -14,6 +14,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.PrePersist;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -38,6 +39,9 @@ public class Obituary extends BaseEntity {
     @Column(length = 90)
     private String farewellPhrase;
 
+    @Column(length = 11)
+    private String wordColor;
+
     @Column(nullable = false)
     private Boolean isMine;
 
@@ -52,5 +56,4 @@ public class Obituary extends BaseEntity {
 
     @ManyToOne
     private DeathCertificate deathCertificate;
-
 }
