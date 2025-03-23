@@ -1,7 +1,6 @@
 package com.caronte.caronte.auth;
 
 import java.util.Objects;
-import java.util.Optional;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -62,11 +61,9 @@ public class AuthService {
         userRepository.save(user);
     }
 
-    public String getUserNameById(Long userId) {
-        Optional<User> userOpt = userRepository.findById(userId);
-        if(userOpt.isPresent()) {
-            return userOpt.get().getName();
-        }
-        throw new RuntimeException("Usuario no encontrado");
+    public String getNameById(Long userId) {
+        return userRepository.findById(userId)
+                             .map(User::getName)
+                             .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
     }
 }
