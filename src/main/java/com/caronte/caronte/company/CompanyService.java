@@ -21,7 +21,7 @@ public class CompanyService {
     }
 
     @Transactional(readOnly = true)
-    public Iterable<Company> findAll() {
+    public List<Company> findAll() {
         return companyRepository.findAll();
     }
 
@@ -41,13 +41,9 @@ public class CompanyService {
         companyToUpdate.setCity(request.getCity());
         companyToUpdate.setZipCode(request.getZipCode());
         companyToUpdate.setEmail(request.getEmail());
-        companyToUpdate.setPassword(passwordEncoder.encode(request.getPassword()));
         companyToUpdate.setTelephone(request.getTelephone());
         companyToUpdate.setImageUrl(request.getImageUrl());
         companyToUpdate.setDescription(request.getDescription());
-        if (!request.getPassword().equals(companyToUpdate.getPassword())) {
-            companyToUpdate.setPassword(request.getPassword());
-        }
         return companyRepository.save(companyToUpdate);
     }
 

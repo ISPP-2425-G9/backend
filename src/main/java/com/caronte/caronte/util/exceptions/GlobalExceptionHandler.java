@@ -16,8 +16,8 @@ import com.caronte.caronte.util.ErrorHandler;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler({Exception.class, DataIntegrityViolationException.class})
-    public ResponseEntity<String> handleResourceException(Exception ex) {
-        return ResponseEntity.internalServerError().body(ex.getMessage());
+    public ResponseEntity<Map<String,String>> handleResourceException(Exception ex) {
+        return ResponseEntity.internalServerError().body(Map.of("error", ex.getMessage()));
     }
 
     @ExceptionHandler(ErrorHandlerException.class)
