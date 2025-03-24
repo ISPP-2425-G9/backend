@@ -6,7 +6,6 @@ import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.caronte.caronte.plan.PlanType;
@@ -25,13 +24,8 @@ public interface CompanyRepository extends LongRepository<Company> {
     AND (:city IS NULL OR LOWER(c.city) LIKE LOWER(CONCAT('%', :city, '%')))
     AND (:name IS NULL OR LOWER(c.name) LIKE LOWER(CONCAT('%', :name, '%')))
     AND (:companyType IS NULL OR c.companyType = :companyType)
-""")
-    Page<Company> findPremiumCompaniesFiltered(
-            @Param("city") String city,
-            @Param("name") String name,
-            @Param("companyType") CompanyType companyType,
-            Pageable pageable
-    );
+    """)
+    Page<Company> findPremiumCompaniesFiltered(String city, String name, CompanyType companyType, Pageable pageable);
 
 }
 

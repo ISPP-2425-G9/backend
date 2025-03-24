@@ -11,8 +11,9 @@ import com.caronte.caronte.customer.CustomerRepository;
 import com.caronte.caronte.deathCertificate.DeathCertificate;
 import com.caronte.caronte.deathCertificate.DeathCertificateService;
 import com.caronte.caronte.imageTemplate.ImageTemplate;
-import com.caronte.caronte.imageTemplate.ImageTemplateService;
-import com.caronte.caronte.receiver.ReceiverService;
+import com.caronte.caronte.imageTemplate.ImageTemplateRepository;
+import com.caronte.caronte.receiver.Receiver;
+import com.caronte.caronte.receiver.ReceiverRepository;
 import com.caronte.caronte.util.MediaHandler;
 import com.caronte.caronte.util.exceptions.ResourceNotFound;
 import com.caronte.caronte.util.exceptions.ResponseThrow;
@@ -22,17 +23,16 @@ public class ObituaryService {
 
     ObituaryRepository obituaryRepository;
     CustomerRepository customerRepository;
-    ImageTemplateService imageTemplateService;
-    ReceiverService receiverService;
+    ImageTemplateRepository imageTemplateRepository;
+    ReceiverRepository receiverRepository;
     DeathCertificateService deathCertificateService;
     MediaHandler mediaHandler;
 
-    public ObituaryService(ObituaryRepository obituaryRepository, CustomerRepository customerRepository,
-            ImageTemplateService imageTemplateService, ReceiverService receiverService,
+    public ObituaryService(ObituaryRepository obituaryRepository, CustomerRepository customerRepository, 
+    ReceiverRepository receiverRepository, ImageTemplateRepository imageTemplateRepository,
             DeathCertificateService deathCertificateService, MediaHandler mediaHandler) {
-        this.receiverService = receiverService;
+        this.receiverRepository = receiverRepository;
         this.customerRepository = customerRepository;
-        this.imageTemplateService = imageTemplateService;
         this.obituaryRepository = obituaryRepository;
         this.deathCertificateService = deathCertificateService;
         this.mediaHandler = mediaHandler;
@@ -53,7 +53,7 @@ public class ObituaryService {
     public Obituary createObituaryWithReceivers(ObituraryRequestDto request, Long customerId) {
         Customer customer = customerRepository.findById(customerId).orElseThrow(() -> ResourceNotFound.of("Customer"));
 
-        ImageTemplate imageTemplate = imageTemplateService.findById(request.getImageTemplate_id());
+        ImageTemplate imageTemplate = imageTemplateRepository.findById(request.getImageTemplate_id()).orElseThrow(() -> ResourceNotFound.of("Image template"));
         DeathCertificate deathCertificate = null;
 
         if (!request.getIsMine()) {
@@ -79,7 +79,8 @@ public class ObituaryService {
         Obituary obituary = saveObituary(request, customImageUrl, customer, imageTemplate, deathCertificate);
 
         List<ObituraryRequestDto.ContactDto> contacts = request.getContacts();
-        receiverService.saveAllObituaryReceiver(contacts, obituary);
+        List<Receiver> receivers = contacts.stream().map(contactDto -> Receiver.parse(contactDto, obituary)).toList();
+        receiverRepository.saveAll(receivers);
 
         return obituary;
     }
@@ -98,9 +99,10 @@ public class ObituaryService {
 
         if (!request.getIsMine() && obituary.getDeathCertificate().getIsVerified()) {
             throw new IllegalArgumentException("You can't upload the obituary since the death certificate is verified");
+        }
 
         String customUrl = request.getCustomImage();
-        ImageTemplate imageTemplate = imageTemplateService.findById(request.getImageTemplate_id());
+        ImageTemplate imageTemplate = imageTemplateRepository.findById(request.getImageTemplate_id()).orElseThrow(() -> ResourceNotFound.of("Image template"));
 
         String customImageUrl = customUrl != null && customUrl.startsWith("data:image/") ?
             mediaHandler.uploadImageToCloudinary(customUrl, "obituaries") : customUrl;
@@ -114,10 +116,11 @@ public class ObituaryService {
 
         updatedObituary = updateObituary(updatedObituary);
 
-        receiverService.deleteReceiversByObituaryId(updatedObituary);
+        receiverRepository.deleteByObituary(updatedObituary);
+        receiverRepository.flush();
 
-        List<ObituraryRequestDto.ContactDto> contacts = request.getContacts();
-        receiverService.saveAllObituaryReceiver(contacts, updatedObituary);
+        List<Receiver> receivers = request.getContacts().stream().map(contactDto -> Receiver.parse(contactDto, obituary)).toList();
+        receiverRepository.saveAll(receivers);
 
         return updatedObituary;
     }

@@ -1,15 +1,13 @@
 package com.caronte.caronte.company;
 
 import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.crypto.password.PasswordEncoder;
-
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.caronte.caronte.auth.payload.response.CompanyUpdateRequest;
-import com.caronte.caronte.plan.PlanType;
 import com.caronte.caronte.util.exceptions.ResourceNotFound;
 
 @Service
@@ -46,27 +44,10 @@ public class CompanyService {
         return companyRepository.save(companyToUpdate);
     }
 
-//     @Transactional
-// <<<<<<< FR-refactoring-code
-//     public List<CompanyDTO> findAllCompaniesPublicInformation(){
-//         List<Company> companiesWithPlan = companyRepository.findByPlan_PlanType(PlanType.PREMIUM);
-//         return companiesWithPlan.stream().map(CompanyDTO::parse).toList();
-// =======
-//     public Page<CompanyDTO> findAllCompaniesPublicInformation(String city, String name, CompanyType companyType, Pageable pageable) {
-//         Page<Company> companies = companyRepository.findPremiumCompaniesFiltered(city, name, companyType, pageable);
-//         return companies.map(company -> new CompanyDTO(
-//                 company.getName(),
-//                 company.getEmail(),
-//                 company.getTelephone(),
-//                 company.getAddress(),
-//                 company.getCity(),
-//                 company.getZipCode(),
-//                 company.getImageUrl(),
-//                 company.getDescription(),
-//                 company.getNif(),
-//                 company.getCompanyType()
-//         ));
-// >>>>>>> develop
-//     }
+    @Transactional
+    public Page<CompanyDTO> findAllCompaniesPublicInformation(String city, String name, CompanyType companyType, Pageable pageable) {
+        Page<Company> companies = companyRepository.findPremiumCompaniesFiltered(city, name, companyType, pageable);
+        return companies.map(CompanyDTO::parse);
+    }
 
 }

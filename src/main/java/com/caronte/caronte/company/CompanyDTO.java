@@ -29,7 +29,8 @@ public class CompanyDTO {
             company.getZipCode(), 
             company.getImageUrl(), 
             company.getDescription(),
-            company.getNif());
+            company.getNif(),
+            company.getCompanyType());
     }
 
 }
