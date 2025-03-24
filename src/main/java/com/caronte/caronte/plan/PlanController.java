@@ -50,7 +50,7 @@ public class PlanController {
         try {
             User user = userService.authorizeUserOrAdmin(userId);
             PlanType actualPlanType = user.getPlan().getPlanType(), newPlanType = changePlanRequest.getPlanType();
-            ResponseThrow.checkOrBadRequest(actualPlanType == newPlanType, 
+            ResponseThrow.checkOrBadRequest(actualPlanType != newPlanType, 
                                             "You have the same plan: " + actualPlanType);
  
             String subscriptionId = changePlanRequest.isPremium() ?
