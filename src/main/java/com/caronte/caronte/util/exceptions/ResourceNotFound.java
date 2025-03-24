@@ -1,13 +1,16 @@
 package com.caronte.caronte.util.exceptions;
 
-public class ResourceNotFound extends RuntimeException {
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
+
+public class ResourceNotFound extends ResponseStatusException {
 
     public ResourceNotFound(String clazz) {
-        super(String.format("%s not found", clazz));
+        super(HttpStatus.NOT_FOUND, String.format("%s not found", clazz));
     }
     
     public ResourceNotFound(String clazz, String property, String value) {
-        super(String.format("%s with %s:%s not found", clazz, property, value));
+        super(HttpStatus.NOT_FOUND, String.format("%s with %s:%s not found", clazz, property, value));
     }
 
     public static ResourceNotFound of(String clazz) {
