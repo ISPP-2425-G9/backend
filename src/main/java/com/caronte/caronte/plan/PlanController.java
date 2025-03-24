@@ -58,7 +58,8 @@ public class PlanController {
             planService.changePlan(user, newPlanType, subscriptionId);
             
             String jwt = jwtUtils.generateJwtToken(userDetailsImpl);
-			List<String> roles = userDetailsImpl.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList());
+            user = userService.findCurrentUser();
+			List<String> roles = UserDetailsImpl.build(user).getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList());
 			String name = authService.getNameById(userDetailsImpl.getId());
             JwtResponse jwtResponse = new JwtResponse(jwt, userDetailsImpl, roles, name);
             return ResponseEntity.ok(jwtResponse);
