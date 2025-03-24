@@ -10,11 +10,11 @@ import org.springframework.transaction.annotation.Transactional;
 import com.caronte.caronte.customer.Customer;
 import com.caronte.caronte.customer.CustomerRepository;
 import com.caronte.caronte.deathCertificate.DeathCertificate;
+import com.caronte.caronte.deathCertificate.DeathCertificateService;
 import com.caronte.caronte.imageTemplate.ImageTemplate;
 import com.caronte.caronte.imageTemplate.ImageTemplateService;
 import com.caronte.caronte.receiver.ReceiverService;
 import com.caronte.caronte.util.MediaHandler;
-import com.caronte.caronte.deathCertificate.DeathCertificateService;
 
 @Service
 public class ObituaryService {
@@ -139,7 +139,7 @@ public class ObituaryService {
 
         String customImageUrl;
         if (customUrl != null && customUrl.startsWith("data:image/")) {
-            customImageUrl = MediaHandler.uploadImageToCloudinary(customUrl, "obituaries");
+            customImageUrl = MediaHandler.uploadImageToCloudinary(MediaHandler.base64ToImage(customUrl), "obituaries");
         } else {
             customImageUrl = customUrl;
         }
