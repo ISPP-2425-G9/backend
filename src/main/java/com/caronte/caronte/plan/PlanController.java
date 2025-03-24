@@ -50,7 +50,7 @@ public class PlanController {
  
             String subscriptionId = changePlanRequest.isPremium() ?
                     stripeService.subscription(changePlanRequest.getPaymentMethodId(), user): null;
-
+            
             planService.changePlan(user, newPlanType, subscriptionId);
             
             String jwt = jwtUtils.generateJwtToken(userDetailsImpl);

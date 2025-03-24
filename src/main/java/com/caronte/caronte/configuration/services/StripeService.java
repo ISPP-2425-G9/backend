@@ -1,6 +1,7 @@
 package com.caronte.caronte.configuration.services;
 
 import java.util.List;
+import java.util.Objects;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -19,6 +20,7 @@ import com.stripe.param.CustomerListParams;
 import com.stripe.param.PaymentIntentCreateParams;
 import com.stripe.param.PaymentMethodAttachParams;
 import com.stripe.param.SubscriptionCreateParams;
+import com.stripe.param.SubscriptionListParams;
 
 @Service
 public class StripeService {
@@ -98,7 +100,26 @@ public class StripeService {
                 .setDefaultPaymentMethod(paymentMethodId)
                 .build();
 
+        
+        
         Subscription subscription = Subscription.create(params);
+        
+        customer = !customers.isEmpty() ? customers.getFirst()
+                : Customer.create(
+                        CustomerCreateParams.builder()
+                                .setEmail(user.getEmail())
+                                .build());
+
+        SubscriptionListParams subscriptionListParams = SubscriptionListParams.builder()
+                .setCustomer(customerId) // ID del cliente
+                .build();
+
+        List<Subscription> subscriptions = Subscription.list(subscriptionListParams).getData();
+        for (Subscription otherSubscription : subscriptions) {
+                if(!Objects.equals(otherSubscription.getId(),  subscription.getId())){
+                        otherSubscription.cancel();
+                }
+        }
         return subscription.getId();
     }
 }
