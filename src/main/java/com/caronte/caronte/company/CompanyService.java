@@ -7,6 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.caronte.caronte.auth.payload.response.CompanyUpdateRequest;
 import com.caronte.caronte.plan.PlanType;
+import com.caronte.caronte.util.exceptions.ResourceNotFound;
 
 @Service
 public class CompanyService {
@@ -24,15 +25,13 @@ public class CompanyService {
 
     @Transactional(readOnly = true)
     public Company findById(Long id) {
-        Company company = companyRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Company not found"));
+        Company company = companyRepository.findById(id).orElseThrow(() -> ResourceNotFound.of("Company"));
         return company;
     }
 
     @Transactional
     public Company update(Long id, CompanyUpdateRequest request) {
-        Company companyToUpdate = companyRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Company not found"));
+        Company companyToUpdate = companyRepository.findById(id).orElseThrow(() -> ResourceNotFound.of("Company"));
         companyToUpdate.setName(request.getName());
         companyToUpdate.setAddress(request.getAddress());
         companyToUpdate.setCity(request.getCity());
@@ -47,17 +46,7 @@ public class CompanyService {
     @Transactional
     public List<CompanyDTO> findAllCompaniesPublicInformation(){
         List<Company> companiesWithPlan = companyRepository.findByPlan_PlanType(PlanType.PREMIUM);
-        return companiesWithPlan.stream().map(company -> new CompanyDTO(
-            company.getName(), 
-            company.getEmail(), 
-            company.getTelephone(), 
-            company.getAddress(), 
-            company.getCity(), 
-            company.getZipCode(), 
-            company.getImageUrl(), 
-            company.getDescription(),
-            company.getNif()))
-            .toList();
+        return companiesWithPlan.stream().map(CompanyDTO::parse).toList();
     }
 
 }

@@ -28,4 +28,12 @@ public class ReceiverResponseDTO {
     @NotBlank(message = "The email cannot be empty")
     String email;
     
+    public static ReceiverResponseDTO parse(Receiver receiver){
+        ReceiverResponseDTO receiverResponseDTO = new ReceiverResponseDTO();
+        receiverResponseDTO.setId(receiver.getId());
+        receiverResponseDTO.setName(receiver.getName());
+        receiverResponseDTO.setTelephone(receiver.getTelephone());
+        receiverResponseDTO.setEmail(receiver.getEmail());
+        return receiverResponseDTO;
+    }
 }

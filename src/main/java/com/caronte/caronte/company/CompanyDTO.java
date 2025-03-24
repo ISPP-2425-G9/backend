@@ -18,4 +18,17 @@ public class CompanyDTO {
     private String description;
     private String nif;
 
+    public static CompanyDTO parse(Company company) {
+        return new CompanyDTO(
+            company.getName(), 
+            company.getEmail(), 
+            company.getTelephone(), 
+            company.getAddress(), 
+            company.getCity(), 
+            company.getZipCode(), 
+            company.getImageUrl(), 
+            company.getDescription(),
+            company.getNif());
+    }
+
 }
