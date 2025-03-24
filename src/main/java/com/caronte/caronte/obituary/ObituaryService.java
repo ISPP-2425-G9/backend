@@ -1,7 +1,6 @@
 package com.caronte.caronte.obituary;
 
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -33,30 +32,32 @@ public class ObituaryService {
         this.obituaryRepository = obituaryRepository;
         this.deathCertificateService = deathCertificateService;
     }
+    @Transactional
+    public DeathCertificate certificateManagement(ObituraryRequestDto request, Customer customer, Long customerId) {
 
-    private LocalDate parseDate(String input) {
-        if (input == null || input.trim().isEmpty())
-            return null;
-
-        List<DateTimeFormatter> formatters = List.of(
-                DateTimeFormatter.ofPattern("dd/MM/yyyy"),
-                DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-
-        for (DateTimeFormatter formatter : formatters) {
-            try {
-                return LocalDate.parse(input, formatter);
-            } catch (Exception ignored) {
-            }
+        DeathCertificate deathCertificate = null;
+        if(request.getDeathCertificate() == null || request.getDeathCertificate().getDni() == null || request.getDeathCertificate().getFile() == null){
+            throw new IllegalArgumentException("The Death Certificate is invalid");
         }
+        if (customer.getDni().equals(request.getDeathCertificate().getDni())){
+            throw new IllegalArgumentException("No puedes subir un certificado con tu DNI");
+        }
+        Iterable<Obituary> obituaries = obituaryRepository.findByCustomerDni(request.getDeathCertificate().getDni());
+        Boolean existCustomer = customerRepository.existsByDni(request.getDeathCertificate().getDni());
 
-        throw new RuntimeException("Formato de fecha inválido: " + input);
+        if(existCustomer && obituaries.iterator().hasNext() && obituaries.iterator().next().getDeathCertificate() == null){
+            deathCertificate = deathCertificateService.createDeathCertificateAndRelations(request.getDeathCertificate(), customerId );
+
+        }else{
+            deathCertificate = deathCertificateService.createDeathCertificate(request.getDeathCertificate());  
+        }
+        return deathCertificate;
     }
-
     @Transactional
     public Obituary createObituaryWithReceivers(ObituraryRequestDto request, Long customerId) {
         String name = request.getName();
-        LocalDate birthDate = parseDate(request.getBirthDate());
-        LocalDate deathDate = parseDate(request.getDeathDate());
+        LocalDate birthDate = request.getBirthDate();
+        LocalDate deathDate = null;
 
         String farewellMessage = request.getFarewellMessage();
         String farewellPhrase = request.getFarewellPhrase();
@@ -71,21 +72,8 @@ public class ObituaryService {
         DeathCertificate deathCertificate = null;
         
         if(!isMine){
-            if(request.getDeathCertificate() == null || request.getDeathCertificate().getDni() == null || request.getDeathCertificate().getFile() == null){
-                throw new IllegalArgumentException("The Death Certificate is invalid");
-            }
-            if (customer.getDni().equals(request.getDeathCertificate().getDni())){
-                throw new IllegalArgumentException("No puedes subir un certificado con tu DNI");
-            }
-            Iterable<Obituary> obituaries = obituaryRepository.findByCustomerDni(request.getDeathCertificate().getDni());
-            Boolean existCustomer = customerRepository.existsByDni(request.getDeathCertificate().getDni());
-
-            if(existCustomer && obituaries.iterator().hasNext() && obituaries.iterator().next().getDeathCertificate() == null){
-                deathCertificate = deathCertificateService.createDeathCertificateAndRelations(request.getDeathCertificate(), customerId );
-
-            }else{
-                deathCertificate = deathCertificateService.createDeathCertificate(request.getDeathCertificate());  
-            }
+            deathDate =request.getDeathDate();
+            deathCertificate = certificateManagement(request, customer, customerId);
         }
         String customUrl = request.getCustomImage();
         String customImageUrl = null;
@@ -96,8 +84,10 @@ public class ObituaryService {
             customImageUrl = customUrl;
         }
 
+        if(wordColor ==null){
+            wordColor = "0,0,0";
+        }
         
-
         Obituary obituary = saveObituary(name, birthDate, deathDate, customImageUrl, farewellMessage, farewellPhrase,
                 isMine, customer, imageTemplate,deathCertificate,wordColor);
 
@@ -112,23 +102,22 @@ public class ObituaryService {
     @Transactional
     public Obituary updateObituaryWithReceivers(Long customerId, Long obituaryId, ObituraryRequestDto request) {
         Obituary obituary = findById(obituaryId);
+        Boolean isMine = request.getIsMine();
+        if(!isMine){
+            throw new IllegalArgumentException("You can't upload the obituary since it isn't yours");
+        }
 
         if (!obituary.getCustomer().getId().equals(customerId)) {
             throw new IllegalArgumentException("You are not allowed to update this obituary");
         }
 
-        Boolean isMine = request.getIsMine();
         if(obituary.getIsMine() && !isMine || !obituary.getIsMine() && isMine){
             throw new IllegalArgumentException("You can't change IsMine property");
         }
 
-        if(!isMine && obituary.getDeathCertificate().getIsVerified()){
-            throw new IllegalArgumentException("You can't upload the obituary since the death certificate is verified");
-        } 
-
         String name = request.getName();
-        LocalDate birthDate = parseDate(request.getBirthDate());
-        LocalDate deathDate = parseDate(request.getDeathDate());
+        LocalDate birthDate = request.getBirthDate();
+        LocalDate deathDate = request.getDeathDate();
         String farewellMessage = request.getFarewellMessage();
         String farewellPhrase = request.getFarewellPhrase();
         Long imageTemplateId = request.getImageTemplate_id();
@@ -142,6 +131,9 @@ public class ObituaryService {
             customImageUrl = MediaHandler.uploadImageToCloudinary(MediaHandler.base64ToImage(customUrl), "obituaries");
         } else {
             customImageUrl = customUrl;
+        }
+        if(wordColor ==null){
+            wordColor = "0,0,0";
         }
 
         Obituary updatedObituary = null;
@@ -168,7 +160,6 @@ public class ObituaryService {
         
         return updatedObituary;
     }
-
     @Transactional
     public Obituary saveObituary(String name, LocalDate birth_date, LocalDate death_date, String custom_image_url,
             String farewell_message, String farewell_phrase, Boolean is_mine, Customer customer,
@@ -188,7 +179,6 @@ public class ObituaryService {
         obituary.setWordColor(word_color);
         return obituaryRepository.save(obituary);
     }
-
     @Transactional
     public void deleteObituaryByCustomer(Long customerId, Long obituaryId) {
         Obituary obituary = findById(obituaryId);
