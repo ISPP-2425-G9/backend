@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.caronte.caronte.customer.Customer;
 import com.caronte.caronte.customer.CustomerRepository;
 import com.caronte.caronte.deathCertificate.DeathCertificate;
+import com.caronte.caronte.deathCertificate.DeathCertificateRequestDTO;
 import com.caronte.caronte.deathCertificate.DeathCertificateService;
 import com.caronte.caronte.imageTemplate.ImageTemplate;
 import com.caronte.caronte.imageTemplate.ImageTemplateRepository;
@@ -34,6 +35,7 @@ public class ObituaryService {
         this.receiverRepository = receiverRepository;
         this.customerRepository = customerRepository;
         this.obituaryRepository = obituaryRepository;
+        this.imageTemplateRepository = imageTemplateRepository;
         this.deathCertificateService = deathCertificateService;
         this.mediaHandler = mediaHandler;
     }
@@ -50,6 +52,29 @@ public class ObituaryService {
     }
 
     @Transactional
+    public DeathCertificate certificateManagement(ObituraryRequestDto request, Customer customer, Long customerId) {
+
+        DeathCertificateRequestDTO deathCertificateDTO = request.getDeathCertificate();
+        String dni = deathCertificateDTO.getDni();
+        if(deathCertificateDTO == null || dni == null || deathCertificateDTO.getFile() == null){
+            throw new IllegalArgumentException("The Death Certificate is invalid");
+        }
+
+        if (customer.getDni().equals(deathCertificateDTO.getDni())){
+            throw new IllegalArgumentException("No puedes subir un certificado con tu DNI");
+        }
+
+        List<Obituary> obituaries = obituaryRepository.findByCustomerDni(dni);
+        Boolean existCustomer = customerRepository.existsByDni(dni);
+
+        DeathCertificate deathCertificate = existCustomer && !obituaries.isEmpty() && obituaries.getFirst().getDeathCertificate() == null ?
+            deathCertificateService.createDeathCertificateAndRelations(deathCertificateDTO, customerId ) :
+            deathCertificateService.createDeathCertificate(deathCertificateDTO);  
+        
+        return deathCertificate;
+    }
+
+    @Transactional
     public Obituary createObituaryWithReceivers(ObituraryRequestDto request, Long customerId) {
         Customer customer = customerRepository.findById(customerId).orElseThrow(() -> ResourceNotFound.of("Customer"));
 
@@ -57,25 +82,21 @@ public class ObituaryService {
         DeathCertificate deathCertificate = null;
 
         if (!request.getIsMine()) {
-            if (request.getDeathCertificate() == null || request.getDeathCertificate().getDni() == null
-                    || request.getDeathCertificate().getFile() == null) {
-                throw new IllegalArgumentException("The Death Certificate is invalid");
-            }
-            if (Objects.equals(customer.getDni(), request.getDeathCertificate().getDni())) {
-                throw new IllegalArgumentException("No puedes subir un certificado con tu DNI");
-            }
-            
-            List<Obituary> obituaries = obituaryRepository.findByCustomerDni(request.getDeathCertificate().getDni());
-            Boolean existCustomer = customerRepository.existsByDni(request.getDeathCertificate().getDni());
-
-            deathCertificate = existCustomer && !obituaries.isEmpty() && obituaries.getFirst().getDeathCertificate() == null ?
-                deathCertificateService.createDeathCertificateAndRelations(request.getDeathCertificate(), customerId):
-                deathCertificateService.createDeathCertificate(request.getDeathCertificate());
+            deathCertificate = certificateManagement(request, customer, customerId);
+        } else {
+            request.setDeathDate(null);
         }
+
+
         String customUrl = request.getCustomImage();
         String customImageUrl = Objects.nonNull(customUrl) && customUrl.startsWith("data:image/") ?
                 mediaHandler.uploadImageToCloudinary(customUrl, "obituaries") : customUrl;
-                
+            
+        
+        if(request.getWordColor() == null) {
+            request.setWordColor("0,0,0");
+        }
+
         Obituary obituary = saveObituary(request, customImageUrl, customer, imageTemplate, deathCertificate);
 
         List<ObituraryRequestDto.ContactDto> contacts = request.getContacts();
@@ -89,6 +110,10 @@ public class ObituaryService {
     public Obituary updateObituaryWithReceivers(Long customerId, Long obituaryId, ObituraryRequestDto request) {
         Obituary obituary = findById(obituaryId);
 
+        if (!request.getIsMine() && obituary.getDeathCertificate().getIsVerified()) {
+            throw new IllegalArgumentException("You can't upload the obituary since the death certificate is verified");
+        }
+
         if (!Objects.equals(obituary.getCustomer().getId(), customerId)) {
             throw new IllegalArgumentException("You are not allowed to update this obituary");
         }
@@ -97,26 +122,21 @@ public class ObituaryService {
             throw new IllegalArgumentException("You can't change IsMine property");
         }
 
-        if (!request.getIsMine() && obituary.getDeathCertificate().getIsVerified()) {
-            throw new IllegalArgumentException("You can't upload the obituary since the death certificate is verified");
-        }
-
         String customUrl = request.getCustomImage();
         ImageTemplate imageTemplate = imageTemplateRepository.findById(request.getImageTemplate_id()).orElseThrow(() -> ResourceNotFound.of("Image template"));
-
         String customImageUrl = customUrl != null && customUrl.startsWith("data:image/") ?
             mediaHandler.uploadImageToCloudinary(customUrl, "obituaries") : customUrl;
         
         Obituary updatedObituary = request.parse();
         Customer customer = customerRepository.findById(customerId).orElseThrow(() -> ResourceNotFound.of("Customer"));
-        updatedObituary.setId(obituaryId);
+        updatedObituary.setId(obituary.getId());
         updatedObituary.setCustomImageUrl(customImageUrl);
         updatedObituary.setImageTemplate(imageTemplate);
         updatedObituary.setCustomer(customer);
 
         updatedObituary = updateObituary(updatedObituary);
 
-        receiverRepository.deleteByObituary(updatedObituary);
+        receiverRepository.deleteByObituary(obituary);
         receiverRepository.flush();
 
         List<Receiver> receivers = request.getContacts().stream().map(contactDto -> Receiver.parse(contactDto, obituary)).toList();
