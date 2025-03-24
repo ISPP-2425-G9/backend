@@ -25,15 +25,17 @@ public class ObituaryService {
     ImageTemplateService imageTemplateService;
     ReceiverService receiverService;
     DeathCertificateService deathCertificateService;
+    MediaHandler mediaHandler;
 
     public ObituaryService(ObituaryRepository obituaryRepository, CustomerRepository customerRepository,
             ImageTemplateService imageTemplateService, ReceiverService receiverService,
-            DeathCertificateService deathCertificateService) {
+            DeathCertificateService deathCertificateService, MediaHandler mediaHandler) {
         this.receiverService = receiverService;
         this.customerRepository = customerRepository;
         this.imageTemplateService = imageTemplateService;
         this.obituaryRepository = obituaryRepository;
         this.deathCertificateService = deathCertificateService;
+        this.mediaHandler = mediaHandler;
     }
 
     @Transactional
@@ -60,9 +62,9 @@ public class ObituaryService {
                 deathCertificateService.createDeathCertificate(request.getDeathCertificate());
         }
         String customUrl = request.getCustomImage();
-        String customImageUrl = Objects.nonNull(customUrl) && customUrl.startsWith("data:image/") ?
-                MediaHandler.uploadImageToCloudinary(MediaHandler.base64ToImage(customUrl), "obituaries") : customUrl;
-
+        String customImageUrl = Objects.nonNull(customUrl) && customUrl.startsWith("data:image/") && false ?
+                mediaHandler.uploadImageToCloudinary(customUrl, "obituaries") : customUrl;
+        customImageUrl = "";
         Obituary obituary = saveObituary(request, customImageUrl, customer, imageTemplate, deathCertificate);
 
         List<ObituraryRequestDto.ContactDto> contacts = request.getContacts();
@@ -89,17 +91,18 @@ public class ObituaryService {
 
         String customUrl = request.getCustomImage();
         ImageTemplate imageTemplate = imageTemplateService.findById(request.getImageTemplate_id());
-        String wordColor = request.getWordColor();
 
-        String customImageUrl = customUrl != null && customUrl.startsWith("data:image/") ?
-            MediaHandler.uploadImageToCloudinary(MediaHandler.base64ToImage(customUrl), "obituaries") : customUrl;
+        String customImageUrl = customUrl != null && customUrl.startsWith("data:image/") && false ?
+            mediaHandler.uploadImageToCloudinary(customUrl, "obituaries") : customUrl;
         
         Obituary updatedObituary = request.parse();
-        obituary.setCustomImageUrl(customImageUrl);
-        obituary.setImageTemplate(imageTemplate);
-        obituary.setWordColor(wordColor);
+        Customer customer = customerRepository.findById(customerId).orElseThrow(() -> ResourceNotFound.of("Customer"));
+        updatedObituary.setId(obituaryId);
+        updatedObituary.setCustomImageUrl(customImageUrl);
+        updatedObituary.setImageTemplate(imageTemplate);
+        updatedObituary.setCustomer(customer);
 
-        updatedObituary = updateObituary(obituary);
+        updatedObituary = updateObituary(updatedObituary);
 
         receiverService.deleteReceiversByObituaryId(updatedObituary);
 
@@ -157,7 +160,7 @@ public class ObituaryService {
     @Transactional(readOnly = true)
     public Obituary getObituaryById(Long obituaryId, Long userId) {
         Obituary obituary = obituaryRepository.findById(obituaryId).orElseThrow(() -> ResourceNotFound.of("Obituary"));
-        ResponseThrow.checkOrForbidden(!Objects.equals(obituary.getCustomer().getId(), userId));
+        ResponseThrow.checkOrForbidden(Objects.equals(obituary.getCustomer().getId(), userId));
         if (obituary.getWordColor() == null) {
             obituary.setWordColor("0,0,0");
         }

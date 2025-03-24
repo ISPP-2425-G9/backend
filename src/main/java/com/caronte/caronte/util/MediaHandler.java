@@ -1,10 +1,5 @@
 package com.caronte.caronte.util;
 
-import com.cloudinary.Cloudinary;
-import com.cloudinary.utils.ObjectUtils;
-import io.github.cdimascio.dotenv.Dotenv;
-
-import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -12,9 +7,21 @@ import java.io.IOException;
 import java.util.Base64;
 import java.util.Map;
 
+import javax.imageio.ImageIO;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
+import com.cloudinary.Cloudinary;
+import com.cloudinary.utils.ObjectUtils;
+
+@Component
 public class MediaHandler {
 
-    public static BufferedImage base64ToImage(String base64String) {
+    @Value("${cloudinary.url}")
+    private String cloudinaryImageUrl;
+
+    private static BufferedImage base64ToImage(String base64String) {
         BufferedImage image = null;
         try {
             if (base64String != null && base64String.contains(",")) {
@@ -30,10 +37,9 @@ public class MediaHandler {
         return image;
     }
 
-    public static String uploadImageToCloudinary(BufferedImage image, String folder) {
-        Dotenv dotenv = Dotenv.load();
-        Cloudinary cloudinary_image = new Cloudinary(dotenv.get("CLOUDINARY_IMAGES_URL"));
-
+    public String uploadImageToCloudinary(String base64String, String folder) {
+        Cloudinary cloudinaryImage = new Cloudinary(cloudinaryImageUrl);
+        BufferedImage image = base64ToImage(base64String);
         try {
             File tempFile = File.createTempFile("upload_", ".png");
             ImageIO.write(image, "png", tempFile);
@@ -42,7 +48,7 @@ public class MediaHandler {
                 "folder", "images/" + folder + "/"
             );
 
-            Map uploadResult = cloudinary_image.uploader().upload(tempFile, options);
+            Map uploadResult = cloudinaryImage.uploader().upload(tempFile, options);
             tempFile.delete();
             return uploadResult.get("secure_url").toString();
 
