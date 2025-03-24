@@ -9,7 +9,7 @@ public class ResourceNotFound extends ResponseStatusException {
         super(HttpStatus.NOT_FOUND, String.format("%s not found", clazz));
     }
     
-    public ResourceNotFound(String clazz, String property, String value) {
+    public ResourceNotFound(String clazz, String property, Object value) {
         super(HttpStatus.NOT_FOUND, String.format("%s with %s:%s not found", clazz, property, value));
     }
 
@@ -17,7 +17,7 @@ public class ResourceNotFound extends ResponseStatusException {
         return new ResourceNotFound(clazz);
     }
 
-    public static ResourceNotFound of(String clazz, String property, String value) {
+    public static ResourceNotFound of(String clazz, String property, Object value) {
         return new ResourceNotFound(clazz, property, value);
     }
 }

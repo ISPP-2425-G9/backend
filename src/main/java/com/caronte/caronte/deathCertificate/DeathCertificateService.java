@@ -4,10 +4,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
 import com.caronte.caronte.customer.Customer;
 import com.caronte.caronte.customer.CustomerRepository;
@@ -16,7 +14,6 @@ import com.caronte.caronte.obituary.ObituaryRepository;
 import com.caronte.caronte.util.MediaHandler;
 import com.caronte.caronte.util.exceptions.CertificateAssociationException;
 import com.caronte.caronte.util.exceptions.ResourceNotFound;
-import com.caronte.caronte.util.exceptions.ResponseThrow;
 
 @Service
 public class DeathCertificateService {
@@ -90,9 +87,7 @@ public class DeathCertificateService {
 
     @Transactional
     public DeathCertificateWithObituaryDniDTO getDeathCertificateByObituaryId(Long obituaryId) {
-        Obituary obituary = obituaryRepository.findById(obituaryId)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "The obituary has not been found"));
-        ResponseThrow.checkOrNotFound(Objects.isNull(obituary.getDeathCertificate()), "Death certificate not found");
+        Obituary obituary = obituaryRepository.findById(obituaryId).orElseThrow(() -> ResourceNotFound.of("Obituary"));
         return new DeathCertificateWithObituaryDniDTO(obituary);
     }
 

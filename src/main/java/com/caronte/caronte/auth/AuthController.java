@@ -1,7 +1,7 @@
 package com.caronte.caronte.auth;
 
 import java.util.List;
-import java.util.Optional;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import org.springframework.http.ResponseEntity;
@@ -116,10 +116,9 @@ public class AuthController {
 			@PathVariable Long customerId,
 			@RequestBody @Valid CustomerUpdateRequest request) {
 		userService.authorizeUserOrAdmin(customerId);
-		Optional<User> userWithEmail = userService.findByEmail(request.getEmail());
-		
-		if(userWithEmail.isPresent() && !userWithEmail.get().getId().equals(customerId)) 
-			throw new IllegalAccessError("This email is of other user");
+		userService.findByEmail(request.getEmail())
+			.filter(user -> Objects.equals(user.getId(), customerId))
+			.orElseThrow(() -> new IllegalAccessError("This email is of other user"));
 		
 		Customer customer = customerService.update(customerId, request);
 		UserDetailsImpl userDetails = UserDetailsImpl.build(customer);
@@ -132,8 +131,7 @@ public class AuthController {
 	}
 
 	@PutMapping("/password/{userId}")
-	public ResponseEntity<JwtResponse> updateCustomer(
-			@PathVariable Long userId,
+	public ResponseEntity<JwtResponse> updateCustomer(@PathVariable Long userId,
 			@RequestBody @Valid UserChangePasswordRequest request) {
         userService.authorizeUserOrAdmin(userId);
         User user = userService.changePassword(userId, request);
@@ -158,10 +156,9 @@ public class AuthController {
 			@PathVariable Long companyId,
 			@RequestBody @Valid CompanyUpdateRequest request) {
         userService.authorizeUser(companyId);
-		Optional<User> userWithEmail = userService.findByEmail(request.getEmail());
-		
-		if(userWithEmail.isPresent() && !userWithEmail.get().getId().equals(companyId)) 
-			throw new IllegalAccessError("This email is of other user");
+		userService.findByEmail(request.getEmail())
+			.filter(user -> Objects.equals(user.getId(), companyId))
+			.orElseThrow(() -> new IllegalAccessError("This email is of other user"));
 
         Company company = companyService.update(companyId, request);
         UserDetailsImpl userDetails = UserDetailsImpl.build(company);
@@ -210,8 +207,7 @@ public class AuthController {
 	}
 
 	@PutMapping("/admin/companies/{companyId}")
-	public ResponseEntity<Company> updateCompanyByAdmin(
-			@PathVariable Long companyId,
+	public ResponseEntity<Company> updateCompanyByAdmin( @PathVariable Long companyId,
 			@RequestBody @Valid CompanyUpdateRequest request) {
 		Company company = companyService.update(companyId, request);
         return ResponseEntity.ok(company);

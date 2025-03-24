@@ -38,8 +38,7 @@ public class MessageController {
         Long customerId = userService.findCurrentUserId();
         Message createdMessage = messageService.createMessage(request, customerId);
         
-        return ResponseEntity.status(HttpStatus.CREATED)
-                            .body(Map.of("messageId", createdMessage.getId()));
+        return ResponseEntity.status(HttpStatus.CREATED).body(Map.of("messageId", createdMessage.getId()));
     }
 
 }

@@ -38,6 +38,17 @@ public class ObituaryService {
         this.mediaHandler = mediaHandler;
     }
 
+    
+    @Transactional(readOnly = true)
+    public Obituary findById(Long id) {
+        return obituaryRepository.findById(id).orElseThrow(() -> ResourceNotFound.of("Obituary"));
+    }
+    
+    @Transactional(readOnly = true)
+    public List<Obituary> findObituaryByCustomerDni(String dni) {
+        return obituaryRepository.findByCustomerDni(dni);
+    }
+
     @Transactional
     public Obituary createObituaryWithReceivers(ObituraryRequestDto request, Long customerId) {
         Customer customer = customerRepository.findById(customerId).orElseThrow(() -> ResourceNotFound.of("Customer"));
@@ -62,9 +73,9 @@ public class ObituaryService {
                 deathCertificateService.createDeathCertificate(request.getDeathCertificate());
         }
         String customUrl = request.getCustomImage();
-        String customImageUrl = Objects.nonNull(customUrl) && customUrl.startsWith("data:image/") && false ?
+        String customImageUrl = Objects.nonNull(customUrl) && customUrl.startsWith("data:image/") ?
                 mediaHandler.uploadImageToCloudinary(customUrl, "obituaries") : customUrl;
-        customImageUrl = "";
+                
         Obituary obituary = saveObituary(request, customImageUrl, customer, imageTemplate, deathCertificate);
 
         List<ObituraryRequestDto.ContactDto> contacts = request.getContacts();
@@ -92,7 +103,7 @@ public class ObituaryService {
         String customUrl = request.getCustomImage();
         ImageTemplate imageTemplate = imageTemplateService.findById(request.getImageTemplate_id());
 
-        String customImageUrl = customUrl != null && customUrl.startsWith("data:image/") && false ?
+        String customImageUrl = customUrl != null && customUrl.startsWith("data:image/") ?
             mediaHandler.uploadImageToCloudinary(customUrl, "obituaries") : customUrl;
         
         Obituary updatedObituary = request.parse();
@@ -130,11 +141,6 @@ public class ObituaryService {
         obituaryRepository.deleteById(obituaryId);
     }
 
-    @Transactional(readOnly = true)
-    public Obituary findById(Long id) {
-        return obituaryRepository.findById(id).orElseThrow(() -> ResourceNotFound.of("Obituary"));
-    }
-
     @Transactional
     public Obituary updateObituary(Obituary obituary) {
         return obituaryRepository.save(obituary);
@@ -168,9 +174,5 @@ public class ObituaryService {
 
     }
 
-    @Transactional(readOnly = true)
-    public List<Obituary> findObituaryByCustomerDni(String dni) {
-        return obituaryRepository.findByCustomerDni(dni);
-    }
 
 }

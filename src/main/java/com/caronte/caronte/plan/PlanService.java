@@ -2,14 +2,13 @@ package com.caronte.caronte.plan;
 
 import java.util.Optional;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
 import com.caronte.caronte.plan.dtos.PlanResponse;
 import com.caronte.caronte.user.User;
 import com.caronte.caronte.user.UserRepository;
+import com.caronte.caronte.util.exceptions.ResourceNotFound;
 
 @Service
 public class PlanService {
@@ -25,7 +24,7 @@ public class PlanService {
 
     @Transactional
     public Plan changePlan(Long id, PlanType planType){
-        Plan plan = planRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Plan con ID " + id + " no encontrado"));
+        Plan plan = planRepository.findById(id).orElseThrow(() -> ResourceNotFound.of("Plan", "ID", id));
         plan.setPlanType(planType);
         return planRepository.save(plan);
     }

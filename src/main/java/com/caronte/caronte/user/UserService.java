@@ -12,6 +12,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import com.caronte.caronte.auth.payload.response.UserChangePasswordRequest;
 import com.caronte.caronte.configuration.services.UserDetailsImpl;
+import com.caronte.caronte.util.exceptions.ResourceNotFound;
 import com.caronte.caronte.util.exceptions.ResponseThrow;
 
 @Service
@@ -81,8 +82,7 @@ public class UserService {
 
     @Transactional
     public User changePassword(Long id, UserChangePasswordRequest request) {
-        User user = userRepository.findById(id)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+        User user = userRepository.findById(id).orElseThrow(() -> ResourceNotFound.of("User"));
         user.setPassword(this.passwordEncoder.encode(request.getNewPassword()));
         return userRepository.save(user);
     }

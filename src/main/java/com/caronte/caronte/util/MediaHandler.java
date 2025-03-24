@@ -40,21 +40,21 @@ public class MediaHandler {
     public String uploadImageToCloudinary(String base64String, String folder) {
         Cloudinary cloudinaryImage = new Cloudinary(cloudinaryImageUrl);
         BufferedImage image = base64ToImage(base64String);
+        File tempFile = null;
         try {
-            File tempFile = File.createTempFile("upload_", ".png");
+            tempFile = File.createTempFile("upload_", ".png");
             ImageIO.write(image, "png", tempFile);
 
-            Map<String, Object> options = ObjectUtils.asMap(
-                "folder", "images/" + folder + "/"
-            );
-
+            Map options = ObjectUtils.asMap("folder", "images/" + folder + "/");
             Map uploadResult = cloudinaryImage.uploader().upload(tempFile, options);
-            tempFile.delete();
+            
             return uploadResult.get("secure_url").toString();
-
         } catch (IOException e) {
             e.printStackTrace();
             return null;
+        } finally {
+            if (tempFile != null && tempFile.exists()) 
+                tempFile.delete();
         }
     }
 }
