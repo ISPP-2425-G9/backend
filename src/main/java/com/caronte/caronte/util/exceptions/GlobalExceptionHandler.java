@@ -1,11 +1,11 @@
 package com.caronte.caronte.util.exceptions;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -14,11 +14,6 @@ import com.caronte.caronte.util.ErrorHandler;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
-
-    @ExceptionHandler({Exception.class, DataIntegrityViolationException.class})
-    public ResponseEntity<Map<String,String>> handleResourceException(Exception ex) {
-        return ResponseEntity.internalServerError().body(Map.of("error", ex.getMessage()));
-    }
 
     @ExceptionHandler(ErrorHandlerException.class)
     public ResponseEntity<ErrorHandler> handleResourceErrorHandler(ErrorHandlerException ex) {
@@ -30,19 +25,16 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().body("Credenciales incorrectas");
     }
 
-    
-    @ExceptionHandler({ MethodArgumentNotValidException.class, IllegalArgumentException.class })
-    public ResponseEntity<Map<String, String>> handleValidationExceptions(Exception ex) {
-        Map<String, String> errors = new HashMap<>();
-
-        if (ex instanceof MethodArgumentNotValidException) {
-            ((MethodArgumentNotValidException) ex).getBindingResult().getFieldErrors()
-                    .forEach(error -> errors.put(error.getField(), error.getDefaultMessage()));
-        } else {
-            errors.put("error", ex.getMessage());
-        }
-
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<Map<String, String>> handleValidationExceptionds(MethodArgumentNotValidException ex) {
+        Map<String, String> errors = ex.getFieldErrors().stream()
+                .collect(Collectors.toMap(FieldError::getField, FieldError::getDefaultMessage));
         return ResponseEntity.badRequest().body(errors);
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<Map<String, String>> handleValidationExceptions(Exception ex) {
+        return ResponseEntity.badRequest().body(Map.of("error", ex.getMessage()));
     }
 
 }
