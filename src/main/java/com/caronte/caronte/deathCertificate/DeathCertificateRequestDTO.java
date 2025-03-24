@@ -17,7 +17,6 @@ public class DeathCertificateRequestDTO {
     @NotNull
     private String dni;
 
-    
     private Boolean isVerificate;
 
 }
