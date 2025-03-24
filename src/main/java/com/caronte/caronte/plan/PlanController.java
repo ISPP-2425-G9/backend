@@ -22,7 +22,6 @@ import com.caronte.caronte.configuration.services.UserDetailsImpl;
 import com.caronte.caronte.user.User;
 import com.caronte.caronte.user.UserService;
 import com.caronte.caronte.util.exceptions.ResponseThrow;
-import com.stripe.model.Subscription;
 
 @RestController
 @RequestMapping("/api/plans")
@@ -55,13 +54,7 @@ public class PlanController {
  
             String subscriptionId = changePlanRequest.isPremium() ?
                     stripeService.subscription(changePlanRequest.getPaymentMethodId(), user): null;
-            String actualSubscriptionId = user.getPlan().getSubscriptionId();
-            
-            if(actualSubscriptionId != null) {
-                Subscription subscription = Subscription.retrieve(actualSubscriptionId);
-                subscription.cancel();
-            }
-            
+
             planService.changePlan(user, newPlanType, subscriptionId);
             
             String jwt = jwtUtils.generateJwtToken(userDetailsImpl);
