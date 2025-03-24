@@ -139,7 +139,7 @@ public class ObituaryService {
 
         String customImageUrl;
         if (customUrl != null && customUrl.startsWith("data:image/")) {
-            customImageUrl = MediaHandler.uploadImageToCloudinary(customUrl, "obituaries");
+            customImageUrl = MediaHandler.uploadImageToCloudinary(MediaHandler.base64ToImage(customUrl), "obituaries");
         } else {
             customImageUrl = customUrl;
         }
