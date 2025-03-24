@@ -17,6 +17,7 @@ public class CompanyDTO {
     private String imageUrl;
     private String description;
     private String nif;
+    private CompanyType companyType;
 
     public static CompanyDTO parse(Company company) {
         return new CompanyDTO(

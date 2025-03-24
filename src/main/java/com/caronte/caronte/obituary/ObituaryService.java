@@ -98,7 +98,6 @@ public class ObituaryService {
 
         if (!request.getIsMine() && obituary.getDeathCertificate().getIsVerified()) {
             throw new IllegalArgumentException("You can't upload the obituary since the death certificate is verified");
-        }
 
         String customUrl = request.getCustomImage();
         ImageTemplate imageTemplate = imageTemplateService.findById(request.getImageTemplate_id());
