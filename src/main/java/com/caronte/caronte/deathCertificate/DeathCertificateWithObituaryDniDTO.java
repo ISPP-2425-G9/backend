@@ -1,5 +1,7 @@
 package com.caronte.caronte.deathCertificate;
 
+import com.caronte.caronte.obituary.Obituary;
+
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.Setter;
@@ -13,9 +15,9 @@ public class DeathCertificateWithObituaryDniDTO {
     @NotBlank(message = "The certificate cannot be blank")
     private DeathCertificate deathCertificate;
 
-    public DeathCertificateWithObituaryDniDTO(String dni, DeathCertificate deathCertificate) {
-        this.dni = dni;
-        this.deathCertificate = deathCertificate;
+    public DeathCertificateWithObituaryDniDTO(Obituary obituary) {
+        this.dni = obituary.getCustomer().getDni();
+        this.deathCertificate = obituary.getDeathCertificate();
     }
     
 }

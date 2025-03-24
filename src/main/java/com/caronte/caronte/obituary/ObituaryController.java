@@ -2,7 +2,6 @@ package com.caronte.caronte.obituary;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -23,9 +22,6 @@ import jakarta.validation.Valid;
 @RestController
 @RequestMapping("api/obituary")
 public class ObituaryController {
-
-    @Value("${stripe.obituary.price.id}")
-    private String obituaryPriceId;
 
     private final ObituaryService obituaryService;
     private final UserService userService;
@@ -67,7 +63,7 @@ public class ObituaryController {
     }
 
     @GetMapping("/myObituaries/{obituaryId}")
-    public ResponseEntity<Obituary> getObituaryById(@PathVariable Long obituaryId, Authentication authentication) {
+    public ResponseEntity<Obituary> getObituaryById(@PathVariable Long obituaryId) {
         Long userId = userService.findCurrentUserId();
         Obituary obituary = obituaryService.getObituaryById(obituaryId, userId);
         obituary.setCustomer(null);
