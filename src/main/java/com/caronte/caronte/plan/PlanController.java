@@ -1,10 +1,6 @@
 package com.caronte.caronte.plan;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -59,9 +55,7 @@ public class PlanController {
             
             String jwt = jwtUtils.generateJwtToken(userDetailsImpl);
             user = userService.findCurrentUser();
-			List<String> roles = UserDetailsImpl.build(user).getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList());
-			String name = authService.getNameById(userDetailsImpl.getId());
-            JwtResponse jwtResponse = new JwtResponse(jwt, userDetailsImpl, roles, name);
+            JwtResponse jwtResponse = new JwtResponse(jwt, user);
             return ResponseEntity.ok(jwtResponse);
         } catch (ResponseStatusException e) {
             return ResponseEntity.status(e.getStatusCode()).body(e.getBody());
