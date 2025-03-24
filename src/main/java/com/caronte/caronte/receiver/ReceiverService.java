@@ -25,7 +25,9 @@ public class ReceiverService {
         receiver.setTelephone(telephone);
         receiver.setEmail(email);
         receiver.setObituary(obituary);
-        return receiverRepository.save(receiver);
+        receiver = receiverRepository.save(receiver);
+        receiverRepository.flush();
+        return receiver;
     }
     @Transactional
     public void deleteReceiversByObituaryId(Obituary obituary) {

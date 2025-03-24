@@ -177,7 +177,9 @@ public class ObituaryService {
         obituary.setImageTemplate(imageTemplate);
         obituary.setDeathCertificate(certificate);
         obituary.setWordColor(word_color);
-        return obituaryRepository.save(obituary);
+        obituary = obituaryRepository.save(obituary);
+        obituaryRepository.flush();
+        return obituary;
     }
     @Transactional
     public void deleteObituaryByCustomer(Long customerId, Long obituaryId) {
@@ -197,7 +199,9 @@ public class ObituaryService {
 
     @Transactional
     public Obituary updateObituary(Obituary obituary) {
-        return obituaryRepository.save(obituary);
+        Obituary updatedObituary = obituaryRepository.save(obituary);
+        obituaryRepository.flush();
+        return updatedObituary;
     }
 
     @Transactional
