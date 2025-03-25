@@ -46,27 +46,32 @@ public class EmergencyContactService {
                 emergencyContactCreated.getEmail());
     }
 
+    @Transactional
     public EmergencyContactDTO update(EmergencyContactDTO emergencyContactDTO, Long id, String email){
         Optional<EmergencyContact> emergencyContactOptional = emergencyContactRepository.findById(id);
-
         if(emergencyContactOptional.isEmpty()){
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Contacto de emergencia no encontrado");
         }
         if(!emergencyContactOptional.get().getCustomer().getEmail().equals(email)){
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "No tienes permisos para modificar este contacto de emergencia");
         }
-        checkIfEmailIsDuplicate(emergencyContactDTO.email(), email);
-        checkIfTelephoneIsDuplicate(emergencyContactDTO.telephone(), email);
+        EmergencyContact existingContact = emergencyContactOptional.get();
+        if (!existingContact.getTelephone().equals(emergencyContactDTO.telephone())) {
+            checkIfTelephoneIsDuplicate(emergencyContactDTO.telephone(), email);
+        }
+        if (!existingContact.getEmail().equals(emergencyContactDTO.email())) {
+            checkIfEmailIsDuplicate(emergencyContactDTO.email(), email);
+        }
 
-        EmergencyContact contact = emergencyContactOptional.get();
-        contact.setName(emergencyContactDTO.name());
-        contact.setTelephone(emergencyContactDTO.telephone());
-        contact.setEmail(emergencyContactDTO.email());
-        EmergencyContact updatedContact = emergencyContactRepository.save(contact);
+        existingContact.setName(emergencyContactDTO.name());
+        existingContact.setTelephone(emergencyContactDTO.telephone());
+        existingContact.setEmail(emergencyContactDTO.email());
+        EmergencyContact updatedContact = emergencyContactRepository.save(existingContact);
         return new EmergencyContactDTO(updatedContact.getName(),
                 updatedContact.getTelephone(),
                 updatedContact.getEmail());
     }
+
 
 
     private void checkIfTelephoneIsDuplicate(String telephone, String customerEmail) {
