@@ -1,5 +1,6 @@
 package com.caronte.caronte.emergencyContact;
 
+import com.caronte.caronte.emergencyContact.DTOs.EmergencyContactDTO;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -25,7 +26,7 @@ public class EmergencyContactController {
     public ResponseEntity<?> getEmergencyContacts() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
-        List<EmergencyContact> emergencyContacts = emergencyContactService.findAll(email);
+        List<EmergencyContactDTO> emergencyContacts = emergencyContactService.findAll(email);
         return ResponseEntity.ok().body(emergencyContacts);
     }
 
