@@ -9,14 +9,13 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
-import java.net.http.HttpResponse;
 import java.util.List;
 
 @Controller
 @RequestMapping("/api/contacts")
 public class EmergencyContactController {
 
-    private EmergencyContactService emergencyContactService;
+    private final EmergencyContactService emergencyContactService;
 
     public EmergencyContactController (EmergencyContactService emergencyContactService) {
         this.emergencyContactService = emergencyContactService;

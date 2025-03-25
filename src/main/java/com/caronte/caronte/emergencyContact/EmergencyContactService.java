@@ -2,7 +2,6 @@ package com.caronte.caronte.emergencyContact;
 
 import com.caronte.caronte.customer.Customer;
 import com.caronte.caronte.customer.CustomerRepository;
-import com.caronte.caronte.customer.CustomerService;
 import com.caronte.caronte.emergencyContact.DTOs.EmergencyContactDTO;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -15,9 +14,9 @@ import java.util.Optional;
 @Service
 public class EmergencyContactService {
 
-    private EmergencyContactRepository emergencyContactRepository;
+    private final EmergencyContactRepository emergencyContactRepository;
 
-    private CustomerRepository customerRepository;
+    private final CustomerRepository customerRepository;
 
     public EmergencyContactService (EmergencyContactRepository emergencyContactRepository, CustomerRepository customerRepository) {
         this.emergencyContactRepository = emergencyContactRepository;
