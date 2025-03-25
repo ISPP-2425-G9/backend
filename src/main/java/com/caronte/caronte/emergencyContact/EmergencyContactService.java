@@ -1,11 +1,14 @@
 package com.caronte.caronte.emergencyContact;
 
+import com.caronte.caronte.customer.Customer;
 import com.caronte.caronte.customer.CustomerRepository;
 import com.caronte.caronte.customer.CustomerService;
 import com.caronte.caronte.emergencyContact.DTOs.EmergencyContactDTO;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class EmergencyContactService {
@@ -26,8 +29,18 @@ public class EmergencyContactService {
                 .toList();
     }
 
-    public EmergencyContact save(EmergencyContact emergencyContact) {
-        return emergencyContactRepository.save(emergencyContact);
+    @Transactional
+    public EmergencyContactDTO save(EmergencyContactDTO emergencyContactDTO, String email) {
+        System.out.println("emergencyContactDTO: " + emergencyContactDTO);
+        Optional<Customer> customer = customerRepository.findByEmail(email);
+        if (customer.isEmpty()) {
+            throw new RuntimeException("Customer not found");
+        }
+        EmergencyContact emergencyContact = new EmergencyContact(emergencyContactDTO, customer.get());
+        EmergencyContact emergencyContactCreated = emergencyContactRepository.save(emergencyContact);
+        return new EmergencyContactDTO(emergencyContactCreated.getName(),
+                emergencyContactCreated.getTelephone(),
+                emergencyContactCreated.getEmail());
     }
 
 

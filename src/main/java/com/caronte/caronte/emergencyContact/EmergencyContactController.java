@@ -7,6 +7,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.net.http.HttpResponse;
@@ -28,6 +30,15 @@ public class EmergencyContactController {
         String email = authentication.getName();
         List<EmergencyContactDTO> emergencyContacts = emergencyContactService.findAll(email);
         return ResponseEntity.ok().body(emergencyContacts);
+    }
+
+    @PostMapping
+    public ResponseEntity<?> saveEmergencyContact(@RequestBody EmergencyContactDTO emergencyContactDTO) {
+        System.out.println("emergencyContactDTO: " + emergencyContactDTO);
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();
+        EmergencyContactDTO emergencyContact = emergencyContactService.save(emergencyContactDTO, email);
+        return ResponseEntity.status(HttpStatus.CREATED).body(emergencyContact);
     }
 
 

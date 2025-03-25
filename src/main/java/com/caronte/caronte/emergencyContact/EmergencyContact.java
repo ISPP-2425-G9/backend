@@ -1,5 +1,6 @@
 package com.caronte.caronte.emergencyContact;
 
+import com.caronte.caronte.emergencyContact.DTOs.EmergencyContactDTO;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
@@ -32,4 +33,14 @@ public class EmergencyContact extends BaseEntity {
     @JoinColumn(nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Customer customer;
+
+    public EmergencyContact(EmergencyContactDTO emergencyContactDTO, Customer customer) {
+        this.name = emergencyContactDTO.name();
+        this.telephone = emergencyContactDTO.telephone();
+        this.email = emergencyContactDTO.email();
+        this.customer = customer;
+    }
+
+    public EmergencyContact() {
+    }
 }
