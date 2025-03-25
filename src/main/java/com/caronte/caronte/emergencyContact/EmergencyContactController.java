@@ -48,5 +48,13 @@ public class EmergencyContactController {
         return ResponseEntity.ok().body(emergencyContact);
     }
 
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteEmergencyContact(@PathVariable Long id) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();
+        emergencyContactService.delete(id, email);
+        return ResponseEntity.noContent().build();
+    }
+
 
 }

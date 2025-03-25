@@ -72,6 +72,17 @@ public class EmergencyContactService {
                 updatedContact.getEmail());
     }
 
+    @Transactional
+    public void delete(Long id, String email) {
+        Optional<EmergencyContact> emergencyContactOptional = emergencyContactRepository.findById(id);
+        if(emergencyContactOptional.isEmpty()){
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Contacto de emergencia no encontrado");
+        }
+        if(!emergencyContactOptional.get().getCustomer().getEmail().equals(email)){
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "No tienes permisos para eliminar este contacto de emergencia");
+        }
+        emergencyContactRepository.deleteById(id);
+    }
 
 
     private void checkIfTelephoneIsDuplicate(String telephone, String customerEmail) {
