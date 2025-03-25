@@ -4,8 +4,10 @@ import com.caronte.caronte.customer.Customer;
 import com.caronte.caronte.customer.CustomerRepository;
 import com.caronte.caronte.customer.CustomerService;
 import com.caronte.caronte.emergencyContact.DTOs.EmergencyContactDTO;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Optional;
@@ -31,7 +33,8 @@ public class EmergencyContactService {
 
     @Transactional
     public EmergencyContactDTO save(EmergencyContactDTO emergencyContactDTO, String email) {
-        System.out.println("emergencyContactDTO: " + emergencyContactDTO);
+        checkIfTelephoneIsDuplicate(emergencyContactDTO.telephone(), email);
+        checkIfEmailIsDuplicate(emergencyContactDTO.email(), email);
         Optional<Customer> customer = customerRepository.findByEmail(email);
         if (customer.isEmpty()) {
             throw new RuntimeException("Customer not found");
@@ -44,5 +47,15 @@ public class EmergencyContactService {
     }
 
 
+    private void checkIfTelephoneIsDuplicate(String telephone, String customerEmail) {
+        if (emergencyContactRepository.existsByTelephoneAndCustomer(telephone, customerEmail)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El número de teléfono ya está registrado.");
+        }
+    }
 
+    private void checkIfEmailIsDuplicate(String email, String customerEmail) {
+        if (emergencyContactRepository.existsByEmailAndCustomer(email, customerEmail)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El email ya está registrado.");
+        }
+    }
 }
