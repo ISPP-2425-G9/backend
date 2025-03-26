@@ -2,8 +2,10 @@ package com.caronte.caronte.message;
 
 import java.util.List;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.caronte.caronte.customer.Customer;
 import com.caronte.caronte.customer.CustomerRepository;
@@ -85,4 +87,12 @@ public class MessageService {
         return code;
     }
 
+    public List<Message> getMessagesByCustomerId(Long customerId) {
+        return messageRepository.findAllByCustomerId(customerId);
+    }
+
+    public Message getMessageById(Long message_id, Long customerId) {
+        return messageRepository.findById(message_id)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Message not found"));
+    }
 }
