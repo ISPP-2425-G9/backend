@@ -7,6 +7,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
+import java.util.stream.Collectors;
+
 
 import java.util.List;
 import java.util.Optional;
@@ -26,8 +28,8 @@ public class EmergencyContactService {
     public List<EmergencyContactDTO> findAll(String email) {
         List<EmergencyContact> emergencyContacts =  emergencyContactRepository.findAllByCustomerEmail(email);
         return emergencyContacts.stream()
-                .map(contact -> new EmergencyContactDTO(contact.getName(), contact.getTelephone(), contact.getEmail()))
-                .toList();
+                .map(contact -> new EmergencyContactDTO(contact.getId(),contact.getName(), contact.getTelephone(), contact.getEmail()))
+                .collect(Collectors.toList());
     }
 
     @Transactional
@@ -40,7 +42,8 @@ public class EmergencyContactService {
         }
         EmergencyContact emergencyContact = new EmergencyContact(emergencyContactDTO, customer.get());
         EmergencyContact emergencyContactCreated = emergencyContactRepository.save(emergencyContact);
-        return new EmergencyContactDTO(emergencyContactCreated.getName(),
+        return new EmergencyContactDTO(emergencyContactCreated.getId(),
+                emergencyContactCreated.getName(),
                 emergencyContactCreated.getTelephone(),
                 emergencyContactCreated.getEmail());
     }
@@ -66,7 +69,8 @@ public class EmergencyContactService {
         existingContact.setTelephone(emergencyContactDTO.telephone());
         existingContact.setEmail(emergencyContactDTO.email());
         EmergencyContact updatedContact = emergencyContactRepository.save(existingContact);
-        return new EmergencyContactDTO(updatedContact.getName(),
+        return new EmergencyContactDTO(updatedContact.getId(),
+                updatedContact.getName(),
                 updatedContact.getTelephone(),
                 updatedContact.getEmail());
     }
