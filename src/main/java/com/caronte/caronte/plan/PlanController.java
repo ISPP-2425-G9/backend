@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
-import com.caronte.caronte.auth.AuthService;
 import com.caronte.caronte.auth.payload.response.JwtResponse;
 import com.caronte.caronte.configuration.jwt.JwtUtils;
 import com.caronte.caronte.configuration.services.StripeService;
@@ -23,15 +22,13 @@ import com.caronte.caronte.util.exceptions.ResponseThrow;
 @RequestMapping("/api/plans")
 public class PlanController {
 
-    private final AuthService authService;
     private final PlanService planService;
     private final UserService userService;
     private final StripeService stripeService;
     private final JwtUtils jwtUtils;
 
-    public PlanController(AuthService authService, PlanService planService, UserService userService, 
+    public PlanController(PlanService planService, UserService userService, 
                           StripeService stripeService, JwtUtils jwtUtils) {
-        this.authService = authService;
         this.planService = planService;
         this.userService = userService;
         this.stripeService = stripeService;
