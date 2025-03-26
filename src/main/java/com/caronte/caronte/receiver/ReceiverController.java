@@ -23,8 +23,6 @@ import com.caronte.caronte.obituary.ObituaryService;
 @RestController
 @RequestMapping("api/receiver")
 public class ReceiverController {
-
-
     private final ReceiverService receiverService;
     private final ObituaryService obituaryService;
 

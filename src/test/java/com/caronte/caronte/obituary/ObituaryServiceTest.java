@@ -11,6 +11,7 @@ import com.caronte.caronte.imageTemplate.ImageTemplateService;
 import com.caronte.caronte.obituary.ObituraryRequestDto.ContactDto;
 import com.caronte.caronte.receiver.ReceiverService;
 import com.caronte.caronte.util.MediaHandler;
+import com.caronte.caronte.deathCertificate.DeathCertificate;
 import com.caronte.caronte.deathCertificate.DeathCertificateService;
 
 import java.awt.image.BufferedImage;
@@ -48,6 +49,9 @@ public class ObituaryServiceTest {
     private ObituraryRequestDto requestDto;
     private Customer customer;
     private ImageTemplate imageTemplate;
+    private Obituary obituary;
+    private Obituary obituary2;
+    private DeathCertificate certificate;
 
     @BeforeEach
     public void setUp() {
@@ -61,16 +65,48 @@ public class ObituaryServiceTest {
         imageTemplate = new ImageTemplate();
         imageTemplate.setId(1L);
 
+        certificate = new DeathCertificate();
+        certificate.setId(1L);
+
         requestDto = new ObituraryRequestDto();
         requestDto.setName("John Doe");
         requestDto.setFarewellMessage("Goodbye!");
         requestDto.setFarewellPhrase("Rest in peace.");
         requestDto.setIsMine(true);
         requestDto.setImageTemplate_id(1L);
-        requestDto.setCustomImage("https://static.nationalgeographicla.com/files/styles/image_3200/public/comedy-wildlife-awards-squirel-stop.jpg");  
+        requestDto.setCustomImage("https://static.nationalgeographicla.com/files/styles/image_3200/public/comedy-wildlife-awards-squirel-stop.jpg"); 
+        
+    
+        obituary = new Obituary();
+        obituary.setId(1L);
+        obituary.setName("Alfonso Manuel Giraldillo");
+        obituary.setFarewellMessage("Esto es un mensaje de despedida");
+        obituary.setFarewellPhrase("Esto es una frase de despedida");
+        obituary.setCustomImageUrl("uploaded-image-url");
+        obituary.setBirthDate(null);
+        obituary.setDeathDate(null);
+        obituary.setCustomer(customer);
+        obituary.setImageTemplate(imageTemplate);
+        obituary.setDeathCertificate(null);
+        obituary.setIsMine(true);
+        
+
+        obituary2 = new Obituary();
+        obituary2.setId(2L);
+        obituary2.setName("Alfonso Manuel Giraldillo");
+        obituary2.setFarewellMessage("Esto es un mensaje de despedida");
+        obituary2.setFarewellPhrase("Esto es una frase de despedida");
+        obituary2.setCustomImageUrl("uploaded-image-url");
+        obituary2.setBirthDate(null);
+        obituary2.setDeathDate(null);
+        obituary2.setCustomer(customer);
+        obituary2.setImageTemplate(imageTemplate);
+        obituary2.setDeathCertificate(null);
+        obituary2.setIsMine(false);
+
     }
 @Test
-    public void testCreateObituaryWithReceivers() {
+    public void testCreateObituaryWithReceiversIsMineTrue() {
         String base64Image = "https://static.nationalgeographicla.com/files/styles/image_3200/public/comedy-wildlife-awards-squirel-stop.jpg";
     
         when(customerRepository.findById(1L)).thenReturn(Optional.of(customer));
@@ -85,7 +121,7 @@ public class ObituaryServiceTest {
         requestDto.setCustomImage(base64Image);  
         requestDto.setBirthDate(null);
         requestDto.setDeathDate(null);
-    
+
         List<ContactDto> contacts = new ArrayList<>();
         ContactDto contact1 = new ContactDto();
         contact1.setName("Contacto1Nombre");
@@ -94,34 +130,29 @@ public class ObituaryServiceTest {
         contacts.add(contact1);
         requestDto.setContacts(contacts);
         
-    
+        when(obituaryRepository.save(any(Obituary.class))).thenReturn(obituary);
         Obituary obituary_test = obituaryService.createObituaryWithReceivers(requestDto, customer.getId());
-        //when(receiverService.saveObituaryReceiver(eq("Contacto1Nombre"), eq("68556790743"), eq("email1@gmail.com"), any(Obituary.class))).thenReturn(null); // Cambiado a when()
-        when(receiverService.saveObituaryReceiver(eq("Contacto1Nombre"), eq("68556790743"), eq("email1@gmail.com"), eq(obituary_test))).thenReturn(null); // Cambiado a when()
+        when(receiverService.saveObituaryReceiver(eq("Contacto1Nombre"), eq("68556790743"), eq("email1@gmail.com"), eq(obituary_test))).thenReturn(null);
+        
 
-        // Verificar la interacción con los mocks
         verify(customerRepository).findById(1L);
-        assertEquals(1L, customerRepository.findById(1L).get().getId());
         verify(imageTemplateService).findById(1L);
         verify(receiverService, times(1)).saveObituaryReceiver(eq("Contacto1Nombre"), eq("68556790743"), eq("email1@gmail.com"), eq(obituary_test));
-    
-        // Verificar que el obituario no sea null
+        verify(obituaryRepository, times(1)).save(any(Obituary.class));
         assertNotNull(obituary_test);
-    
-        // Verificar que los datos del obituario son correctos
         assertEquals("Alfonso Manuel Giraldillo", obituary_test.getName());
         assertEquals("Esto es un mensaje de despedida", obituary_test.getFarewellMessage());
         assertEquals("Esto es una frase de despedida", obituary_test.getFarewellPhrase());
-        assertEquals("uploaded-image-url", obituary_test.getCustomImageUrl());  // Verificar la URL de la imagen subida
-        assertNull(obituary_test.getBirthDate());  // Verificar que la fecha de nacimiento es null
-        assertNull(obituary_test.getDeathDate());  // Verificar que la fecha de fallecimiento es null
+        assertEquals("uploaded-image-url", obituary_test.getCustomImageUrl());  
+        assertNull(obituary_test.getBirthDate());  
+        assertNull(obituary_test.getDeathDate());  
     
-        // Verificar que los contactos han sido correctamente guardados
-        assertEquals(1, contacts.size());  // Sólo un contacto
+        assertEquals(1, contacts.size());  
         for (ObituraryRequestDto.ContactDto contact : contacts) {
             verify(receiverService).saveObituaryReceiver(eq(contact.getName()), eq(contact.getPhone()), eq(contact.getEmail()), eq(obituary_test));
         }
     }
+
 
     @Test
     void testGetObituaryById_WhenObituaryExists() {
