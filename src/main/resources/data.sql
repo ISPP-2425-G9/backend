@@ -124,7 +124,9 @@ INSERT INTO customer (id, dni, is_active) VALUES
 
 INSERT INTO emergency_contact (id, email, name, telephone, customer_id) VALUES 
 (1, 'contacto1@caronte.site', 'Contacto Uno', '678945638', 5),
-(2, 'contacto2@caronte.site', 'Contacto Dos', '643767999', 6);
+(2, 'contacto2@caronte.site', 'Contacto Dos', '643767999', 5),
+(3, 'contacto3@caronte.site', 'Contacto Tres', '674945638', 5),
+(4, 'contacto4@caronte.site', 'Contacto Cuatro', '645767999', 5);
 
 INSERT INTO message (id ,body, code, is_last_will, title, customer_id) VALUES 
 (1, 'Este es el último mensaje de prueba.', 'MSG001', 1, 'Última Voluntad 1', 5),
