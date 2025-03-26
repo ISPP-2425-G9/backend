@@ -22,15 +22,15 @@ import com.caronte.caronte.util.exceptions.ResponseThrow;
 @Service
 public class ObituaryService {
 
-    ObituaryRepository obituaryRepository;
-    CustomerRepository customerRepository;
-    ImageTemplateRepository imageTemplateRepository;
-    ReceiverRepository receiverRepository;
-    DeathCertificateService deathCertificateService;
-    MediaHandler mediaHandler;
+    private final ObituaryRepository obituaryRepository;
+    private final CustomerRepository customerRepository;
+    private final ImageTemplateRepository imageTemplateRepository;
+    private final ReceiverRepository receiverRepository;
+    private final DeathCertificateService deathCertificateService;
+    private final MediaHandler mediaHandler;
 
     public ObituaryService(ObituaryRepository obituaryRepository, CustomerRepository customerRepository, 
-    ReceiverRepository receiverRepository, ImageTemplateRepository imageTemplateRepository,
+            ReceiverRepository receiverRepository, ImageTemplateRepository imageTemplateRepository,
             DeathCertificateService deathCertificateService, MediaHandler mediaHandler) {
         this.receiverRepository = receiverRepository;
         this.customerRepository = customerRepository;
@@ -53,9 +53,9 @@ public class ObituaryService {
 
     @Transactional
     public DeathCertificate certificateManagement(ObituraryRequestDto request, Customer customer, Long customerId) {
-
         DeathCertificateRequestDTO deathCertificateDTO = request.getDeathCertificate();
         String dni = deathCertificateDTO.getDni();
+        
         if(deathCertificateDTO == null || dni == null || deathCertificateDTO.getFile() == null){
             throw new IllegalArgumentException("The Death Certificate is invalid");
         }
@@ -110,7 +110,11 @@ public class ObituaryService {
     public Obituary updateObituaryWithReceivers(Long customerId, Long obituaryId, ObituraryRequestDto request) {
         Obituary obituary = findById(obituaryId);
 
-        if (!request.getIsMine() && obituary.getDeathCertificate().getIsVerified()) {
+        if(!request.getIsMine()){
+            throw new IllegalArgumentException("You can't upload the obituary since it isn't yours");
+        }
+
+        if (obituary.getDeathCertificate().getIsVerified()) {
             throw new IllegalArgumentException("You can't upload the obituary since the death certificate is verified");
         }
 
@@ -144,7 +148,6 @@ public class ObituaryService {
 
         return updatedObituary;
     }
-
     @Transactional
     public Obituary saveObituary(ObituraryRequestDto obituraryRequestDto, String customImageUrl, Customer customer,
             ImageTemplate imageTemplate, DeathCertificate certificate) {
@@ -155,7 +158,6 @@ public class ObituaryService {
         obituary.setDeathCertificate(certificate);
         return obituaryRepository.save(obituary);
     }
-
     @Transactional
     public void deleteObituaryByCustomer(Long customerId, Long obituaryId) {
         Obituary obituary = findById(obituaryId);

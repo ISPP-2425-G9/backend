@@ -1,8 +1,10 @@
+
 package com.caronte.caronte.util;
 
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Base64;
 import java.util.Map;
@@ -18,27 +20,16 @@ import com.cloudinary.utils.ObjectUtils;
 @Component
 public class MediaHandler {
 
-    @Value("${cloudinary.url}")
-    private String cloudinaryImageUrl;
+    private final Cloudinary cloudinaryImage;
+    private final Cloudinary cloudinaryVideo;
 
-    private static BufferedImage base64ToImage(String base64String) {
-        BufferedImage image = null;
-        try {
-            if (base64String != null && base64String.contains(",")) {
-                base64String = base64String.substring(base64String.indexOf(",") + 1);
-            }
-    
-            byte[] imageBytes = Base64.getDecoder().decode(base64String);
-            ByteArrayInputStream bis = new ByteArrayInputStream(imageBytes);
-            image = ImageIO.read(bis);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return image;
+    public MediaHandler(@Value("${cloudinary.image.url}") String cloudinaryImageUrl,
+            @Value("${cloudinary.video.url}") String cloudinaryVideoUrl) {
+        this.cloudinaryImage = new Cloudinary(cloudinaryImageUrl);
+        this.cloudinaryVideo = new Cloudinary(cloudinaryVideoUrl);
     }
 
     public String uploadImageToCloudinary(String base64String, String folder) {
-        Cloudinary cloudinaryImage = new Cloudinary(cloudinaryImageUrl);
         BufferedImage image = base64ToImage(base64String);
         File tempFile = null;
         try {
@@ -47,14 +38,62 @@ public class MediaHandler {
 
             Map options = ObjectUtils.asMap("folder", "images/" + folder + "/");
             Map uploadResult = cloudinaryImage.uploader().upload(tempFile, options);
-            
+
             return uploadResult.get("secure_url").toString();
         } catch (IOException e) {
             e.printStackTrace();
             return null;
         } finally {
-            if (tempFile != null && tempFile.exists()) 
+            if (tempFile != null && tempFile.exists())
                 tempFile.delete();
         }
     }
+
+    public String uploadVideoToCloudinary(File videoFile) {
+        try {
+            Map options = ObjectUtils.asMap("folder", "videos/messages/", "resource_type", "video");
+            Map uploadResult = cloudinaryVideo.uploader().upload(videoFile, options);
+            videoFile.delete();
+            return uploadResult.get("secure_url").toString();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    private static BufferedImage base64ToImage(String base64String) {
+        BufferedImage image = null;
+        try {
+            byte[] imageBytes = decoder(base64String);
+            ByteArrayInputStream bis = new ByteArrayInputStream(imageBytes);
+            return ImageIO.read(bis);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return image;
+    }
+
+    public File base64ToVideo(String base64String) {
+        File videoFile = null;
+        try {
+            byte[] videoBytes = decoder(base64String);
+            videoFile = File.createTempFile("temp-video-", ".mp4");
+            try (FileOutputStream fos = new FileOutputStream(videoFile)) {
+                fos.write(videoBytes);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return videoFile;
+
+    }
+
+    private static byte[] decoder(String base64String) {
+        if (base64String != null && base64String.contains(","))
+            base64String = base64String.substring(base64String.indexOf(",") + 1);
+
+        return Base64.getDecoder().decode(base64String);
+    }
+
 }

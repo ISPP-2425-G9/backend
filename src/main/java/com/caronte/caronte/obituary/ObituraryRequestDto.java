@@ -15,6 +15,7 @@ import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 
+
 @Getter
 @Setter
 public class ObituraryRequestDto {
@@ -22,10 +23,10 @@ public class ObituraryRequestDto {
     @Size(max = 37, message = "The name must be between 0 and 37 characters long")
     private String name;
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
+    @JsonFormat(pattern = "dd/MM/yyyy")
     private LocalDate birthDate;
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
+    @JsonFormat(pattern = "dd/MM/yyyy")
     private LocalDate deathDate;
 
     private String customImage; 
@@ -42,7 +43,6 @@ public class ObituraryRequestDto {
     @NotNull(message = "The 'isMine' field cannot be null")
     private Boolean isMine;
 
-    @NotBlank(message = "The wordColor field cannot be empty")
     @Pattern(regexp = "^(25[0-5]|2[0-4]\\d|1\\d{2}|\\d{1,2}),(25[0-5]|2[0-4]\\d|1\\d{2}|\\d{1,2}),(25[0-5]|2[0-4]\\d|1\\d{2}|\\d{1,2})$", 
     message = "Color must be in the format 'r,g,b' where r, g and b are integers between 0 and 255")
     private String  wordColor; 

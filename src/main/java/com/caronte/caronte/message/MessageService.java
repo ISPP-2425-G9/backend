@@ -11,9 +11,8 @@ import com.caronte.caronte.image.Image;
 import com.caronte.caronte.image.ImageRepository;
 import com.caronte.caronte.receiver.Receiver;
 import com.caronte.caronte.receiver.ReceiverRepository;
+import com.caronte.caronte.util.MediaHandler;
 import com.caronte.caronte.util.exceptions.ResourceNotFound;
-import com.caronte.caronte.video.Video;
-import com.caronte.caronte.video.VideoRepository;
 
 @Service
 public class MessageService {
@@ -21,16 +20,16 @@ public class MessageService {
     private final MessageRepository messageRepository;
     private final CustomerRepository customerRepository;
     private final ReceiverRepository receiverRepository;
-    private final VideoRepository videoRepository;
     private final ImageRepository imageRepository;
+    private final MediaHandler mediaHandler;
 
     public MessageService(MessageRepository messageRepository, CustomerRepository customerRepository,
-            ReceiverRepository receiverRepository, VideoRepository videoRepository, ImageRepository imageRepository) {
+            ReceiverRepository receiverRepository, ImageRepository imageRepository, MediaHandler mediaHandler) {
         this.imageRepository = imageRepository;
         this.messageRepository = messageRepository;
         this.customerRepository = customerRepository;
         this.receiverRepository = receiverRepository;
-        this.videoRepository = videoRepository;
+        this.mediaHandler = mediaHandler;
     }
 
     @Transactional
@@ -40,11 +39,13 @@ public class MessageService {
 
         Message message = new Message(request, customer);
         Message savedMessage = messageRepository.save(message);
-        
-        Video video = new Video(request.getVideoUrl(), savedMessage);
-        Image image = new Image(request.getImageUrl(), savedMessage);
-        videoRepository.save(video);
-        imageRepository.save(image);
+
+        List<String> customImages = request.getCustomImages();
+        List<Image> images = customImages.stream().filter(customImage -> customImage != null && customImage.startsWith("data:image/")).map(customImage -> {
+            String processedImageUrl = mediaHandler.uploadImageToCloudinary(customImage, "message");
+            return new Image(processedImageUrl, message);
+        }).toList();
+        imageRepository.saveAll(images);
 
         if (request.getRecipients() != null) {
             List<Receiver> receivers = request.getRecipients().stream().map(r -> Receiver.parse(r, message)).toList();

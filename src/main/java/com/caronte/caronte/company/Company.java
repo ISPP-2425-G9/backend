@@ -4,8 +4,8 @@ import com.caronte.caronte.user.User;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.*;
-
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -32,8 +32,10 @@ public class Company extends User {
     @Column(unique = true, nullable = false, length = 20)
     private String nif;
 
-    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
     private CompanyType companyType = CompanyType.OTRO;
 
 }
+
+
