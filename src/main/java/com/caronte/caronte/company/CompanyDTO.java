@@ -11,8 +11,9 @@ public class CompanyDTO {
     private String imageUrl;
     private String description;
     private String nif;
+    private CompanyType companyType;
 
-    public CompanyDTO(String name, String email, String telephone, String address, String city, String zipCode, String imageUrl, String description, String nif) {
+    public CompanyDTO(String name, String email, String telephone, String address, String city, String zipCode, String imageUrl, String description, String nif, CompanyType companyType) {
         this.name = name;
         this.email = email;
         this.telephone = telephone;
@@ -22,6 +23,7 @@ public class CompanyDTO {
         this.imageUrl = imageUrl;
         this.description = description;
         this.nif = nif;
+        this.companyType = companyType;
     }
 
     public String getName() {
