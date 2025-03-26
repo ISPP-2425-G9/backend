@@ -6,12 +6,16 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
 @Getter
 @Setter
+@AllArgsConstructor
+@NoArgsConstructor
 public class Plan extends BaseEntity {
 
     @Enumerated(EnumType.STRING)
@@ -20,10 +24,20 @@ public class Plan extends BaseEntity {
 
     private String subscriptionId;
 
-    public static Plan newFreePlan() {
-        Plan plan = new Plan();
-        plan.setPlanType(PlanType.FREE);
-        return plan;
+    public static Plan newPlanFree() {
+        return new Plan(PlanType.FREE, null);
     }
-  
+
+    public static Plan newPlanPremium(String subscriptionId) {
+        return new Plan(PlanType.PREMIUM, subscriptionId);
+    }
+
+    public boolean isFree() {
+        return this.planType == PlanType.FREE;
+    }
+
+    public boolean isPremium() {
+        return this.planType == PlanType.PREMIUM;
+    }
+
 }

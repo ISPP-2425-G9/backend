@@ -2,6 +2,11 @@ package com.caronte.caronte.auth.payload.response;
 
 import java.util.List;
 
+import org.springframework.security.core.GrantedAuthority;
+
+import com.caronte.caronte.configuration.services.UserDetailsImpl;
+import com.caronte.caronte.user.User;
+
 import lombok.Getter;
 import lombok.Setter;
 
@@ -22,6 +27,15 @@ public class JwtResponse {
 		this.username = username;
 		this.roles = roles;
 		this.name = name;
+	}
+
+	public JwtResponse(String accessToken, User user) {
+		this.token = accessToken;
+		UserDetailsImpl userDetailsImpl = UserDetailsImpl.build(user);
+		this.id = user.getId();
+		this.username = userDetailsImpl.getUsername();
+		this.roles = userDetailsImpl.getAuthorities().stream().map(GrantedAuthority::getAuthority).toList();
+		this.name = user.getName();
 	}
 
 	@Override

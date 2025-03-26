@@ -60,7 +60,7 @@ public class UserDetailsImpl implements UserDetails {
 	public static UserDetailsImpl build(Customer customer) {
 		PlanType planType = customer.getPlan().getPlanType();
 		SimpleGrantedAuthority customer_authorization = null;
-		
+
 		if(planType == PlanType.FREE) {
 			customer_authorization = Authorization.CUSTOMER_FREE.getAuthority();
 		} else if(planType == PlanType.PREMIUM) {
@@ -78,7 +78,7 @@ public class UserDetailsImpl implements UserDetails {
 	public static UserDetailsImpl build(Company company) {
 		PlanType planType = company.getPlan().getPlanType();
 		SimpleGrantedAuthority customer_authorization = null;
-		
+
 		if(planType == PlanType.FREE) {
 			customer_authorization = Authorization.COMPANY_FREE.getAuthority();
 		} else if(planType == PlanType.PREMIUM) {
@@ -133,6 +133,10 @@ public class UserDetailsImpl implements UserDetails {
 	public boolean isEnabled() {
 		return true;
 	}
+
+    public boolean isAdmin() {
+        return this.getAuthorities().contains(Authorization.ADMIN.getAuthority());
+    }
 
 	@Override
 	public int hashCode() {
