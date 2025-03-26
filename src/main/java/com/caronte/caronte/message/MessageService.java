@@ -11,8 +11,6 @@ import com.caronte.caronte.image.Image;
 import com.caronte.caronte.image.ImageRepository;
 import com.caronte.caronte.receiver.ReceiverService;
 import com.caronte.caronte.util.MediaHandler;
-import com.caronte.caronte.video.Video;
-import com.caronte.caronte.video.VideoRepository;
 
 @Service
 public class MessageService {
@@ -20,19 +18,16 @@ public class MessageService {
     private final MessageRepository messageRepository;
     private final CustomerRepository customerRepository;
     private final ReceiverService receiverService;
-    private final VideoRepository videoRepository;
     private final ImageRepository imageRepository;
 
     public MessageService(MessageRepository messageRepository,
                           CustomerRepository customerRepository,
                           ReceiverService receiverService,
-                          VideoRepository videoRepository,
                           ImageRepository imageRepository) {
         this.imageRepository = imageRepository;
         this.messageRepository = messageRepository;
         this.customerRepository = customerRepository;
         this.receiverService = receiverService;
-        this.videoRepository = videoRepository;
     }
 
     @Transactional
@@ -52,19 +47,6 @@ public class MessageService {
         message.setCustomer(customer);
 
         Message savedMessage = messageRepository.save(message);
-
-
-        List<String> customVideos = request.getCustomVideos();
-        for (String customVideo : customVideos) {
-            if (customVideo != null && customVideo.startsWith("data:video/")) {
-                String processedVideoUrl = MediaHandler.uploadVideoToCloudinary(MediaHandler.base64ToVideo(customVideo));
-
-                Video video = new Video();
-                video.setVideoUrl(processedVideoUrl);
-                video.setMessage(message);
-                videoRepository.save(video);
-            }
-        }
 
         List<String> customImages = request.getCustomImages();
         for (String customImage : customImages) {
