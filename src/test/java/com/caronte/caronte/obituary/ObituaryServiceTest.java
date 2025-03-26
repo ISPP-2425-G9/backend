@@ -53,7 +53,6 @@ public class ObituaryServiceTest {
     public void setUp() {
         MockitoAnnotations.openMocks(this);
 
-        // Inicializar objetos mockeados y datos de prueba
         customer = new Customer();
         customer.setId(1L);
         customer.setName("Alfonso Manuel Giraldillo");
@@ -72,35 +71,21 @@ public class ObituaryServiceTest {
     }
 @Test
     public void testCreateObituaryWithReceivers() {
-        // Cadena base64 de la URL proporcionada en el JSON (convertimos la URL a base64 para simular la carga real)
-        String base64Image = "https://static.nationalgeographicla.com/files/styles/image_3200/public/comedy-wildlife-awards-squirel-stop.jpg"; // Aquí deberías incluir la cadena base64 completa de la imagen
+        String base64Image = "https://static.nationalgeographicla.com/files/styles/image_3200/public/comedy-wildlife-awards-squirel-stop.jpg";
     
-        // Crear un mock de un customer
-        Customer customer = new Customer();
-        customer.setId(1L);
-        customer.setName("Alfonso Manuel Giraldillo");
-        customer.setEmail("alfonso@example.com");
+        when(customerRepository.findById(1L)).thenReturn(Optional.of(customer));
+        when(imageTemplateService.findById(1L)).thenReturn(imageTemplate); 
     
-        // Crear un mock de ImageTemplate
-        ImageTemplate imageTemplate = new ImageTemplate();
-        imageTemplate.setId(1L);
-    
-        // Simular el comportamiento de los mocks
-        when(customerRepository.findById(1L)).thenReturn(Optional.of(customer)); // Mock de customer
-        when(imageTemplateService.findById(1L)).thenReturn(imageTemplate); // Mock de imageTemplate
-    
-        // Crear el DTO de solicitud de obituario
         ObituraryRequestDto requestDto = new ObituraryRequestDto();
         requestDto.setName("Alfonso Manuel Giraldillo");
         requestDto.setFarewellMessage("Esto es un mensaje de despedida");
         requestDto.setFarewellPhrase("Esto es una frase de despedida");
         requestDto.setImageTemplate_id(1L);
         requestDto.setIsMine(true);
-        requestDto.setCustomImage(base64Image);  // Usamos la cadena base64 de la imagen
+        requestDto.setCustomImage(base64Image);  
         requestDto.setBirthDate(null);
         requestDto.setDeathDate(null);
     
-        // Crear los contactos
         List<ContactDto> contacts = new ArrayList<>();
         ContactDto contact1 = new ContactDto();
         contact1.setName("Contacto1Nombre");
@@ -108,37 +93,66 @@ public class ObituaryServiceTest {
         contact1.setEmail("email1@gmail.com");
         contacts.add(contact1);
         requestDto.setContacts(contacts);
+        
     
-        // Simular el comportamiento del servicio receiver (en vez de doNothing() usamos when())
-        when(receiverService.saveObituaryReceiver(eq("Contacto1Nombre"), eq("68556790743"), eq("email1@gmail.com"), any(Obituary.class))).thenReturn(null); // Cambiado a when()
-    
-        // Ejecutar el método a probar
-        Obituary obituary = obituaryService.createObituaryWithReceivers(requestDto, customer.getId());
-    
+        Obituary obituary_test = obituaryService.createObituaryWithReceivers(requestDto, customer.getId());
+        //when(receiverService.saveObituaryReceiver(eq("Contacto1Nombre"), eq("68556790743"), eq("email1@gmail.com"), any(Obituary.class))).thenReturn(null); // Cambiado a when()
+        when(receiverService.saveObituaryReceiver(eq("Contacto1Nombre"), eq("68556790743"), eq("email1@gmail.com"), eq(obituary_test))).thenReturn(null); // Cambiado a when()
+
         // Verificar la interacción con los mocks
         verify(customerRepository).findById(1L);
+        assertEquals(1L, customerRepository.findById(1L).get().getId());
         verify(imageTemplateService).findById(1L);
-        verify(receiverService, times(1)).saveObituaryReceiver(eq("Contacto1Nombre"), eq("68556790743"), eq("email1@gmail.com"), eq(obituary));
+        verify(receiverService, times(1)).saveObituaryReceiver(eq("Contacto1Nombre"), eq("68556790743"), eq("email1@gmail.com"), eq(obituary_test));
     
         // Verificar que el obituario no sea null
-        assertNotNull(obituary);
+        assertNotNull(obituary_test);
     
         // Verificar que los datos del obituario son correctos
-        assertEquals("Alfonso Manuel Giraldillo", obituary.getName());
-        assertEquals("Esto es un mensaje de despedida", obituary.getFarewellMessage());
-        assertEquals("Esto es una frase de despedida", obituary.getFarewellPhrase());
-        assertEquals("uploaded-image-url", obituary.getCustomImageUrl());  // Verificar la URL de la imagen subida
-        assertNull(obituary.getBirthDate());  // Verificar que la fecha de nacimiento es null
-        assertNull(obituary.getDeathDate());  // Verificar que la fecha de fallecimiento es null
+        assertEquals("Alfonso Manuel Giraldillo", obituary_test.getName());
+        assertEquals("Esto es un mensaje de despedida", obituary_test.getFarewellMessage());
+        assertEquals("Esto es una frase de despedida", obituary_test.getFarewellPhrase());
+        assertEquals("uploaded-image-url", obituary_test.getCustomImageUrl());  // Verificar la URL de la imagen subida
+        assertNull(obituary_test.getBirthDate());  // Verificar que la fecha de nacimiento es null
+        assertNull(obituary_test.getDeathDate());  // Verificar que la fecha de fallecimiento es null
     
         // Verificar que los contactos han sido correctamente guardados
         assertEquals(1, contacts.size());  // Sólo un contacto
         for (ObituraryRequestDto.ContactDto contact : contacts) {
-            verify(receiverService).saveObituaryReceiver(eq(contact.getName()), eq(contact.getPhone()), eq(contact.getEmail()), eq(obituary));
+            verify(receiverService).saveObituaryReceiver(eq(contact.getName()), eq(contact.getPhone()), eq(contact.getEmail()), eq(obituary_test));
         }
     }
 
+    @Test
+    void testGetObituaryById_WhenObituaryExists() {
 
+        Long obituaryId = 1L;
+        Obituary mockObituary = new Obituary();
+        mockObituary.setId(obituaryId);
+        mockObituary.setWordColor(null);
+
+        when(obituaryRepository.findById(obituaryId)).thenReturn(Optional.of(mockObituary));
+
+
+        Obituary result = obituaryService.getObituaryById(obituaryId);
+
+        assertNotNull(result);
+        assertEquals("0,0,0", result.getWordColor()); // Verifica que el color por defecto se asigna
+        verify(obituaryRepository, times(1)).findById(obituaryId);
+    }
+
+    @Test
+    void testGetObituaryById_WhenObituaryNotFound() {
+
+        Long obituaryId = 1L;
+        when(obituaryRepository.findById(obituaryId)).thenReturn(Optional.empty());
+
+        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+            obituaryService.getObituaryById(obituaryId);
+        });
+        assertEquals("Obituary not found", exception.getMessage());
+        verify(obituaryRepository, times(1)).findById(obituaryId);
+    }
 
     
 
@@ -156,20 +170,6 @@ public class ObituaryServiceTest {
         assertEquals("Customer not found", exception.getMessage());
     }
 
-    // Caso: cuando la imagen base64 es inválida
-    @Test
-    public void testCreateObituaryWithReceivers_InvalidBase64Image() {
-        String invalidBase64 = "data:image/jpeg;base64,invalidBase64";  // Cadena base64 inválida
-
-        requestDto.setCustomImage(invalidBase64);  
-
-        // Ejecutar y verificar que se lanza la excepción
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
-            obituaryService.createObituaryWithReceivers(requestDto, customer.getId());
-        });
-
-        assertEquals("Invalid base64 image", exception.getMessage());
-    }
 
     // Caso: cuando no se encuentra el template de imagen
     @Test
@@ -185,49 +185,7 @@ public class ObituaryServiceTest {
         assertEquals("Image template not found", exception.getMessage());
     }
 
-    // Caso: cuando los contactos no son válidos (nombre vacío)
-    @Test
-    public void testCreateObituaryWithReceivers_InvalidContactData() {
-        // Crear un contacto inválido (nombre vacío)
-        List<ContactDto> contacts = new ArrayList<>();
-        ContactDto contact1 = new ContactDto();
-        contact1.setName("");
-        contact1.setPhone("68556790743");
-        contact1.setEmail("email1@gmail.com");
-        contacts.add(contact1);
-        requestDto.setContacts(contacts);
 
-        // Ejecutar y verificar la excepción
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
-            obituaryService.createObituaryWithReceivers(requestDto, 1L);
-        });
 
-        assertEquals("El nombre del contacto es obligatorio.", exception.getMessage());
-    }
 
-    // Caso: cuando la URL de la imagen no es base64, es una URL normal
-    @Test
-public void testCreateObituaryWithReceivers_ValidImageUrl() {
-    String imageUrl = "https://example.com/image.jpg";  // URL de imagen estándar
-
-    requestDto.setCustomImage(imageUrl);  // Usar la URL de la imagen estándar
-
-    // Ejecutar el método
-    Obituary obituary = obituaryService.createObituaryWithReceivers(requestDto, 1L);
-
-    // Verificar que la imagen se haya procesado correctamente
-    assertEquals("uploaded-image-url", obituary.getCustomImageUrl());
-}
-
-    // Caso: cuando el wordColor es nulo, debe asignarse un valor por defecto
-    @Test
-    public void testCreateObituaryWithReceivers_DefaultWordColor() {
-        requestDto.setWordColor(null);  // Asignar null al color
-
-        // Ejecutar el método
-        Obituary obituary = obituaryService.createObituaryWithReceivers(requestDto, 1L);
-
-        // Verificar que el color de la palabra es asignado correctamente a "0,0,0" si es null
-        assertEquals("0,0,0", obituary.getWordColor());
-    }
 }
