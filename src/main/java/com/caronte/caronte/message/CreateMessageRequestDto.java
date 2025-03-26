@@ -15,7 +15,6 @@ public class CreateMessageRequestDto {
 
     private String body;
 
-    private List<String> customVideos;
     private List<String> customImages;
 
     @NotNull
