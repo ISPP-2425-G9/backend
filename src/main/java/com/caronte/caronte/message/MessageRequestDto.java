@@ -9,7 +9,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class CreateMessageRequestDto {
+public class MessageRequestDto {
 
     private String title;
 

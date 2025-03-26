@@ -11,6 +11,7 @@ import com.caronte.caronte.customer.Customer;
 import com.caronte.caronte.customer.CustomerRepository;
 import com.caronte.caronte.image.Image;
 import com.caronte.caronte.image.ImageRepository;
+import com.caronte.caronte.receiver.ReceiverRepository;
 import com.caronte.caronte.receiver.ReceiverService;
 import com.caronte.caronte.util.MediaHandler;
 
@@ -19,21 +20,24 @@ public class MessageService {
 
     private final MessageRepository messageRepository;
     private final CustomerRepository customerRepository;
+    private final ReceiverRepository receiverRepository;
     private final ReceiverService receiverService;
     private final ImageRepository imageRepository;
 
     public MessageService(MessageRepository messageRepository,
                           CustomerRepository customerRepository,
                           ReceiverService receiverService,
-                          ImageRepository imageRepository) {
+                          ImageRepository imageRepository,
+                          ReceiverRepository receiverRepository) {
         this.imageRepository = imageRepository;
         this.messageRepository = messageRepository;
         this.customerRepository = customerRepository;
         this.receiverService = receiverService;
+        this.receiverRepository = receiverRepository;
     }
 
     @Transactional
-    public Message createMessage(CreateMessageRequestDto request, Long customerId) {
+    public Message createMessage(MessageRequestDto request, Long customerId) {
 
         Customer customer = customerRepository.findById(customerId)
                 .orElseThrow(() -> new RuntimeException("Customer not found"));
@@ -54,7 +58,7 @@ public class MessageService {
         for (String customImage : customImages) {
             String processedImageUrl;
             if (customImage != null && customImage.startsWith("data:image/")) {
-                processedImageUrl = MediaHandler.uploadImageToCloudinary(MediaHandler.base64ToImage(customImage),"message");
+                processedImageUrl = MediaHandler.uploadImageToCloudinary(MediaHandler.base64ToImage(customImage),"messages/");
                 
                 Image image = new Image();
                 image.setImageUrl(processedImageUrl);
@@ -65,7 +69,7 @@ public class MessageService {
        
 
         if (request.getRecipients() != null) {
-            for (CreateMessageRequestDto.RecipientDto r : request.getRecipients()) {
+            for (MessageRequestDto.RecipientDto r : request.getRecipients()) {
                 receiverService.saveMessageReceiver(
                         r.getName(),
                         r.getTelephone(),
@@ -94,5 +98,82 @@ public class MessageService {
     public Message getMessageById(Long message_id, Long customerId) {
         return messageRepository.findById(message_id)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Message not found"));
+    }
+
+    public Message updateMessage(Long message_id, MessageRequestDto request, Long customerId) {
+        Message message = messageRepository.findById(message_id)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Message not found"));
+
+        if (!message.getCustomer().getId().equals(customerId)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User not authorized to access this resource");
+        }
+
+        message.setTitle(request.getTitle());
+        message.setBody(request.getBody());
+
+        List<Image> images = this.imageRepository.findAllByMessageId(message_id);
+        for (Image image : images) {
+            MediaHandler.deleteImageFromCloudinary(image.getImageUrl()); //TODO borrar imagenen en Cloudinary
+            this.imageRepository.delete(image);
+        }
+
+        List<String> customImages = request.getCustomImages();
+        for (String customImage : customImages) {
+            String processedImageUrl;
+            if (customImage != null && customImage.startsWith("data:image/")) {
+                processedImageUrl = MediaHandler.uploadImageToCloudinary(MediaHandler.base64ToImage(customImage),"messages/");
+                
+                Image image = new Image();
+                image.setImageUrl(processedImageUrl);
+                image.setMessage(message);
+                imageRepository.save(image);
+            }
+        }
+
+        if (request.getRecipients() != null) {
+            for (MessageRequestDto.RecipientDto r : request.getRecipients()) {
+            boolean recipientExists = receiverRepository.findByMessageId(message_id).stream()
+                .anyMatch(receiver -> receiver.getTelephone().equals(r.getTelephone()) || receiver.getEmail().equals(r.getEmail()));
+            if (!recipientExists) {
+                receiverService.saveMessageReceiver(
+                    r.getName(),
+                    r.getTelephone(),
+                    r.getEmail(),
+                    message
+                );
+            } else {
+                receiverService.updateMessageReceiver(
+                    receiverRepository.findByMessageId(message_id).stream()
+                        .filter(receiver -> receiver.getTelephone().equals(r.getTelephone()) || receiver.getEmail().equals(r.getEmail()))
+                        .findFirst()
+                        .get()
+                        .getId(),
+                    r.getName(),
+                    r.getTelephone(),
+                    r.getEmail()
+                );
+            }
+            }
+        }
+
+        return messageRepository.save(message);
+    }
+
+    public void deleteMessage(Long message_id, Long customerId) {
+        Message message = messageRepository.findById(message_id)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Message not found"));
+
+        if (!message.getCustomer().getId().equals(customerId)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User not authorized to access this resource");
+        }
+
+        List<Image> images = this.imageRepository.findAllByMessageId(message_id);
+        for (Image image : images) {
+            MediaHandler.deleteImageFromCloudinary(image.getImageUrl()); //TODO borrar imagenen en Cloudinary
+            this.imageRepository.delete(image);
+        }
+
+        receiverRepository.findByMessageId(message_id).forEach(receiver -> receiverRepository.delete(receiver));
+        messageRepository.delete(message);
     }
 }
