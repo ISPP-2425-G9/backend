@@ -25,8 +25,7 @@ public class ReceiverService {
         receiver.setTelephone(telephone);
         receiver.setEmail(email);
         receiver.setObituary(obituary);
-        receiver = receiverRepository.save(receiver);
-        receiverRepository.flush();
+        receiver = receiverRepository.saveAndFlush(receiver);
         return receiver;
     }
     @Transactional
@@ -36,7 +35,7 @@ public class ReceiverService {
     }
     @Transactional(readOnly = true)
     public List<ReceiverResponseDTO> getReceiversByObituaryId(Obituary obituary) {
-        List<ReceiverResponseDTO> receivers = new ArrayList();
+        List<ReceiverResponseDTO> receivers = new ArrayList<>();
         List<Receiver> receiversList = receiverRepository.findByObituary(obituary);
         for (Receiver receiver : receiversList) {
             ReceiverResponseDTO receiverResponseDTO = new ReceiverResponseDTO();
