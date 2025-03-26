@@ -4,9 +4,14 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 import lombok.Getter;
 import lombok.Setter;
+
+import java.time.LocalDate;
 import java.util.List;
 
+import org.springframework.cglib.core.Local;
+
 import com.caronte.caronte.deathCertificate.DeathCertificateRequestDTO;
+import com.fasterxml.jackson.annotation.JsonFormat;
 
 @Getter
 @Setter
@@ -15,10 +20,11 @@ public class ObituraryRequestDto {
     @Size(max = 37, message = "The name must be between 0 and 37 characters long")
     private String name;
 
-    @Pattern(regexp = "^(|\\d{2}/\\d{2}/\\d{4})$", message = "The date format must be dd/MM/yyyy or an empty string")
-    private String birthDate;
+    @JsonFormat(pattern = "dd/MM/yyyy")
+    private LocalDate birthDate;
 
-    private String deathDate;
+    @JsonFormat(pattern = "dd/MM/yyyy")
+    private LocalDate deathDate;
 
     private String customImage; 
 
@@ -34,17 +40,11 @@ public class ObituraryRequestDto {
     @NotNull(message = "The 'isMine' field cannot be null")
     private Boolean isMine;
 
-    @NotBlank(message = "The wordColor field cannot be empty")
     @Pattern(regexp = "^(25[0-5]|2[0-4]\\d|1\\d{2}|\\d{1,2}),(25[0-5]|2[0-4]\\d|1\\d{2}|\\d{1,2}),(25[0-5]|2[0-4]\\d|1\\d{2}|\\d{1,2})$", 
     message = "Color must be in the format 'r,g,b' where r, g and b are integers between 0 and 255")
     private String  wordColor; 
 
     private DeathCertificateRequestDTO deathCertificate;
-
-    @AssertTrue(message = "The deathDate field must be null or empty")
-    public boolean isDeathDateValid() {
-        return deathDate == null || deathDate.trim().isEmpty();
-    }
 
     private List<@Valid ContactDto> contacts;
     @Getter

@@ -1,5 +1,7 @@
 package com.caronte.caronte.message;
 
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -8,9 +10,7 @@ import com.caronte.caronte.customer.CustomerRepository;
 import com.caronte.caronte.image.Image;
 import com.caronte.caronte.image.ImageRepository;
 import com.caronte.caronte.receiver.ReceiverService;
-
-import com.caronte.caronte.video.Video;
-import com.caronte.caronte.video.VideoRepository;
+import com.caronte.caronte.util.MediaHandler;
 
 @Service
 public class MessageService {
@@ -18,19 +18,16 @@ public class MessageService {
     private final MessageRepository messageRepository;
     private final CustomerRepository customerRepository;
     private final ReceiverService receiverService;
-    private final VideoRepository videoRepository;
     private final ImageRepository imageRepository;
 
     public MessageService(MessageRepository messageRepository,
-     CustomerRepository customerRepository,
-     ReceiverService receiverService,
-     VideoRepository videoRepository,
-     ImageRepository imageRepository) {
+                          CustomerRepository customerRepository,
+                          ReceiverService receiverService,
+                          ImageRepository imageRepository) {
         this.imageRepository = imageRepository;
         this.messageRepository = messageRepository;
         this.customerRepository = customerRepository;
         this.receiverService = receiverService;
-        this.videoRepository = videoRepository;
     }
 
     @Transactional
@@ -42,24 +39,28 @@ public class MessageService {
         Message message = new Message();
         message.setTitle(request.getTitle());
         message.setBody(request.getBody());
-        
+
         String uniqueCode = generateUniqueRandomCode();
         message.setCode(uniqueCode);
-        
-        message.setIsLastWill(request.getIsLastWill());
+
+        message.setIsLastWill(false);
         message.setCustomer(customer);
 
-        Video video = new Video();
-        video.setVideoUrl(request.getVideoUrl());
-        video.setMessage(message);
-        
-        Image image = new Image();
-        image.setImageUrl(request.getImageUrl());
-        image.setMessage(message);
-
         Message savedMessage = messageRepository.save(message);
-        videoRepository.save(video);
-        imageRepository.save(image);
+
+        List<String> customImages = request.getCustomImages();
+        for (String customImage : customImages) {
+            String processedImageUrl;
+            if (customImage != null && customImage.startsWith("data:image/")) {
+                processedImageUrl = MediaHandler.uploadImageToCloudinary(MediaHandler.base64ToImage(customImage),"message");
+                
+                Image image = new Image();
+                image.setImageUrl(processedImageUrl);
+                image.setMessage(message);
+                imageRepository.save(image);
+            }
+        }
+       
 
         if (request.getRecipients() != null) {
             for (CreateMessageRequestDto.RecipientDto r : request.getRecipients()) {

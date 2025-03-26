@@ -1,17 +1,19 @@
 package com.caronte.caronte.auth.payload.response;
 
-import static com.caronte.caronte.util.RegexContants.REGEX_EMAIL;
-import static com.caronte.caronte.util.RegexContants.REGEX_NIF;
-import static com.caronte.caronte.util.RegexContants.REGEX_ZIP_CODE;
-
 import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.URL;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.caronte.caronte.company.Company;
+import com.caronte.caronte.company.CompanyType;
 import com.caronte.caronte.plan.Plan;
+import static com.caronte.caronte.util.RegexContants.REGEX_EMAIL;
+import static com.caronte.caronte.util.RegexContants.REGEX_NIF;
+import static com.caronte.caronte.util.RegexContants.REGEX_ZIP_CODE;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import lombok.Getter;
@@ -64,6 +66,9 @@ public class RegisterRequestCompany {
     @Length(max=1024)
     private String description;
 
+    @Enumerated(EnumType.STRING)
+    private CompanyType companyType;
+
     public Company parse(PasswordEncoder passwordEncoder){
         Company company = new Company();
         company.setAddress(this.getAddress());
@@ -77,7 +82,8 @@ public class RegisterRequestCompany {
         company.setPassword(passwordEncoder.encode(this.getPassword1()));
         company.setTelephone(this.getTelephone());
         company.setPlan(Plan.newPlanFree());
-
+        company.setCompanyType(this.getCompanyType());
+      
         return company;
 
     }
