@@ -59,32 +59,37 @@ public class MediaHandler {
     public static String deleteImageFromCloudinary(String imageUrl) {
         Dotenv dotenv = Dotenv.load();
         Cloudinary cloudinary = new Cloudinary(dotenv.get("CLOUDINARY_IMAGES_URL"));
-    
+        
         try {
-            // Extraemos el publicId de la URL de la imagen
-            String[] parts = imageUrl.split("/");  // Dividimos la URL por "/"
-            String fileName = parts[parts.length - 1];  // Última parte de la URL
-            String publicId = fileName.split("\\.")[0]; // Eliminamos la extensión para obtener el publicId
-    
-            // Depuración: Verifica el publicId extraído
-            System.out.println("Extracted Public ID: " + publicId);
-    
-            // Llamamos a Cloudinary para eliminar la imagen
-            Map<String, Object> result = cloudinary.uploader().destroy(publicId, ObjectUtils.emptyMap());
-    
-            // Depuración: Verifica el resultado de la eliminación
+            System.out.println("Original image URL: " + imageUrl);
+            
+            String[] parts = imageUrl.split("/upload/");
+            System.out.println("Parts after split: " + parts[1]);
+
+            String filePath = parts[1].split("/", 2)[1].split("\\.")[0];
+            System.out.println("Extracted Public ID: " + filePath);
+            
+            Map<String, Object> result = cloudinary.uploader().destroy(filePath, ObjectUtils.emptyMap());
             System.out.println("Cloudinary result: " + result);
+            
+            if(result.containsKey("result") && result.get("result").equals("ok")) {
+                System.out.println("Image deleted successfully.");
+            } else {
+                System.out.println("Image deletion failed: " + result);
+            }
     
-            // Devuelve el resultado
-            return result.get("result").toString();  // "ok" si es exitoso, o el mensaje de error
-    
+            return result.get("result").toString();
+            
         } catch (Exception e) {
-            // Depuración: Imprime la excepción completa para obtener más información sobre el error
             System.err.println("Error while deleting image from Cloudinary: " + e.getMessage());
-            e.printStackTrace();  // Detalles completos de la excepción
+            e.printStackTrace();
             return null;
         }
     }
+    
+    
+    
+    
     
     
     
