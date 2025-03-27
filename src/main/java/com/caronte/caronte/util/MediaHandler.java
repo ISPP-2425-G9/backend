@@ -16,7 +16,8 @@ import com.cloudinary.utils.ObjectUtils;
 
 public class MediaHandler {
 
-    private static final String token = "modify_before_deploy";
+    private static final String imageToken = "modify_before_deploy";
+    private static final String videoToken = "modify_before_deploy";
 
     public static BufferedImage base64ToImage(String base64String) {
         BufferedImage image = null;
@@ -35,7 +36,7 @@ public class MediaHandler {
     }
 
     public static String uploadImageToCloudinary(BufferedImage image, String folder) {
-        Cloudinary cloudinary_image = new Cloudinary(token);
+        Cloudinary cloudinary_image = new Cloudinary(imageToken);
         try {
             File tempFile = File.createTempFile("upload_", ".png");
             ImageIO.write(image, "png", tempFile);
@@ -54,7 +55,7 @@ public class MediaHandler {
     }
 
     public static String deleteImageFromCloudinary(String imageUrl) {
-        Cloudinary cloudinary = new Cloudinary(token);
+        Cloudinary cloudinary = new Cloudinary(imageToken);
         
         try {
             System.out.println("Original image URL: " + imageUrl);
@@ -104,7 +105,7 @@ public class MediaHandler {
     }
 
     public static String uploadVideoToCloudinary(File videoFile) {
-        Cloudinary cloudinary_video = new Cloudinary(token);
+        Cloudinary cloudinary_video = new Cloudinary(videoToken);
     
         try {
             Map<String, Object> options = ObjectUtils.asMap(
