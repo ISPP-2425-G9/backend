@@ -1,5 +1,9 @@
 package com.caronte.caronte.auth.payload.response;
 
+import static com.caronte.caronte.util.RegexContants.REGEX_EMAIL;
+import static com.caronte.caronte.util.RegexContants.REGEX_NIF;
+import static com.caronte.caronte.util.RegexContants.REGEX_ZIP_CODE;
+
 import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.URL;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -7,9 +11,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import com.caronte.caronte.company.Company;
 import com.caronte.caronte.company.CompanyType;
 import com.caronte.caronte.plan.Plan;
-import static com.caronte.caronte.util.RegexContants.REGEX_EMAIL;
-import static com.caronte.caronte.util.RegexContants.REGEX_NIF;
-import static com.caronte.caronte.util.RegexContants.REGEX_ZIP_CODE;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import jakarta.persistence.EnumType;
@@ -17,10 +18,12 @@ import jakarta.persistence.Enumerated;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Getter
 @Setter
+@NoArgsConstructor
 public class RegisterRequestCompany {
 
     @Length(max=100)
@@ -68,6 +71,13 @@ public class RegisterRequestCompany {
 
     @Enumerated(EnumType.STRING)
     private CompanyType companyType;
+
+    public RegisterRequestCompany(String email, String password1, String password2, String nif) {
+        this.email = email;
+        this.password1 = password1;
+        this.password2 = password2;
+        this.nif = nif;
+    }
 
     public Company parse(PasswordEncoder passwordEncoder){
         Company company = new Company();
