@@ -1,5 +1,7 @@
 # CARONTE - Backend
 
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/e683dd462c204ff6b29b6606e6ba5f4d)](https://app.codacy.com/gh/ISPP-2425-G9/backend?utm_source=github.com&utm_medium=referral&utm_content=ISPP-2425-G9/backend&utm_campaign=Badge_Grade)
+
 ## Descripción
 Caronte es una aplicación backend desarrollada con Spring Boot que utiliza una base de datos MySQL para gestionar y almacenar datos relacionados con coches.
 
