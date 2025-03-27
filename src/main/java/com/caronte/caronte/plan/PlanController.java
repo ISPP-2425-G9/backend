@@ -1,5 +1,6 @@
 package com.caronte.caronte.plan;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,6 +18,7 @@ import com.caronte.caronte.configuration.services.UserDetailsImpl;
 import com.caronte.caronte.user.User;
 import com.caronte.caronte.user.UserService;
 import com.caronte.caronte.util.exceptions.ResponseThrow;
+import com.stripe.Stripe;
 
 @RestController
 @RequestMapping("/api/plans")
@@ -28,11 +30,12 @@ public class PlanController {
     private final JwtUtils jwtUtils;
 
     public PlanController(PlanService planService, UserService userService, 
-                          StripeService stripeService, JwtUtils jwtUtils) {
+                          StripeService stripeService, JwtUtils jwtUtils, @Value("${stripe.api.key}") String secretKey) {
         this.planService = planService;
         this.userService = userService;
         this.stripeService = stripeService;
         this.jwtUtils = jwtUtils;
+        Stripe.apiKey = secretKey;
     }
 
     @Transactional
