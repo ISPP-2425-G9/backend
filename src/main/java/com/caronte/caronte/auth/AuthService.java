@@ -4,6 +4,7 @@ import java.util.Objects;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.caronte.caronte.auth.payload.response.RegisterRequestCompany;
 import com.caronte.caronte.auth.payload.response.RegisterRequestCustomer;
@@ -57,6 +58,7 @@ public class AuthService {
         return registerRequest.parse(passwordEncoder);
     }
 
+    @Transactional
     public void save(User user){
         userRepository.save(user);
     }
