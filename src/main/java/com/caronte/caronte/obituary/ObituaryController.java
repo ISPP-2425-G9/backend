@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.caronte.caronte.obituary.DTOs.ObituraryRequestDto;
 import com.caronte.caronte.user.UserService;
 
 import jakarta.validation.Valid;

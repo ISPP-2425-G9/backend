@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.caronte.caronte.obituary.Obituary;
 import com.caronte.caronte.obituary.ObituaryService;
+import com.caronte.caronte.receiver.DTOs.ReceiverResponseDTO;
 import com.caronte.caronte.user.UserService;
 
 @RestController
