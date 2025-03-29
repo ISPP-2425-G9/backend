@@ -1,7 +1,7 @@
 package com.caronte.caronte.deathCertificate;
 
 import java.util.List;
-import java.util.Objects;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 import org.springframework.stereotype.Service;
@@ -9,11 +9,14 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.caronte.caronte.customer.Customer;
 import com.caronte.caronte.customer.CustomerRepository;
+import com.caronte.caronte.deathCertificate.DTOs.DeathCertificateRequestDTO;
+import com.caronte.caronte.deathCertificate.DTOs.DeathCertificateWithObituaryDniDTO;
 import com.caronte.caronte.obituary.Obituary;
 import com.caronte.caronte.obituary.ObituaryRepository;
 import com.caronte.caronte.util.MediaHandler;
 import com.caronte.caronte.util.exceptions.CertificateAssociationException;
 import com.caronte.caronte.util.exceptions.ResourceNotFound;
+import com.caronte.caronte.util.exceptions.ResponseThrow;
 
 @Service
 public class DeathCertificateService {
@@ -35,7 +38,8 @@ public class DeathCertificateService {
 
     @Transactional
     public DeathCertificate createDeathCertificateAndRelations(DeathCertificateRequestDTO request, Long customerId) {
-        checkDeathCertificate(request, customerId);
+        if(customerId != null) 
+            checkDeathCertificate(request, customerId);
         DeathCertificate certificate = createDeathCertificate(request);
         List<Obituary> obituaries = obituaryRepository.findByCustomerDni(request.getDni());
         obituaries.forEach(obituary -> obituary.setDeathCertificate(certificate));
@@ -45,24 +49,21 @@ public class DeathCertificateService {
 
     @Transactional(readOnly = true)
     public void checkDeathCertificate(DeathCertificateRequestDTO request, Long customerId) {
-        if(customerId == null) return;
-
         Customer customerLogged = customerRepository.findById(customerId).orElseThrow(() -> ResourceNotFound.of("Customer"));
-        
-        validateDniNotOwn(customerLogged.getDni(), request.getDni());
-        List<Obituary> obituaries = getObituariesByDni(request.getDni());
+        validateDniNotOwn(customerLogged, request);
+        List<Obituary> obituaries = getObituariesByDni(customerLogged.getDni());
         validateObituaries(obituaries);
     }
 
-    private void validateDniNotOwn(String loggedDni, String requestDni) {
-        if (Objects.equals(loggedDni, requestDni))
-            throw new IllegalArgumentException("No puedes subir un certificado de defunción con tu DNI");
+    private void validateDniNotOwn(Customer customerLogged, DeathCertificateRequestDTO request) {
+        ResponseThrow.checkOrBadRequest(customerLogged.hasDni(request.getDni()), "No puedes subir un certificado de defunción con tu DNI");
+
     }
     
     private List<Obituary> getObituariesByDni(String dni) {
         return Optional.of(obituaryRepository.findByCustomerDni(dni))
             .filter(obituaries -> !obituaries.isEmpty())
-            .orElseThrow(() -> new IllegalArgumentException("No hay esquelas creadas asociadas a ese DNI"));
+            .orElseThrow(() -> new NoSuchElementException("No hay esquelas creadas asociadas a ese DNI"));
     }
     
     private void validateObituaries(List<Obituary> obituaries) {

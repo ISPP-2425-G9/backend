@@ -35,9 +35,7 @@ public class CustomerService {
     @Transactional
     public Customer update(Long id, CustomerUpdateRequest request) {
         Customer customerToUpdate = customerRepository.findById(id).orElseThrow(() -> ResourceNotFound.of("Customer"));
-        customerToUpdate.setEmail(request.getEmail());
-        customerToUpdate.setName(request.getFullName());
-        customerToUpdate.setTelephone(request.getTelephone());
+        customerToUpdate.update(request);
         return customerRepository.save(customerToUpdate);
     }
 }

@@ -1,4 +1,4 @@
-package com.caronte.caronte.plan._DTOs;
+package com.caronte.caronte.plan.DTOs;
 
 import com.caronte.caronte.plan.PlanType;
 import com.fasterxml.jackson.annotation.JsonIgnore;

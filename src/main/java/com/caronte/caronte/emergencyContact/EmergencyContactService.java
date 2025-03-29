@@ -1,24 +1,23 @@
 package com.caronte.caronte.emergencyContact;
 
-import com.caronte.caronte.customer.Customer;
-import com.caronte.caronte.customer.CustomerRepository;
-import com.caronte.caronte.emergencyContact.DTOs.EmergencyContactDTO;
-import jakarta.validation.Valid;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
-import java.util.stream.Collectors;
 
-
-import java.util.List;
-import java.util.Optional;
+import com.caronte.caronte.customer.Customer;
+import com.caronte.caronte.customer.CustomerRepository;
+import com.caronte.caronte.emergencyContact.DTOs.EmergencyContactDTO;
+import com.caronte.caronte.util.exceptions.ResourceNotFound;
+import com.caronte.caronte.util.exceptions.ResponseThrow;
 
 @Service
 public class EmergencyContactService {
 
     private final EmergencyContactRepository emergencyContactRepository;
-
     private final CustomerRepository customerRepository;
 
     public EmergencyContactService (EmergencyContactRepository emergencyContactRepository, CustomerRepository customerRepository) {
@@ -29,7 +28,7 @@ public class EmergencyContactService {
     public List<EmergencyContactDTO> findAll(String email) {
         List<EmergencyContact> emergencyContacts =  emergencyContactRepository.findAllByCustomerEmail(email);
         return emergencyContacts.stream()
-                .map(contact -> new EmergencyContactDTO(contact.getId(),contact.getName(), contact.getTelephone(), contact.getEmail()))
+                .map(contact -> EmergencyContactDTO.parse(contact))
                 .collect(Collectors.toList());
     }
 
@@ -37,67 +36,48 @@ public class EmergencyContactService {
     public EmergencyContactDTO save(EmergencyContactDTO emergencyContactDTO, String email) {
         checkIfTelephoneIsDuplicate(emergencyContactDTO.telephone(), email);
         checkIfEmailIsDuplicate(emergencyContactDTO.email(), email);
-        Optional<Customer> customer = customerRepository.findByEmail(email);
-        if (customer.isEmpty()) {
-            throw new RuntimeException("Customer not found");
-        }
-        EmergencyContact emergencyContact = new EmergencyContact(emergencyContactDTO, customer.get());
+        
+        Customer customer = customerRepository.findByEmail(email).orElseThrow(() -> ResourceNotFound.of("Customer"));
+
+        EmergencyContact emergencyContact = new EmergencyContact(emergencyContactDTO, customer);
         EmergencyContact emergencyContactCreated = emergencyContactRepository.save(emergencyContact);
-        return new EmergencyContactDTO(emergencyContactCreated.getId(),
-                emergencyContactCreated.getName(),
-                emergencyContactCreated.getTelephone(),
-                emergencyContactCreated.getEmail());
+        return EmergencyContactDTO.parse(emergencyContactCreated);
     }
 
     @Transactional
     public EmergencyContactDTO update(EmergencyContactDTO emergencyContactDTO, Long id, String email){
-        Optional<EmergencyContact> emergencyContactOptional = emergencyContactRepository.findById(id);
-        if(emergencyContactOptional.isEmpty()){
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Contacto de emergencia no encontrado");
-        }
-        if(!emergencyContactOptional.get().getCustomer().getEmail().equals(email)){
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "No tienes permisos para modificar este contacto de emergencia");
-        }
-        EmergencyContact existingContact = emergencyContactOptional.get();
-        if (!existingContact.getTelephone().equals(emergencyContactDTO.telephone())) {
+        EmergencyContact emergencyContact = emergencyContactRepository.findById(id).orElseThrow(() -> ResourceNotFound.of("Emergency Contact"));
+
+        ResponseThrow.checkOrForbidden(emergencyContact.hasCustomerEmail(email));
+
+        if (!emergencyContact.hasTelephone(emergencyContactDTO.telephone())) {
             checkIfTelephoneIsDuplicate(emergencyContactDTO.telephone(), email);
         }
-        if (!existingContact.getEmail().equals(emergencyContactDTO.email())) {
+        if (!emergencyContact.hasEmail(emergencyContactDTO.email())) {
             checkIfEmailIsDuplicate(emergencyContactDTO.email(), email);
         }
 
-        existingContact.setName(emergencyContactDTO.name());
-        existingContact.setTelephone(emergencyContactDTO.telephone());
-        existingContact.setEmail(emergencyContactDTO.email());
-        EmergencyContact updatedContact = emergencyContactRepository.save(existingContact);
-        return new EmergencyContactDTO(updatedContact.getId(),
-                updatedContact.getName(),
-                updatedContact.getTelephone(),
-                updatedContact.getEmail());
+        emergencyContact.update(emergencyContactDTO);
+        EmergencyContact updatedContact = emergencyContactRepository.save(emergencyContact);
+        return EmergencyContactDTO.parse(updatedContact);
     }
 
     @Transactional
     public void delete(Long id, String email) {
-        Optional<EmergencyContact> emergencyContactOptional = emergencyContactRepository.findById(id);
-        if(emergencyContactOptional.isEmpty()){
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Contacto de emergencia no encontrado");
-        }
-        if(!emergencyContactOptional.get().getCustomer().getEmail().equals(email)){
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "No tienes permisos para eliminar este contacto de emergencia");
-        }
+        EmergencyContact emergencyContact = emergencyContactRepository.findById(id)
+            .orElseThrow(() -> ResourceNotFound.of("Emergency Contact"));
+        ResponseThrow.checkOrForbidden(emergencyContact.hasCustomerEmail(email), "No tienes permisos para eliminar este contacto de emergencia");
         emergencyContactRepository.deleteById(id);
     }
 
 
     private void checkIfTelephoneIsDuplicate(String telephone, String customerEmail) {
-        if (emergencyContactRepository.existsByTelephoneAndCustomer(telephone, customerEmail)) {
+        if (emergencyContactRepository.existsByTelephoneAndCustomer(telephone, customerEmail))
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El número de teléfono ya está registrado.");
-        }
     }
 
     private void checkIfEmailIsDuplicate(String email, String customerEmail) {
-        if (emergencyContactRepository.existsByEmailAndCustomer(email, customerEmail)) {
+        if (emergencyContactRepository.existsByEmailAndCustomer(email, customerEmail))
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El email ya está registrado.");
-        }
     }
 }

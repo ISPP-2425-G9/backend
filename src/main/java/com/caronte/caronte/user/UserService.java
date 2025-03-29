@@ -2,18 +2,15 @@ package com.caronte.caronte.user;
 
 import java.util.Optional;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
 import com.caronte.caronte.auth.payload.response.UserChangePasswordRequest;
 import com.caronte.caronte.configuration.services.UserDetailsImpl;
 import com.caronte.caronte.util.exceptions.ResourceNotFound;
-
 import com.caronte.caronte.util.exceptions.ResponseThrow;
 
 @Service
@@ -35,20 +32,21 @@ public class UserService {
     @Transactional(readOnly = true)
     public User findCurrentUser() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (!auth.isAuthenticated()) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not authenticated");
-        }
-
+        ResponseThrow.checkOrForbidden(!auth.isAuthenticated(), "User is not authenticated");
         UserDetailsImpl userDetails = (UserDetailsImpl) auth.getPrincipal();
-
-        return userRepository.findById(userDetails.getId())
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+        return userRepository.findById(userDetails.getId()).orElseThrow(() -> ResourceNotFound.of("User"));
     }
 
     @Transactional(readOnly = true)
     public Long findCurrentUserId() {
         return findCurrentUser().getId();
     }
+
+    @Transactional(readOnly = true)
+    public String findCurrentUserEmail() {
+        return findCurrentUser().getEmail();
+    }
+
 
     @Transactional(readOnly = true)
     public User authorizeUserOrAdmin(Long userId, String message){

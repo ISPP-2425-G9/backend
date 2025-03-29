@@ -9,10 +9,11 @@ import org.springframework.transaction.annotation.Transactional;
 import com.caronte.caronte.customer.Customer;
 import com.caronte.caronte.customer.CustomerRepository;
 import com.caronte.caronte.deathCertificate.DeathCertificate;
-import com.caronte.caronte.deathCertificate.DeathCertificateRequestDTO;
 import com.caronte.caronte.deathCertificate.DeathCertificateService;
+import com.caronte.caronte.deathCertificate.DTOs.DeathCertificateRequestDTO;
 import com.caronte.caronte.imageTemplate.ImageTemplate;
 import com.caronte.caronte.imageTemplate.ImageTemplateRepository;
+import com.caronte.caronte.obituary.DTOs.ObituraryRequestDto;
 import com.caronte.caronte.receiver.Receiver;
 import com.caronte.caronte.receiver.ReceiverRepository;
 import com.caronte.caronte.util.MediaHandler;
@@ -56,13 +57,9 @@ public class ObituaryService {
         DeathCertificateRequestDTO deathCertificateDTO = request.getDeathCertificate();
         String dni = deathCertificateDTO.getDni();
         
-        if(deathCertificateDTO == null || dni == null || deathCertificateDTO.getFile() == null){
-            throw new IllegalArgumentException("The Death Certificate is invalid");
-        }
-
-        if (customer.getDni().equals(deathCertificateDTO.getDni())){
-            throw new IllegalArgumentException("No puedes subir un certificado con tu DNI");
-        }
+        ResponseThrow.checkOrBadRequest(dni != null && deathCertificateDTO != null && deathCertificateDTO.getFile() != null, 
+                                 "The Death Certificate is invalid");
+        ResponseThrow.checkOrBadRequest(!customer.hasDni(deathCertificateDTO.getDni()), "No puedes subir un certificado con tu DNI");
 
         List<Obituary> obituaries = obituaryRepository.findByCustomerDni(dni);
         Boolean existCustomer = customerRepository.existsByDni(dni);
@@ -92,10 +89,7 @@ public class ObituaryService {
         String customImageUrl = Objects.nonNull(customUrl) && customUrl.startsWith("data:image/") ?
                 mediaHandler.uploadImageToCloudinary(customUrl, "obituaries") : customUrl;
             
-        
-        if(request.getWordColor() == null) {
-            request.setWordColor("0,0,0");
-        }
+        request.setDefaultWordColorIfNull();
 
         Obituary obituary = saveObituary(request, customImageUrl, customer, imageTemplate, deathCertificate);
 
@@ -110,35 +104,23 @@ public class ObituaryService {
     public Obituary updateObituaryWithReceivers(Long customerId, Long obituaryId, ObituraryRequestDto request) {
         Obituary obituary = findById(obituaryId);
 
-        if(!request.getIsMine()){
-            throw new IllegalArgumentException("You can't upload the obituary since it isn't yours");
-        }
-
-        if (obituary.getDeathCertificate().getIsVerified()) {
-            throw new IllegalArgumentException("You can't upload the obituary since the death certificate is verified");
-        }
-
-        if (!Objects.equals(obituary.getCustomer().getId(), customerId)) {
-            throw new IllegalArgumentException("You are not allowed to update this obituary");
-        }
-
-        if (obituary.getIsMine() != request.getIsMine()) {
-            throw new IllegalArgumentException("You can't change IsMine property");
-        }
+        ResponseThrow.checkOrBadRequest(request.getIsMine(), "You can't upload the obituary since it isn't yours");
+        ResponseThrow.checkOrBadRequest(!obituary.isVerified(), "You can't upload the obituary since the death certificate is verified");
+        ResponseThrow.checkOrBadRequest(obituary.hasCustomerId(customerId), "You are not allowed to update this obituary");
+        ResponseThrow.checkOrBadRequest(obituary.getIsMine() == request.getIsMine(), "You can't change IsMine property");
 
         String customUrl = request.getCustomImage();
         ImageTemplate imageTemplate = imageTemplateRepository.findById(request.getImageTemplate_id()).orElseThrow(() -> ResourceNotFound.of("Image template"));
         String customImageUrl = customUrl != null && customUrl.startsWith("data:image/") ?
             mediaHandler.uploadImageToCloudinary(customUrl, "obituaries") : customUrl;
         
-        Obituary updatedObituary = request.parse();
         Customer customer = customerRepository.findById(customerId).orElseThrow(() -> ResourceNotFound.of("Customer"));
-        updatedObituary.setId(obituary.getId());
-        updatedObituary.setCustomImageUrl(customImageUrl);
-        updatedObituary.setImageTemplate(imageTemplate);
-        updatedObituary.setCustomer(customer);
+        obituary.update(request);
+        obituary.setCustomImageUrl(customImageUrl);
+        obituary.setImageTemplate(imageTemplate);
+        obituary.setCustomer(customer);
 
-        updatedObituary = updateObituary(updatedObituary);
+        Obituary updatedObituary = updateObituary(obituary);
 
         receiverRepository.deleteByObituary(obituary);
         receiverRepository.flush();
@@ -157,7 +139,6 @@ public class ObituaryService {
         obituary.setCustomer(customer);
         obituary.setImageTemplate(imageTemplate);
         obituary.setDeathCertificate(certificate);
-        obituary.setWordColor(word_color);
         obituary = obituaryRepository.saveAndFlush(obituary);
         return obituary;
     }
@@ -165,7 +146,7 @@ public class ObituaryService {
     @Transactional
     public void deleteObituaryByCustomer(Long customerId, Long obituaryId) {
         Obituary obituary = findById(obituaryId);
-        ResponseThrow.checkOrForbidden(!Objects.equals(obituary.getCustomer().getId(), customerId));
+        ResponseThrow.checkOrForbidden(obituary.hasCustomerId(customerId));
         obituaryRepository.deleteById(obituaryId);
     }
 
@@ -185,9 +166,7 @@ public class ObituaryService {
         List<Obituary> obituaries = obituaryRepository.findByCustomerId(customerId);
         obituaries.forEach(obituary -> {
             obituary.setCustomer(null);
-            if (obituary.getWordColor() == null) {
-                obituary.setWordColor("0,0,0");
-            }
+            obituary.setDefaultWordColorIfNull();
         });
         return obituaries;
     }
@@ -195,10 +174,8 @@ public class ObituaryService {
     @Transactional(readOnly = true)
     public Obituary getObituaryById(Long obituaryId, Long userId) {
         Obituary obituary = obituaryRepository.findById(obituaryId).orElseThrow(() -> ResourceNotFound.of("Obituary"));
-        ResponseThrow.checkOrForbidden(Objects.equals(obituary.getCustomer().getId(), userId));
-        if (obituary.getWordColor() == null) {
-            obituary.setWordColor("0,0,0");
-        }
+        ResponseThrow.checkOrForbidden(obituary.hasCustomerId(userId));
+        obituary.setDefaultWordColorIfNull();
         return obituary;
 
     }

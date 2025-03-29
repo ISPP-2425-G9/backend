@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.caronte.caronte.auth.payload.response.CompanyUpdateRequest;
+import com.caronte.caronte.company.DTOs.CompanyDTO;
 import com.caronte.caronte.util.exceptions.ResourceNotFound;
 
 @Service
@@ -33,14 +34,7 @@ public class CompanyService {
     @Transactional
     public Company update(Long id, CompanyUpdateRequest request) {
         Company companyToUpdate = companyRepository.findById(id).orElseThrow(() -> ResourceNotFound.of("Company"));
-        companyToUpdate.setName(request.getName());
-        companyToUpdate.setAddress(request.getAddress());
-        companyToUpdate.setCity(request.getCity());
-        companyToUpdate.setZipCode(request.getZipCode());
-        companyToUpdate.setEmail(request.getEmail());
-        companyToUpdate.setTelephone(request.getTelephone());
-        companyToUpdate.setImageUrl(request.getImageUrl());
-        companyToUpdate.setDescription(request.getDescription());
+        companyToUpdate.update(request);
         return companyRepository.save(companyToUpdate);
     }
 

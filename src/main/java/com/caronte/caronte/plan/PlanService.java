@@ -3,7 +3,7 @@ package com.caronte.caronte.plan;
 
 import org.springframework.stereotype.Service;
 
-import com.caronte.caronte.plan.dtos.PlanResponse;
+import com.caronte.caronte.plan.DTOs.PlanResponse;
 import com.caronte.caronte.user.User;
 import com.caronte.caronte.user.UserRepository;
 import com.stripe.exception.StripeException;
