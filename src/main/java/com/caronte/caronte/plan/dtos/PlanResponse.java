@@ -1,9 +1,10 @@
 package com.caronte.caronte.plan.dtos;
 
-import java.time.LocalDate;
-
+import java.time.LocalDateTime;
 import com.caronte.caronte.plan.Plan;
 import com.caronte.caronte.plan.PlanType;
+import com.stripe.exception.StripeException;
+import com.stripe.model.Subscription;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
@@ -16,17 +17,23 @@ public class PlanResponse {
     @NotNull
     private PlanType planType;
 
-    private LocalDate expiringDate;
+    private LocalDateTime expiringDate;
 
-    public PlanResponse(LocalDate expiringDate, PlanType planType) {
+    public PlanResponse(LocalDateTime expiringDate, PlanType planType) {
         this.expiringDate = expiringDate;
         this.planType = planType;
     }
 
-    public PlanResponse(Plan plan){
+    public PlanResponse(Plan plan) throws StripeException{
         this.planType = plan.getPlanType();
-        //TODO: añadir el año preguntandoselo a Stripe
-        this.expiringDate = LocalDate.of(2030, 3, 30);
+
+        if(plan.isPremium()) {
+            Subscription subscription = Subscription.retrieve(plan.getSubscriptionId());
+            Long currentPeriodEnd = subscription.getCurrentPeriodEnd();
+            this.expiringDate = LocalDateTime.ofEpochSecond(currentPeriodEnd, 0, java.time.ZoneOffset.UTC);
+        } else {
+            this.expiringDate = null;
+        }
     }
 
 }

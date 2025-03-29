@@ -26,7 +26,7 @@ public class RegisterRequestCompany {
     @Length(max=100)
     @NotBlank(message = "El nombre es requerido")
     private String name;
-    
+
     @Length(max=255)
     @NotBlank(message = "El email es requerido")
     @Pattern(regexp = REGEX_EMAIL, message = "Invalid email format")
@@ -37,32 +37,32 @@ public class RegisterRequestCompany {
 
     @NotBlank(message = "Password2 es requerido")
     private String password2;
-    
+
     @Length(max=15)
     @NotBlank(message = "El teléfono es requerido")
     private String telephone;
-    
+
     @Length(max=255)
     @NotBlank(message = "La dirección es requerida")
     private String address;
-    
+
     @Length(max=100)
     @NotBlank(message = "La ciudad es requerida")
     private String city;
-    
+
     @NotBlank(message = "El código postal es requerido")
     @Pattern(regexp = REGEX_ZIP_CODE, message = "Formato de código postal invalido")
     private String zipCode;
-    
+
     @NotBlank(message = "El NIF de la compañia es requerido")
     @Pattern(regexp = REGEX_NIF, message = "Formato de NIF invalido")
     private String nif;
-    
+
     @URL
     @Length(max=512)
     @JsonProperty("image")
     private String imageUrl;
-    
+
     @Length(max=1024)
     private String description;
 
@@ -81,8 +81,9 @@ public class RegisterRequestCompany {
         company.setEmail(this.getEmail());
         company.setPassword(passwordEncoder.encode(this.getPassword1()));
         company.setTelephone(this.getTelephone());
-        company.setPlan(Plan.newFreePlan());
+        company.setPlan(Plan.newPlanFree());
         company.setCompanyType(this.getCompanyType());
+      
         return company;
 
     }

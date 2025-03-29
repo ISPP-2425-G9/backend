@@ -16,9 +16,11 @@ public class ReceiverService {
     public ReceiverService(ReceiverRepository receiverRepository) {
         this.receiverRepository = receiverRepository;
     }
-
+  
+  
     @Transactional(readOnly = true)
     public List<ReceiverResponseDTO> getReceiversByObituaryId(Obituary obituary) {
+        List<ReceiverResponseDTO> receivers = new ArrayList<>();
         List<Receiver> receiversList = receiverRepository.findByObituary(obituary);
         List<ReceiverResponseDTO> receivers = receiversList.stream().map(ReceiverResponseDTO::parse).toList();
         return receivers;
@@ -42,4 +44,19 @@ public class ReceiverService {
         receiverRepository.flush();
     }
         
+    public Receiver updateMessageReceiver(Long id, String name, String telephone, String email) {
+        Receiver receiver = receiverRepository.findById(id).orElseThrow(() -> new RuntimeException("Receiver not found"));
+        if (!receiver.getName().equals(name)) {
+            receiver.setName(name);
+        }
+        if (!receiver.getTelephone().equals(telephone)) {
+            receiver.setTelephone(telephone);
+        }
+        if (!receiver.getEmail().equals(email)) {
+            receiver.setEmail(email);
+        }
+        return receiverRepository.save(receiver);
+    }
+    
+
 }

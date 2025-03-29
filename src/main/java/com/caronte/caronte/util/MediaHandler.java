@@ -55,8 +55,38 @@ public class MediaHandler {
             Map uploadResult = cloudinaryVideo.uploader().upload(videoFile, options);
             videoFile.delete();
             return uploadResult.get("secure_url").toString();
-
         } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+          
+    public static String deleteImageFromCloudinary(String imageUrl) {
+        Dotenv dotenv = Dotenv.load();
+        Cloudinary cloudinary = new Cloudinary(dotenv.get("CLOUDINARY_IMAGES_URL"));
+        
+        try {
+            System.out.println("Original image URL: " + imageUrl);
+            
+            String[] parts = imageUrl.split("/upload/");
+            System.out.println("Parts after split: " + parts[1]);
+
+            String filePath = parts[1].split("/", 2)[1].split("\\.")[0];
+            System.out.println("Extracted Public ID: " + filePath);
+            
+            Map<String, Object> result = cloudinary.uploader().destroy(filePath, ObjectUtils.emptyMap());
+            System.out.println("Cloudinary result: " + result);
+            
+            if(result.containsKey("result") && result.get("result").equals("ok")) {
+                System.out.println("Image deleted successfully.");
+            } else {
+                System.out.println("Image deletion failed: " + result);
+            }
+    
+            return result.get("result").toString();
+            
+        } catch (Exception e) {
+            System.err.println("Error while deleting image from Cloudinary: " + e.getMessage());
             e.printStackTrace();
             return null;
         }
