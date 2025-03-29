@@ -1,8 +1,8 @@
 package com.caronte.caronte.auth;
 
+import java.nio.file.AccessDeniedException;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -70,11 +70,8 @@ public class AuthController {
                 new UsernamePasswordAuthenticationToken(loginRequest.getId(), loginRequest.getPassword()));
         SecurityContextHolder.getContext().setAuthentication(authentication);
         String jwt = jwtUtils.generateJwtToken(authentication);
-        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
-        List<String> roles = userDetails.getAuthorities().stream().map(item -> item.getAuthority())
-                .collect(Collectors.toList());
-		String name = authService.getNameById(userDetails.getId());
-        JwtResponse jwtResponse = new JwtResponse(jwt, userDetails.getId(), userDetails.getUsername(), roles, name);
+		User user = userService.findCurrentUser();
+        JwtResponse jwtResponse = new JwtResponse(jwt, user);
         return ResponseEntity.ok().body(jwtResponse);
 	}
 
@@ -123,10 +120,8 @@ public class AuthController {
 		Customer customer = customerService.update(customerId, request);
 		UserDetailsImpl userDetails = UserDetailsImpl.build(customer);
 		String jwt = jwtUtils.generateJwtToken(userDetails);
-		List<String> roles = userDetails.getAuthorities().stream().map(item -> item.getAuthority())
-				.collect(Collectors.toList());
-		String name = customer.getName();
-		JwtResponse jwtResponse = new JwtResponse(jwt, userDetails.getId(), userDetails.getUsername(), roles, name);
+		User user = userService.findCurrentUser();
+        JwtResponse jwtResponse = new JwtResponse(jwt, user);
 		return ResponseEntity.ok().body(jwtResponse);
 	}
 
@@ -136,11 +131,8 @@ public class AuthController {
         userService.authorizeUserOrAdmin(userId);
         User user = userService.changePassword(userId, request);
         UserDetailsImpl userDetails = UserDetailsImpl.build(user);
-        String jwt = jwtUtils.generateJwtToken(userDetails);
-        List<String> roles = userDetails.getAuthorities().stream().map(item -> item.getAuthority())
-                .collect(Collectors.toList());
-		String name = user.getName();
-		JwtResponse jwtResponse = new JwtResponse(jwt, userDetails.getId(), userDetails.getUsername(), roles, name);
+		String jwt = jwtUtils.generateJwtToken(userDetails);
+        JwtResponse jwtResponse = new JwtResponse(jwt, user);
         return ResponseEntity.ok().body(jwtResponse);
 	}
 
@@ -154,19 +146,17 @@ public class AuthController {
 	@PutMapping("/companies/{companyId}")
 	public ResponseEntity<JwtResponse> updateCompany(
 			@PathVariable Long companyId,
-			@RequestBody @Valid CompanyUpdateRequest request) {
+			@RequestBody @Valid CompanyUpdateRequest request) throws AccessDeniedException {
         userService.authorizeUser(companyId);
 		userService.findByEmail(request.getEmail())
 			.filter(user -> Objects.equals(user.getId(), companyId))
-			.orElseThrow(() -> new IllegalAccessError("This email is of other user"));
+			.orElseThrow(() -> new AccessDeniedException("This email is of other user"));
 
         Company company = companyService.update(companyId, request);
         UserDetailsImpl userDetails = UserDetailsImpl.build(company);
         String jwt = jwtUtils.generateJwtToken(userDetails);
-        List<String> roles = userDetails.getAuthorities().stream().map(item -> item.getAuthority())
-                .collect(Collectors.toList());
-		String name = company.getName();
-		JwtResponse jwtResponse = new JwtResponse(jwt, userDetails.getId(), userDetails.getUsername(), roles, name);
+		User user = userService.findCurrentUser();
+        JwtResponse jwtResponse = new JwtResponse(jwt, user);
         return ResponseEntity.ok().body(jwtResponse);
 	}
 
