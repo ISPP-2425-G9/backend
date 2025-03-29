@@ -34,4 +34,5 @@ public class Message extends BaseEntity {
     @JoinColumn(nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Customer customer;
+
 }

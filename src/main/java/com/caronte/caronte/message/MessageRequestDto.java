@@ -1,26 +1,25 @@
 package com.caronte.caronte.message;
 
+import java.util.List;
+
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
-public class CreateMessageRequestDto {
+public class MessageRequestDto {
 
-    @NotBlank
     private String title;
 
-    @NotBlank
     private String body;
 
-    private String videoUrl;
-    private String imageUrl;
+    private List<String> customImages;
 
     @NotNull
-    private Boolean isLastWill;
+    private Boolean isLastWill = false;
+    
 
     private List<RecipientDto> recipients;
 

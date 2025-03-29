@@ -9,11 +9,11 @@ import org.springframework.transaction.annotation.Transactional;
 import com.caronte.caronte.customer.Customer;
 import com.caronte.caronte.customer.CustomerRepository;
 import com.caronte.caronte.deathCertificate.DeathCertificate;
+import com.caronte.caronte.deathCertificate.DeathCertificateService;
 import com.caronte.caronte.imageTemplate.ImageTemplate;
 import com.caronte.caronte.imageTemplate.ImageTemplateService;
 import com.caronte.caronte.receiver.ReceiverService;
 import com.caronte.caronte.util.MediaHandler;
-import com.caronte.caronte.deathCertificate.DeathCertificateService;
 
 @Service
 public class ObituaryService {
@@ -177,7 +177,8 @@ public class ObituaryService {
         obituary.setImageTemplate(imageTemplate);
         obituary.setDeathCertificate(certificate);
         obituary.setWordColor(word_color);
-        return obituaryRepository.save(obituary);
+        obituary = obituaryRepository.saveAndFlush(obituary);
+        return obituary;
     }
     @Transactional
     public void deleteObituaryByCustomer(Long customerId, Long obituaryId) {
@@ -197,7 +198,8 @@ public class ObituaryService {
 
     @Transactional
     public Obituary updateObituary(Obituary obituary) {
-        return obituaryRepository.save(obituary);
+        Obituary updatedObituary = obituaryRepository.saveAndFlush(obituary);
+        return updatedObituary;
     }
 
     @Transactional
