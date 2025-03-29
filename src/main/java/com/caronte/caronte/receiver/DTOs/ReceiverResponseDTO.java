@@ -1,4 +1,6 @@
-package com.caronte.caronte.receiver;
+package com.caronte.caronte.receiver.DTOs;
+
+import com.caronte.caronte.receiver.Receiver;
 
 import jakarta.persistence.Id;
 import jakarta.validation.constraints.Email;

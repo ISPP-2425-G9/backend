@@ -1,6 +1,7 @@
-package com.caronte.caronte.plan.dtos;
+package com.caronte.caronte.plan._DTOs;
 
 import java.time.LocalDateTime;
+
 import com.caronte.caronte.plan.Plan;
 import com.caronte.caronte.plan.PlanType;
 import com.stripe.exception.StripeException;

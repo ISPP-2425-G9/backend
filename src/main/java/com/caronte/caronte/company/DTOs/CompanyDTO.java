@@ -1,4 +1,7 @@
-package com.caronte.caronte.company;
+package com.caronte.caronte.company.DTOs;
+
+import com.caronte.caronte.company.Company;
+import com.caronte.caronte.company.CompanyType;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

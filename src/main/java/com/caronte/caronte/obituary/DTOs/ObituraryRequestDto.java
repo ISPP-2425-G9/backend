@@ -1,10 +1,14 @@
-package com.caronte.caronte.obituary;
+package com.caronte.caronte.obituary.DTOs;
+
+import static com.caronte.caronte.util.RegexContants.REGEX_RGB;
 
 import java.time.LocalDate;
 import java.util.List;
 
-import com.caronte.caronte.deathCertificate.DeathCertificateRequestDTO;
+import com.caronte.caronte.deathCertificate.DTOs.DeathCertificateRequestDTO;
+import com.caronte.caronte.obituary.Obituary;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
@@ -43,13 +47,13 @@ public class ObituraryRequestDto {
     @NotNull(message = "The 'isMine' field cannot be null")
     private Boolean isMine;
 
-    @Pattern(regexp = "^(25[0-5]|2[0-4]\\d|1\\d{2}|\\d{1,2}),(25[0-5]|2[0-4]\\d|1\\d{2}|\\d{1,2}),(25[0-5]|2[0-4]\\d|1\\d{2}|\\d{1,2})$", 
-    message = "Color must be in the format 'r,g,b' where r, g and b are integers between 0 and 255")
+    @Pattern(regexp = REGEX_RGB, message = "Color must be in the format 'r,g,b' where r, g and b are integers between 0 and 255")
     private String  wordColor; 
 
     private DeathCertificateRequestDTO deathCertificate;
 
     private List<@Valid ContactDto> contacts;
+    
     @Getter
     @Setter
     public static class ContactDto {
@@ -74,6 +78,12 @@ public class ObituraryRequestDto {
         obituary.setIsMine(this.isMine);
         obituary.setWordColor(this.wordColor);
         return obituary;
+    }
+
+    @JsonIgnore
+    public void setDefaultWordColorIfNull() {
+        if(this.wordColor == null)
+            this.wordColor = "0,0,0";
     }
 
 }
