@@ -61,10 +61,7 @@ public class MediaHandler {
         }
     }
           
-    public static String deleteImageFromCloudinary(String imageUrl) {
-        Dotenv dotenv = Dotenv.load();
-        Cloudinary cloudinary = new Cloudinary(dotenv.get("CLOUDINARY_IMAGES_URL"));
-        
+    public String deleteImageFromCloudinary(String imageUrl) {        
         try {
             System.out.println("Original image URL: " + imageUrl);
             
@@ -74,7 +71,7 @@ public class MediaHandler {
             String filePath = parts[1].split("/", 2)[1].split("\\.")[0];
             System.out.println("Extracted Public ID: " + filePath);
             
-            Map<String, Object> result = cloudinary.uploader().destroy(filePath, ObjectUtils.emptyMap());
+            Map result = cloudinaryImage.uploader().destroy(filePath, ObjectUtils.emptyMap());
             System.out.println("Cloudinary result: " + result);
             
             if(result.containsKey("result") && result.get("result").equals("ok")) {
@@ -104,7 +101,7 @@ public class MediaHandler {
         return image;
     }
 
-    public File base64ToVideo(String base64String) {
+    private File base64ToVideo(String base64String) {
         File videoFile = null;
         try {
             byte[] videoBytes = decoder(base64String);
