@@ -77,8 +77,8 @@ public class DeathCertificateService {
     }
 
     @Transactional
-    public DeathCertificate getAllDeathCertificates() {
-        return deathCertificateRepository.findAll().iterator().next();
+    public Iterable<DeathCertificate> getAllDeathCertificates() {
+        return deathCertificateRepository.findAll();
     }
 
     @Transactional
@@ -93,7 +93,5 @@ public class DeathCertificateService {
         return new DeathCertificateWithObituaryDniDTO(obituary.getCustomer().getDni(), obituary.getDeathCertificate());
     }
 
-
-    
 
 }
