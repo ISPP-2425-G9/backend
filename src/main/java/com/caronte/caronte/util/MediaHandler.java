@@ -29,6 +29,7 @@ public class MediaHandler {
         this.cloudinaryVideo = new Cloudinary(cloudinaryVideoUrl);
     }
 
+    @SuppressWarnings("rawtypes")
     public String uploadImageToCloudinary(String base64String, String folder) {
         BufferedImage image = base64ToImage(base64String);
         File tempFile = null;
@@ -49,6 +50,7 @@ public class MediaHandler {
         }
     }
 
+    @SuppressWarnings("rawtypes")
     public String uploadVideoToCloudinary(File videoFile) {
         try {
             Map options = ObjectUtils.asMap("folder", "videos/messages/", "resource_type", "video");
@@ -60,7 +62,8 @@ public class MediaHandler {
             return null;
         }
     }
-          
+         
+    @SuppressWarnings("rawtypes")
     public String deleteImageFromCloudinary(String imageUrl) {        
         try {
             System.out.println("Original image URL: " + imageUrl);
@@ -101,6 +104,7 @@ public class MediaHandler {
         return image;
     }
 
+    @SuppressWarnings("unused")
     private File base64ToVideo(String base64String) {
         File videoFile = null;
         try {
