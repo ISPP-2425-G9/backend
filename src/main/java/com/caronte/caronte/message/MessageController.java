@@ -15,9 +15,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-
+import com.caronte.caronte.message.DTOs.MessageRequestDto;
 import com.caronte.caronte.user.UserService;
 import com.caronte.caronte.util.ErrorHandler;
+import com.caronte.caronte.util.exceptions.ResponseThrow;
 
 import jakarta.validation.Valid;
 
@@ -35,8 +36,7 @@ public class MessageController {
 
     @PostMapping
     public ResponseEntity<Map<String, Long>> createMessage(
-            @Valid @RequestBody CreateMessageRequestDto request,
-            BindingResult bindingResult) {
+            @Valid @RequestBody MessageRequestDto request, BindingResult bindingResult) {
         ErrorHandler errorHandler = ErrorHandler.catchError(bindingResult);
         errorHandler.throwIfHasErrors();
         
@@ -46,25 +46,11 @@ public class MessageController {
         return ResponseEntity.status(HttpStatus.CREATED).body(Map.of("messageId", createdMessage.getId()));
     }
 
-    @GetMapping("/{customer_id}/my_messages")
-    public ResponseEntity<?> getMessagesByCustomerId(
-            @PathVariable Long customer_id,
-            Authentication authentication) {
-
-        if (authentication == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                                .body(Map.of("error", "User not authenticated"));
-        }
-
+    @GetMapping("/{customerId}/my_messages")
+    public ResponseEntity<?> getMessagesByCustomerId(@PathVariable Long customerId) {
         try {
-            UserDetailsImpl userPrincipal = (UserDetailsImpl) authentication.getPrincipal();
-            Long customerId = userPrincipal.getId();
-            if (!customerId.equals(customer_id)) {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                                    .body(Map.of("error", "User not authorized to access this resource"));
-            }
-            List<Message> messages = messageService.getMessagesByCustomerId(customerId);
-            
+            userService.authorizeUser(customerId);
+            List<Message> messages = messageService.getMessagesByCustomerId(customerId); 
             return ResponseEntity.ok(messages);
         } catch (Exception e) {
             e.printStackTrace();
@@ -73,90 +59,32 @@ public class MessageController {
         }
     }
 
-    @GetMapping("/{message_id}")
-    public ResponseEntity<?> getMessageById(
-            @PathVariable Long message_id,
-            Authentication authentication) {
+    @GetMapping("/{messageId}")
+    public ResponseEntity<?> getMessageById(@PathVariable Long messageId) {
+        Long customerId = userService.findCurrentUserId();
+        Message message = messageService.getMessageById(messageId, customerId);
+        ResponseThrow.checkOrForbidden(message.hasCustomerWithId(customerId), "User not authorized to access this resource");
 
-        if (authentication == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                                .body(Map.of("error", "User not authenticated"));
-        }
-
-        try {
-            UserDetailsImpl userPrincipal = (UserDetailsImpl) authentication.getPrincipal();
-            Long customerId = userPrincipal.getId();
-            Message message = messageService.getMessageById(message_id, customerId);
-            if (message.getCustomer().getId().equals(customerId)) {
-                return ResponseEntity.ok(message);
-            } else {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                                    .body(Map.of("error", "User not authorized to access this resource"));
-            }
-        
-        }catch (ResponseStatusException e) {
-            return ResponseEntity.status(e.getStatusCode()).body(Map.of("error", e.getReason()));
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                                .body(Map.of("error", e.getMessage()));
-        }
+        return ResponseEntity.ok(message);
     }
 
-    @PutMapping("/{message_id}")
-    public ResponseEntity<?> updateMessage(
-            @PathVariable Long message_id,
+    @PutMapping("/{messageId}")
+    public ResponseEntity<Message> updateMessage(
+            @PathVariable Long messageId,
             @Valid @RequestBody MessageRequestDto request,
-            BindingResult bindingResult,
-            Authentication authentication) {
-
-        if (authentication == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                                .body(Map.of("error", "User not authenticated"));
-        }
-
+            BindingResult bindingResult) {
         ErrorHandler errorHandler = ErrorHandler.catchError(bindingResult);
-        if (errorHandler.hasErrors()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorHandler.getErrors());
-        }
+        errorHandler.throwIfHasErrors();
 
-        try {
-            UserDetailsImpl userPrincipal = (UserDetailsImpl) authentication.getPrincipal();
-            Long customerId = userPrincipal.getId();
-            Message updatedMessage = messageService.updateMessage(message_id, request, customerId);
-            
-            return ResponseEntity.ok(updatedMessage);
-        } catch (ResponseStatusException e) {
-            return ResponseEntity.status(e.getStatusCode()).body(Map.of("error", e.getReason()));
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                                .body(Map.of("error", e.getMessage()));
-        }
+        Long customerId = userService.findCurrentUserId();
+        Message updatedMessage = messageService.updateMessage(messageId, request, customerId);
+        return ResponseEntity.ok(updatedMessage);
     }
 
     @DeleteMapping("/{message_id}")
-    public ResponseEntity<?> deleteMessage(
-            @PathVariable Long message_id,
-            Authentication authentication) {
-
-        if (authentication == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                                .body(Map.of("error", "User not authenticated"));
-        }
-
-        try {
-            UserDetailsImpl userPrincipal = (UserDetailsImpl) authentication.getPrincipal();
-            Long customerId = userPrincipal.getId();
-            messageService.deleteMessage(message_id, customerId);
-            
-            return ResponseEntity.ok().build();
-        } catch (ResponseStatusException e) {
-            return ResponseEntity.status(e.getStatusCode()).body(Map.of("error", e.getReason()));
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                                .body(Map.of("error", e.getMessage()));
-        }
+    public ResponseEntity<?> deleteMessage(@PathVariable Long messageId) {
+        Long customerId = userService.findCurrentUserId();
+        messageService.deleteMessage(messageId, customerId);
+        return ResponseEntity.ok().build();
     }
 }
