@@ -1,12 +1,14 @@
 package com.caronte.caronte.receiver;
 
+import java.util.Objects;
+
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
-import com.caronte.caronte.message.CreateMessageRequestDto.RecipientDto;
 import com.caronte.caronte.message.Message;
+import com.caronte.caronte.message.DTOs.MessageRequestDto.RecipientDto;
 import com.caronte.caronte.obituary.Obituary;
-import com.caronte.caronte.obituary.ObituraryRequestDto.ContactDto;
+import com.caronte.caronte.obituary.DTOs.ObituraryRequestDto.ContactDto;
 import com.caronte.caronte.util.BaseEntity;
 
 import jakarta.persistence.Column;
@@ -65,5 +67,17 @@ public class Receiver extends BaseEntity {
         receiver.setEmail(contactDto.getEmail());
         receiver.setObituary(obituary);
         return receiver;
+    }
+
+    public boolean hasTelephone(String telephone){
+        return Objects.equals(this.telephone, telephone);
+    }
+
+    public boolean hasEmail(String email){
+        return Objects.equals(this.email, email);
+    }
+
+    public boolean hasEqualEmailOrTelephone(RecipientDto recipientDto){
+        return hasEmail(recipientDto.getEmail()) || hasTelephone(recipientDto.getTelephone());
     }
 }

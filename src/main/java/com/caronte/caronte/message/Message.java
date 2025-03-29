@@ -8,7 +8,9 @@ import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
 import com.caronte.caronte.customer.Customer;
+import com.caronte.caronte.message.DTOs.MessageRequestDto;
 import com.caronte.caronte.util.BaseEntity;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -38,7 +40,7 @@ public class Message extends BaseEntity {
     @Column(nullable = false)
     private Boolean isLastWill;
 
-    public Message(CreateMessageRequestDto requestDto, Customer customer) {
+    public Message(MessageRequestDto requestDto, Customer customer) {
         this.title = requestDto.getTitle();
         this.body = requestDto.getBody();
         this.isLastWill = requestDto.getIsLastWill();
@@ -57,5 +59,10 @@ public class Message extends BaseEntity {
     @JoinColumn(nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Customer customer;
+
+    @JsonIgnore
+    public boolean hasCustomerWithId(Long id) {
+        return this.customer.getId() == id;
+    }
 
 }
