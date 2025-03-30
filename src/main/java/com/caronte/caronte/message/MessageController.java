@@ -81,7 +81,7 @@ public class MessageController {
         return ResponseEntity.ok(updatedMessage);
     }
 
-    @DeleteMapping("/{message_id}")
+    @DeleteMapping("/{messageId}")
     public ResponseEntity<?> deleteMessage(@PathVariable Long messageId) {
         Long customerId = userService.findCurrentUserId();
         messageService.deleteMessage(messageId, customerId);

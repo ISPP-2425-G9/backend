@@ -2,6 +2,7 @@ package com.caronte.caronte.obituary;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -55,11 +56,11 @@ public class ObituaryService {
     @Transactional
     public DeathCertificate certificateManagement(ObituraryRequestDto request, Customer customer, Long customerId) {
         DeathCertificateRequestDTO deathCertificateDTO = request.getDeathCertificate();
-        String dni = deathCertificateDTO.getDni();
-        
-        ResponseThrow.checkOrBadRequest(dni != null && deathCertificateDTO != null && deathCertificateDTO.getFile() != null, 
-                                 "The Death Certificate is invalid");
-        ResponseThrow.checkOrBadRequest(!customer.hasDni(deathCertificateDTO.getDni()), "No puedes subir un certificado con tu DNI");
+        String dni = Optional.ofNullable(deathCertificateDTO).map(DeathCertificateRequestDTO::getDni).orElse(null);
+        String file = Optional.ofNullable(deathCertificateDTO).map(DeathCertificateRequestDTO::getFile).orElse(null);
+
+        ResponseThrow.checkOrBadRequest(deathCertificateDTO != null && dni != null && file != null,"The Death Certificate is invalid");
+        ResponseThrow.checkOrBadRequest(!customer.hasDni(dni), "No puedes subir un certificado con tu DNI");
 
         List<Obituary> obituaries = obituaryRepository.findByCustomerDni(dni);
         Boolean existCustomer = customerRepository.existsByDni(dni);
