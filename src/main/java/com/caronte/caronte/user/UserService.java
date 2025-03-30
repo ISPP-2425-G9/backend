@@ -25,6 +25,11 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
+    public User findById(Long id) {
+        return userRepository.findById(id).orElseThrow(() -> ResourceNotFound.of("User", "ID", id));
+    }
+
+    @Transactional(readOnly = true)
     public Optional<User> findByEmail(String email) {
         return userRepository.findByEmail(email);
     }
@@ -32,7 +37,7 @@ public class UserService {
     @Transactional(readOnly = true)
     public User findCurrentUser() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        ResponseThrow.checkOrForbidden(!auth.isAuthenticated(), "User is not authenticated");
+        ResponseThrow.checkOrForbidden(auth.isAuthenticated(), "User is not authenticated");
         UserDetailsImpl userDetails = (UserDetailsImpl) auth.getPrincipal();
         return userRepository.findById(userDetails.getId()).orElseThrow(() -> ResourceNotFound.of("User"));
     }

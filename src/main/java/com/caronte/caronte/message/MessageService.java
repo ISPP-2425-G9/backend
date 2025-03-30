@@ -82,7 +82,7 @@ public class MessageService {
         message.setBody(request.getBody());
 
         List<Image> oldImages = this.imageRepository.findAllByMessageId(messageId);
-        oldImages.forEach(oldImage -> mediaHandler.deleteImageFromCloudinary(oldImage.getImageUrl())); // TODO borrar imagenen en Cloudinary
+        oldImages.forEach(oldImage -> mediaHandler.deleteImageFromCloudinary(oldImage.getImageUrl()));
         this.imageRepository.deleteAll(oldImages);
 
         List<Image> newImages = request.getCustomImages().stream()

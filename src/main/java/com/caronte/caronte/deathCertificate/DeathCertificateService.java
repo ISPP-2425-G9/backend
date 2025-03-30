@@ -56,7 +56,7 @@ public class DeathCertificateService {
     }
 
     private void validateDniNotOwn(Customer customerLogged, DeathCertificateRequestDTO request) {
-        ResponseThrow.checkOrBadRequest(customerLogged.hasDni(request.getDni()), "No puedes subir un certificado de defunción con tu DNI");
+        ResponseThrow.checkOrBadRequest(!customerLogged.hasDni(request.getDni()), "No puedes subir un certificado de defunción con tu DNI");
 
     }
     

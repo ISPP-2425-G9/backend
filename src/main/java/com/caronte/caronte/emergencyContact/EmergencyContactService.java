@@ -48,7 +48,7 @@ public class EmergencyContactService {
     public EmergencyContactDTO update(EmergencyContactDTO emergencyContactDTO, Long id, String email){
         EmergencyContact emergencyContact = emergencyContactRepository.findById(id).orElseThrow(() -> ResourceNotFound.of("Emergency Contact"));
 
-        ResponseThrow.checkOrForbidden(emergencyContact.hasCustomerEmail(email));
+        ResponseThrow.checkOrForbidden(emergencyContact.hasCustomerEmail(email), "No tienes permisos para modificar este contacto de emergencia");
 
         if (!emergencyContact.hasTelephone(emergencyContactDTO.telephone())) {
             checkIfTelephoneIsDuplicate(emergencyContactDTO.telephone(), email);
