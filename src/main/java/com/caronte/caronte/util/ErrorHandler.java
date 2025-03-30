@@ -8,6 +8,7 @@ import java.util.Map;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 
+import com.caronte.caronte.util.exceptions.ErrorHandlerException;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import lombok.AllArgsConstructor;
@@ -21,7 +22,7 @@ public class ErrorHandler {
 
     public static ErrorHandler catchError(BindingResult bindingResult) {
         Map<String, List<String>> errors = new HashMap<>();
-        
+
         if (bindingResult.hasErrors()) {
             for (FieldError error : bindingResult.getFieldErrors()) {
                 errors.computeIfAbsent(error.getField(), _ -> new ArrayList<>()).add(error.getDefaultMessage());
@@ -42,8 +43,13 @@ public class ErrorHandler {
     public boolean hasErrors(){
         return !isEmpty();
     }
-    
+
     public Map<String, List<String>> getErrors() {
         return errors;
+    }
+
+    public void throwIfHasErrors() {
+        if (hasErrors())
+            throw new ErrorHandlerException(this);
     }
 }
