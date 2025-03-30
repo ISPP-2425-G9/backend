@@ -1,6 +1,7 @@
 package com.caronte.caronte.obituary.DTOs;
 
 import static com.caronte.caronte.util.RegexContants.REGEX_RGB;
+import static com.caronte.caronte.util.RegexContants.REGEX_TELEPHONE;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -60,7 +61,7 @@ public class ObituraryRequestDto {
         @NotBlank(message = "The contact name cannot be empty")
         private String name;
 
-        @Pattern(regexp = "\\d{9,15}", message = "The phone number must contain between 9 and 15 numeric digits")
+        @Pattern(regexp = REGEX_TELEPHONE, message = "The phone number must contain 9 digits")
         private String phone;
 
         @Email(message = "The email is not valid")
