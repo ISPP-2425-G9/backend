@@ -1,5 +1,6 @@
-package com.caronte.caronte.plan;
+package com.caronte.caronte.plan.DTOs;
 
+import com.caronte.caronte.plan.PlanType;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.validation.constraints.NotNull;

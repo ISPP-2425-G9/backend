@@ -1,22 +1,27 @@
 package com.caronte.caronte.emergencyContact;
 
-import com.caronte.caronte.emergencyContact.DTOs.EmergencyContactDTO;
+import java.util.Objects;
+
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
 import com.caronte.caronte.customer.Customer;
+import com.caronte.caronte.emergencyContact.DTOs.EmergencyContactDTO;
 import com.caronte.caronte.util.BaseEntity;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
 @Getter
 @Setter
+@NoArgsConstructor
 public class EmergencyContact extends BaseEntity {
     
     @Column(nullable = false, length = 100)
@@ -41,6 +46,24 @@ public class EmergencyContact extends BaseEntity {
         this.customer = customer;
     }
 
-    public EmergencyContact() {
+    @JsonIgnore
+    public boolean hasCustomerEmail(String email) {
+        return Objects.equals(this.getCustomer().getEmail(), email);
+    }
+    
+    @JsonIgnore
+    public boolean hasTelephone(String telephone) {
+        return Objects.equals(this.getTelephone(), telephone);
+    }
+
+    @JsonIgnore
+    public boolean hasEmail(String email) {
+        return Objects.equals(this.getEmail(), email);
+    }
+
+    public void update(EmergencyContactDTO emergencyContactDTO){
+        this.setName(emergencyContactDTO.name());
+        this.setTelephone(emergencyContactDTO.telephone());
+        this.setEmail(emergencyContactDTO.email());
     }
 }

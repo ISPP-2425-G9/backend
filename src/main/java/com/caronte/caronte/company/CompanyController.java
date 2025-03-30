@@ -6,7 +6,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.caronte.caronte.company.DTOs.CompanyDTO;
 
 @RestController
 @RequestMapping("/api/companies")
@@ -27,14 +32,13 @@ public class CompanyController {
      * - name (opcional): filtro por nombre de compañía (busca coincidencias parciales)
      * - companyType (opcional): tipo de compañía (valores: FLORIST, NOTARIES, FUNERAL_HOMES, LAW_FIRMS, OTHER)
      */
-
     @GetMapping("/premium")
-    public Page<CompanyDTO> getPremiumCompanies(
+    public ResponseEntity<Page<CompanyDTO>> getPremiumCompanies(
             @RequestParam(required = false) String city,
             @RequestParam(required = false) String name,
             @RequestParam(required = false) CompanyType companyType,
             Pageable pageable) {
-        return companyService.findAllCompaniesPublicInformation(city, name, companyType, pageable);
+        return ResponseEntity.ok(companyService.findAllCompaniesPublicInformation(city, name, companyType, pageable));
     }
 
     @GetMapping("/companiesTypes")

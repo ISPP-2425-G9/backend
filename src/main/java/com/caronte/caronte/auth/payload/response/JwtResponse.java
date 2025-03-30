@@ -29,6 +29,14 @@ public class JwtResponse {
 		this.name = name;
 	}
 
+	public JwtResponse(String accessToken, UserDetailsImpl userDetailsImpl, String name) {
+		this.token = accessToken;
+		this.id = userDetailsImpl.getId();
+		this.username = userDetailsImpl.getUsername();
+		this.roles = userDetailsImpl.getAuthorities().stream().map(GrantedAuthority::getAuthority).toList();
+		this.name = name;
+	}
+
 	public JwtResponse(String accessToken, User user) {
 		this.token = accessToken;
 		UserDetailsImpl userDetailsImpl = UserDetailsImpl.build(user);
@@ -37,6 +45,7 @@ public class JwtResponse {
 		this.roles = userDetailsImpl.getAuthorities().stream().map(GrantedAuthority::getAuthority).toList();
 		this.name = user.getName();
 	}
+
 
 	@Override
 	public String toString() {

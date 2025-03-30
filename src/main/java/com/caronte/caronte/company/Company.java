@@ -1,4 +1,6 @@
 package com.caronte.caronte.company;
+
+import com.caronte.caronte.auth.payload.response.CompanyUpdateRequest;
 import com.caronte.caronte.user.User;
 
 import jakarta.persistence.Column;
@@ -35,10 +37,17 @@ public class Company extends User {
     @Enumerated(EnumType.STRING)
     private CompanyType companyType = CompanyType.OTRO;
 
-
-    public void setCompanyType(CompanyType companyType) {
-        this.companyType = companyType;
+    public void update(CompanyUpdateRequest request) {
+        this.setName(request.getName());
+        this.setAddress(request.getAddress());
+        this.setCity(request.getCity());
+        this.setZipCode(request.getZipCode());
+        this.setEmail(request.getEmail());
+        this.setTelephone(request.getTelephone());
+        this.setImageUrl(request.getImageUrl());
+        this.setDescription(request.getDescription());
     }
+
 }
 
 

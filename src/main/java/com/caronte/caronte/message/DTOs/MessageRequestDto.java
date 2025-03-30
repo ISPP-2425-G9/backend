@@ -1,6 +1,9 @@
-package com.caronte.caronte.message;
+package com.caronte.caronte.message.DTOs;
 
 import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonSetter;
+import com.fasterxml.jackson.annotation.Nulls;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -22,6 +25,11 @@ public class MessageRequestDto {
     
 
     private List<RecipientDto> recipients;
+
+    @JsonSetter(nulls = Nulls.AS_EMPTY)
+    public void setRecipients(List<RecipientDto> recipients) {
+        this.recipients = (recipients != null) ? recipients : List.of();
+    }
 
     @Getter
     @Setter
