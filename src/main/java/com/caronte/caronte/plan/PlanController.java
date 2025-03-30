@@ -1,6 +1,6 @@
 package com.caronte.caronte.plan;
 
-import org.springframework.beans.factory.annotation.Value;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.transaction.annotation.Transactional;
@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.server.ResponseStatusException;
 
 import com.caronte.caronte.auth.payload.response.JwtResponse;
 import com.caronte.caronte.configuration.jwt.JwtUtils;
@@ -19,7 +18,8 @@ import com.caronte.caronte.plan.DTOs.ChangePlanRequest;
 import com.caronte.caronte.user.User;
 import com.caronte.caronte.user.UserService;
 import com.caronte.caronte.util.exceptions.ResponseThrow;
-import com.stripe.Stripe;
+import com.stripe.exception.StripeException;
+
 
 @RestController
 @RequestMapping("/api/plans")
@@ -31,38 +31,30 @@ public class PlanController {
     private final JwtUtils jwtUtils;
 
     public PlanController(PlanService planService, UserService userService, 
-                          StripeService stripeService, JwtUtils jwtUtils, @Value("${stripe.api.key}") String secretKey) {
+                          StripeService stripeService, JwtUtils jwtUtils) {
         this.planService = planService;
         this.userService = userService;
         this.stripeService = stripeService;
         this.jwtUtils = jwtUtils;
-        Stripe.apiKey = secretKey;
     }
 
     @Transactional
     @PutMapping("/{userId}")
     public ResponseEntity<?> changePlan(@PathVariable Long userId, @RequestBody ChangePlanRequest changePlanRequest,
-    @AuthenticationPrincipal UserDetailsImpl userDetailsImpl) {
-        try {
-            User user = userService.authorizeUserOrAdmin(userId);
-            PlanType actualPlanType = user.getPlan().getPlanType(), newPlanType = changePlanRequest.getPlanType();
-            ResponseThrow.checkOrBadRequest(actualPlanType != newPlanType, 
-                                            "You have the same plan: " + actualPlanType);
- 
-            String subscriptionId = changePlanRequest.isPremium() ?
-                    stripeService.subscription(changePlanRequest.getPaymentMethodId(), user): null;
-            
-            planService.changePlan(user, newPlanType, subscriptionId);
-            
-            String jwt = jwtUtils.generateJwtToken(userDetailsImpl);
-            user = userService.findCurrentUser();
-            JwtResponse jwtResponse = new JwtResponse(jwt, user);
-            return ResponseEntity.ok(jwtResponse);
-        } catch (ResponseStatusException e) {
-            return ResponseEntity.status(e.getStatusCode()).body(e.getBody());
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+    @AuthenticationPrincipal UserDetailsImpl userDetailsImpl) throws StripeException {
+        User user = userService.authorizeUserOrAdmin(userId);
+        PlanType actualPlanType = user.getPlan().getPlanType(), newPlanType = changePlanRequest.getPlanType();
+        ResponseThrow.checkOrBadRequest(actualPlanType != newPlanType, "You have the same plan: " + actualPlanType);
+
+        String subscriptionId = changePlanRequest.isPremium() ?
+                stripeService.subscription(changePlanRequest.getPaymentMethodId(), user): null;
+        
+        planService.changePlan(user, newPlanType, subscriptionId);
+        
+        String jwt = jwtUtils.generateJwtToken(userDetailsImpl);
+        user = userService.findCurrentUser();
+        JwtResponse jwtResponse = new JwtResponse(jwt, user);
+        return ResponseEntity.ok(jwtResponse);
     }
 
 }
