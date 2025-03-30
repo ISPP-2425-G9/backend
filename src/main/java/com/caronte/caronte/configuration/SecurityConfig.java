@@ -86,7 +86,7 @@ public class SecurityConfig {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowCredentials(true);
-        config.setAllowedOrigins(Arrays.asList("https://sprint2.caronte.site", "http://sprint2.caronte.site", "https://www.sprint2.caronte.site", "http://www.sprint2.caronte.site"));
+        config.setAllowedOrigins(Arrays.asList("https://sprint3.caronte.site", "http://sprint3.caronte.site", "https://www.sprint3.caronte.site", "http://www.sprint3.caronte.site"));
         config.setAllowedHeaders(Arrays.asList("*"));
         config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         source.registerCorsConfiguration("/**", config);
@@ -99,7 +99,7 @@ public class SecurityConfig {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowCredentials(true);
-        config.setAllowedOrigins(Arrays.asList("https://sprint2.caronte.site", "http://sprint2.caronte.site", "https://www.sprint2.caronte.site", "http://www.sprint2.caronte.site"));
+        config.setAllowedOrigins(Arrays.asList("https://sprint3.caronte.site", "http://sprint3.caronte.site", "https://www.sprint3.caronte.site", "http://www.sprint3.caronte.site"));
         config.setAllowedHeaders(Arrays.asList("*"));
         config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         source.registerCorsConfiguration("/**", config);
