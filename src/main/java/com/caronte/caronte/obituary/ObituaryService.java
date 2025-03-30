@@ -95,6 +95,7 @@ public class ObituaryService {
         for (ObituraryRequestDto.ContactDto contact : contacts) {
             receiverService.saveObituaryReceiver(contact.getName(), contact.getPhone(), contact.getEmail(), obituary);
         }
+        receiverService.notifyReceivers(contacts, obituary);
 
         return obituary;
     }
