@@ -1,12 +1,14 @@
 package com.caronte.caronte.plan;
 
+
 import org.springframework.stereotype.Service;
 
-import com.caronte.caronte.plan.dtos.PlanResponse;
+import com.caronte.caronte.plan.DTOs.PlanResponse;
 import com.caronte.caronte.user.User;
 import com.caronte.caronte.user.UserRepository;
 import com.stripe.exception.StripeException;
 import com.stripe.model.Subscription;
+
 
 @Service
 public class PlanService {
@@ -20,9 +22,10 @@ public class PlanService {
         this.userRepository = userRepository;
     }
 
+
     public Plan changePlan(User user, PlanType planType, String subscriptionId) throws StripeException {
         Plan plan = user.getPlan();
-        // Si lo que se realiza es una cancelación del plan premium, se debe de cancelar la suscripción en Stripe
+        // If you change premium plan to free, Stripe subscription must be cancel
         if(plan.isPremium() && planType == PlanType.FREE) {
             Subscription subscription = Subscription.retrieve(plan.getSubscriptionId());
             subscription.cancel();

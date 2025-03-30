@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.caronte.caronte.company.Company;
 import com.caronte.caronte.user.User;
+import com.stripe.Stripe;
 import com.stripe.exception.StripeException;
 import com.stripe.model.Customer;
 import com.stripe.model.PaymentIntent;
@@ -34,19 +35,13 @@ public class StripeService {
     @Value("${stripe.obituary.price.id}")
     private String obituaryPriceId;
 
+    public StripeService(@Value("${stripe.api.key}") String secretKey){
+        Stripe.apiKey = secretKey;
+    }
+
     @Transactional
     public void pay(String paymentMethodId, String email) throws StripeException {
-        List<Customer> customers = Customer.list(CustomerListParams.builder()
-                .setEmail(email)
-                .setLimit(1L)
-                .build()).getData();
-
-        // This "Customer" refers to Stripe's Customer class, not Caronte's.
-        Customer customer = !customers.isEmpty() ? customers.getFirst()
-                : Customer.create(
-                        CustomerCreateParams.builder()
-                                .setEmail(email)
-                                .build());
+        Customer customer = getCustomerByEmail(email);
 
         Price price = Price.retrieve(obituaryPriceId);
 
@@ -69,18 +64,7 @@ public class StripeService {
     
     @Transactional
     public String subscription(String paymentMethodId, User user) throws StripeException {
-        List<Customer> customers = Customer.list(CustomerListParams.builder()
-                .setEmail(user.getEmail())
-                .setLimit(1L)
-                .build()).getData();
-
-        // This "Customer" refers to Stripe's Customer class, not Caronte's.
-        Customer customer = !customers.isEmpty() ? customers.getFirst()
-                : Customer.create(
-                        CustomerCreateParams.builder()
-                                .setEmail(user.getEmail())
-                                .build());
-
+        Customer customer = getCustomerByEmail(user.getEmail());
         String customerId = customer.getId();
 
         PaymentMethodAttachParams attachParams = PaymentMethodAttachParams.builder()
@@ -103,15 +87,9 @@ public class StripeService {
         
         
         Subscription subscription = Subscription.create(params);
-        
-        customer = !customers.isEmpty() ? customers.getFirst()
-                : Customer.create(
-                        CustomerCreateParams.builder()
-                                .setEmail(user.getEmail())
-                                .build());
 
         SubscriptionListParams subscriptionListParams = SubscriptionListParams.builder()
-                .setCustomer(customerId) // ID del cliente
+                .setCustomer(customerId)
                 .build();
 
         List<Subscription> subscriptions = Subscription.list(subscriptionListParams).getData();
@@ -121,5 +99,21 @@ public class StripeService {
                 }
         }
         return subscription.getId();
+    }
+
+    private static Customer getCustomerByEmail(String email) throws StripeException {
+        List<Customer> customers = Customer.list(CustomerListParams.builder()
+                .setEmail(email)
+                .setLimit(1L)
+                .build()).getData();
+
+        // This "Customer" refers to Stripe's Customer class, not Caronte's.
+        Customer customer = !customers.isEmpty() ? customers.getFirst()
+                : Customer.create(
+                        CustomerCreateParams.builder()
+                                .setEmail(email)
+                                .build());
+
+        return customer;
     }
 }

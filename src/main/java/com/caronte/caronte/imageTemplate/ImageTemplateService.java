@@ -1,11 +1,12 @@
 package com.caronte.caronte.imageTemplate;
 
 
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.stream.Collectors;
+import com.caronte.caronte.util.exceptions.ResourceNotFound;
 
 @Service
 public class ImageTemplateService {
@@ -15,15 +16,14 @@ public class ImageTemplateService {
     public ImageTemplateService(ImageTemplateRepository imageTemplateRepository) {
         this.imageTemplateRepository = imageTemplateRepository;
     }
+
     @Transactional
     public ImageTemplate findById(Long id) {
-        ImageTemplate imageTemplate = imageTemplateRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Image template not found"));
-        return imageTemplate;
+        return imageTemplateRepository.findById(id).orElseThrow(() -> ResourceNotFound.of("Image template"));
     }
+
     @Transactional
     public List<ImageTemplate> getAllTemplateUrls() {
-        return imageTemplateRepository.findAll()
-                .stream()
-                .collect(Collectors.toList());
+        return imageTemplateRepository.findAll();
     }
 }

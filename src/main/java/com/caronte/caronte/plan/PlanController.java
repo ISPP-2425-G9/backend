@@ -15,6 +15,7 @@ import com.caronte.caronte.auth.payload.response.JwtResponse;
 import com.caronte.caronte.configuration.jwt.JwtUtils;
 import com.caronte.caronte.configuration.services.StripeService;
 import com.caronte.caronte.configuration.services.UserDetailsImpl;
+import com.caronte.caronte.plan.DTOs.ChangePlanRequest;
 import com.caronte.caronte.user.User;
 import com.caronte.caronte.user.UserService;
 import com.caronte.caronte.util.exceptions.ResponseThrow;

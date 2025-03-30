@@ -1,4 +1,4 @@
-package com.caronte.caronte.plan.dtos;
+package com.caronte.caronte.plan.DTOs;
 
 import java.time.LocalDateTime;
 
