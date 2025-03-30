@@ -26,9 +26,8 @@ public class MessageRequestDto {
 
     private List<RecipientDto> recipients;
 
-    @JsonSetter(nulls = Nulls.AS_EMPTY)
-    public void setRecipients(List<RecipientDto> recipients) {
-        this.recipients = (recipients != null) ? recipients : List.of();
+    public List<RecipientDto> getRecipients() {
+        return this.recipients != null ? this.recipients : List.of();
     }
 
     @Getter
