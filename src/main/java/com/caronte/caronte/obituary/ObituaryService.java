@@ -17,12 +17,15 @@ import com.caronte.caronte.imageTemplate.ImageTemplateRepository;
 import com.caronte.caronte.obituary.DTOs.ObituraryRequestDto;
 import com.caronte.caronte.receiver.Receiver;
 import com.caronte.caronte.receiver.ReceiverRepository;
+import com.caronte.caronte.receiver.ReceiverService;
 import com.caronte.caronte.util.MediaHandler;
 import com.caronte.caronte.util.exceptions.ResourceNotFound;
 import com.caronte.caronte.util.exceptions.ResponseThrow;
 
 @Service
 public class ObituaryService {
+
+    private final ReceiverService receiverService;
 
     private final ObituaryRepository obituaryRepository;
     private final CustomerRepository customerRepository;
@@ -33,13 +36,14 @@ public class ObituaryService {
 
     public ObituaryService(ObituaryRepository obituaryRepository, CustomerRepository customerRepository, 
             ReceiverRepository receiverRepository, ImageTemplateRepository imageTemplateRepository,
-            DeathCertificateService deathCertificateService, MediaHandler mediaHandler) {
+            DeathCertificateService deathCertificateService, MediaHandler mediaHandler, ReceiverService receiverService) {
         this.receiverRepository = receiverRepository;
         this.customerRepository = customerRepository;
         this.obituaryRepository = obituaryRepository;
         this.imageTemplateRepository = imageTemplateRepository;
         this.deathCertificateService = deathCertificateService;
         this.mediaHandler = mediaHandler;
+        this.receiverService = receiverService;
     }
 
     
@@ -96,8 +100,9 @@ public class ObituaryService {
 
         List<ObituraryRequestDto.ContactDto> contacts = request.getContacts();
         List<Receiver> receivers = contacts.stream().map(contactDto -> Receiver.parse(contactDto, obituary)).toList();
-        receiverRepository.saveAll(receivers);
-
+        receivers = receiverRepository.saveAll(receivers);
+        receiverService.notifyReceivers(receivers, obituary);
+        
         return obituary;
     }
 

@@ -104,7 +104,7 @@ public class MessageService {
                 Receiver receiver = existingReceiver.get();
                 receiverService.updateMessageReceiver(receiver.getId(), recipient);
             } else {
-                receiverService.saveObituaryReceiver(recipient, message);
+                receiverService.saveMessageReceiver(recipient, message);
             }
         }
         

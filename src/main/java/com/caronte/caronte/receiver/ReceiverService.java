@@ -65,18 +65,18 @@ public class ReceiverService {
     }
 
     @Transactional
-    public void notifyReceivers(List<ContactDto> contacts, Obituary obituary) {
-        for (ContactDto contact : contacts) {
+    public void notifyReceivers(List<Receiver> receivers, Obituary obituary) {
+        for (Receiver receiver : receivers) {
             try {
                 byte[] pdfBytes = emailService.generateObituaryPdf(obituary);
 
-                emailService.sendEmailWithAttachment(contact.getEmail(), "Esquela de " + obituary.getName(),
+                emailService.sendEmailWithAttachment(receiver.getEmail(), "Esquela de " + obituary.getName(),
                         "Adjunto encontrarás la esquela de " + obituary.getName(),
                         pdfBytes, "esquela_" + obituary.getName() + ".pdf");
 
-                System.out.println("Email enviado a: " + contact.getEmail());
+                System.out.println("Email enviado a: " + receiver.getEmail());
             } catch (Exception e) {
-                System.out.println("Error al notificar por email a: " + contact.getEmail() + " - " + e.getMessage());
+                System.out.println("Error al notificar por email a: " + receiver.getEmail() + " - " + e.getMessage());
             }
         }
     }
