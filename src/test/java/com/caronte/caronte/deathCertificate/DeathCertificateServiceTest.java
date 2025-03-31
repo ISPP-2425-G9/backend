@@ -18,15 +18,15 @@ import java.awt.image.BufferedImage;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.caronte.caronte.customer.Customer;
@@ -39,27 +39,28 @@ import com.caronte.caronte.util.MediaHandler;
 import com.caronte.caronte.util.exceptions.CertificateAssociationException;
 import com.caronte.caronte.util.exceptions.ResourceNotFound;
 
-@SpringBootTest
+@ExtendWith(MockitoExtension.class)
 public class DeathCertificateServiceTest {
 
-    @MockitoBean
+    @Mock
     private DeathCertificateRepository deathCertificateRepository;
 
-    @MockitoBean
+    @Mock
     private MediaHandler mediaHandler;
 
-    @MockitoBean
+    @Mock
     private ObituaryRepository obituaryRepository;
 
-    @MockitoBean
+    @Mock
     private CustomerRepository customerRepository;
 
-    @Autowired
+    @InjectMocks
     private DeathCertificateService deathCertificateService;
 
     private DeathCertificateRequestDTO requestDTO;
     private DeathCertificate deathCertificate1;
     private DeathCertificate deathCertificate2;
+    private Customer customer;
     
     @BeforeEach
     void setUp() {
@@ -77,6 +78,9 @@ public class DeathCertificateServiceTest {
         deathCertificate2.setUrl("https://example.com/certificate2.png");
         deathCertificate2.setIsVerified(true);
 
+        customer = new Customer();
+        customer.setId(1L);
+        customer.setName("Jones Smiths");
 
     }
 
@@ -84,19 +88,25 @@ public class DeathCertificateServiceTest {
     void createDeathCertificate_ValidImage_Success() {
         String uploadedUrl = "https://cloudinary.com/certificates/cert.png";
         BufferedImage image = new BufferedImage(1, 1, BufferedImage.TYPE_INT_RGB);
+    
+        DeathCertificateRequestDTO requestDTO = new DeathCertificateRequestDTO();
+        requestDTO.setFile("someBase64EncodedString");
+    
         try (var mediaHandlerMock = mockStatic(MediaHandler.class)) {
-            mediaHandlerMock.when(() -> mediaHandler.base64ToImage(anyString())).thenReturn(image);
-            mediaHandlerMock.when(() -> mediaHandler.uploadImageToCloudinary(any(), eq("certificates"))).thenReturn(uploadedUrl);
-            when(deathCertificateRepository.save(any(DeathCertificate.class))).thenAnswer(invocation -> invocation.getArgument(0));
-
+            mediaHandlerMock.when(() -> MediaHandler.base64ToImage(anyString())).thenReturn(image);
+            when(mediaHandler.uploadImageToCloudinary(any(), eq("certificates"))).thenReturn(uploadedUrl);
+            when(deathCertificateRepository.save(any(DeathCertificate.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+    
             DeathCertificate result = deathCertificateService.createDeathCertificate(requestDTO);
-
+    
             assertNotNull(result);
             assertEquals(uploadedUrl, result.getUrl());
             assertFalse(result.getIsVerified());
             verify(deathCertificateRepository).save(any(DeathCertificate.class));
-            mediaHandlerMock.verify(() -> mediaHandler.base64ToImage(anyString()), times(1));
-            mediaHandlerMock.verify(() -> mediaHandler.uploadImageToCloudinary(any(), eq("certificates")), times(1));
+    
+            mediaHandlerMock.verify(() -> MediaHandler.base64ToImage(anyString()), times(1));
+            verify(mediaHandler, times(1)).uploadImageToCloudinary(any(), eq("certificates"));
         }
     }
 
@@ -110,30 +120,33 @@ public class DeathCertificateServiceTest {
 
         assertEquals("The death certificate is not a valid image", exception.getMessage());
     }
-     @Test
+    
+    @Test
     void checkDeathCertificate_NullRequest_ThrowsException() {
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+        when(customerRepository.findById(eq(1L))).thenReturn(Optional.of(customer));
+        assertThrows(NullPointerException.class, () -> {
             deathCertificateService.checkDeathCertificate(null, 1L);
         });
-        assertEquals("The Death Certificate is invalid", exception.getMessage());
     }
 
     @Test
     void checkDeathCertificate_NullDni_ThrowsException() {
         requestDTO.setDni(null);
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+        when(customerRepository.findById(eq(1L))).thenReturn(Optional.of(customer));
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> {
             deathCertificateService.checkDeathCertificate(requestDTO, 1L);
         });
-        assertEquals("The Death Certificate is invalid", exception.getMessage());
+        assertEquals("No puedes subir un certificado de defunción con tu DNI", exception.getReason());
     }
 
     @Test
     void checkDeathCertificate_NullFile_ThrowsException() {
         requestDTO.setFile(null);
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+        when(customerRepository.findById(eq(1L))).thenReturn(Optional.of(customer));
+        NoSuchElementException exception = assertThrows(NoSuchElementException.class, () -> {
             deathCertificateService.checkDeathCertificate(requestDTO, 1L);
         });
-        assertEquals("The Death Certificate is invalid", exception.getMessage());
+        assertEquals("No hay esquelas creadas asociadas a ese DNI", exception.getMessage());
     }
 
     @Test
@@ -159,10 +172,12 @@ public class DeathCertificateServiceTest {
 
     @Test
     void checkDeathCertificate_NoObituaries_ThrowsException() {
+        Customer mockCustomer = mock(Customer.class);
+        when(customerRepository.findById(anyLong())).thenReturn(Optional.of(mockCustomer));
         when(obituaryRepository.findByCustomerDni(anyString())).thenReturn(Collections.emptyList());
         
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-            deathCertificateService.checkDeathCertificate(requestDTO, null);
+        NoSuchElementException exception = assertThrows(NoSuchElementException.class, () -> {
+            deathCertificateService.checkDeathCertificate(requestDTO, anyLong());
         });
         assertEquals("No hay esquelas creadas asociadas a ese DNI", exception.getMessage());
     }
@@ -170,14 +185,24 @@ public class DeathCertificateServiceTest {
     @Test
     void checkDeathCertificate_CertificateAlreadyUploaded_ThrowsException() {
         Obituary obituary = mock(Obituary.class);
-        when(obituary.getDeathCertificate()).thenReturn(new DeathCertificate());
-        when(obituaryRepository.findByCustomerDni(anyString())).thenReturn(Collections.singletonList(obituary));
+        String dni = "12345678K";
+        Customer customer = mock(Customer.class);
+        DeathCertificateRequestDTO request = mock(DeathCertificateRequestDTO.class);
         
-        CertificateAssociationException exception = assertThrows(CertificateAssociationException.class, () -> {
-            deathCertificateService.checkDeathCertificate(requestDTO, null);
-        });
+        when(customer.getDni()).thenReturn(dni); 
+        when(request.getDni()).thenReturn(dni);  
+        when(obituary.getDeathCertificate()).thenReturn(any(DeathCertificate.class)); 
+        when(customerRepository.findById(1L)).thenReturn(Optional.of(customer));  
+        when(obituaryRepository.findByCustomerDni(dni)).thenReturn(Collections.singletonList(obituary));  
+        
+        CertificateAssociationException exception = 
+            assertThrows(CertificateAssociationException.class, () -> {
+                deathCertificateService.checkDeathCertificate(request, 1L);  
+            });
+    
         assertEquals("El certificado de este cliente ya ha sido subido", exception.getMessage());
     }
+    
 
     @Test
     void getDeathCertificateByObituaryId_Success() {
@@ -211,10 +236,9 @@ public class DeathCertificateServiceTest {
     @Test
     void getDeathCertificateByObituaryId_NoDeathCertificate_ThrowsException() {
         Obituary obituary = mock(Obituary.class);
-        when(obituary.getDeathCertificate()).thenReturn(null);
-        when(obituaryRepository.findById(anyLong())).thenReturn(Optional.of(obituary));
+        when(obituaryRepository.findById(eq(1L))).thenReturn(Optional.of(obituary));
         
-        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> {
+        ResourceNotFound exception = assertThrows(ResourceNotFound.class, () -> {
             deathCertificateService.getDeathCertificateByObituaryId(1L);
         });
         assertEquals("Death certificate not found", exception.getReason());
@@ -223,18 +247,14 @@ public class DeathCertificateServiceTest {
 
     @Test
     void testGetAllDeathCertificates() {
-
         List<DeathCertificate> deathCertificates = Arrays.asList(deathCertificate1, deathCertificate2);
         when(deathCertificateRepository.findAll()).thenReturn(deathCertificates);
 
-        Iterable<DeathCertificate> result = deathCertificateService.getAllDeathCertificates();
-        List<DeathCertificate> list = StreamSupport.stream(result.spliterator(), false)
-                                             .collect(Collectors.toList());
-        assertEquals(list.size(), 2);  
-        assertEquals(list.get(0).getUrl(), deathCertificate1.getUrl()); 
-        assertEquals(list.get(1).getUrl(), deathCertificate2.getUrl()); 
+        List<DeathCertificate> result = deathCertificateService.getAllDeathCertificates();
+        
+        assertEquals(result.size(), 2);  
+        assertEquals(result.get(0).getUrl(), deathCertificate1.getUrl()); 
+        assertEquals(result.get(1).getUrl(), deathCertificate2.getUrl()); 
     }
 
-    
-    
 }

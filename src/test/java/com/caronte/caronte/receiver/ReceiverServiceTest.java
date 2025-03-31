@@ -12,9 +12,10 @@ import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.caronte.caronte.message.Message;
 import com.caronte.caronte.message.DTOs.MessageRequestDto.RecipientDto;
@@ -22,13 +23,13 @@ import com.caronte.caronte.obituary.Obituary;
 import com.caronte.caronte.obituary.DTOs.ObituraryRequestDto.ContactDto;
 import com.caronte.caronte.receiver.DTOs.ReceiverResponseDTO;
 
-@SpringBootTest
+@ExtendWith(MockitoExtension.class)
 public class ReceiverServiceTest {
 
-    @MockitoBean
+    @Mock
     private ReceiverRepository receiverRepository;
 
-    @Autowired
+    @InjectMocks
     private ReceiverService receiverService;
 
     private Obituary obituary;

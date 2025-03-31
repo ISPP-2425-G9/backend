@@ -469,10 +469,10 @@ public class ObituaryServiceTest {
         obituaryList.add(obituary);
         when(obituaryRepository.findByCustomerId(customerId)).thenReturn(obituaryList);
 
-        Iterable<Obituary> result = obituaryService.getAllObituariesByCustomer(customerId);
+        List<Obituary> result = obituaryService.getAllObituariesByCustomer(customerId);
 
         assertNotNull(result);
-        assertEquals(1, ((List<?>) result).size());
+        assertEquals(1, result.size());
         verify(obituaryRepository, times(1)).findByCustomerId(customerId);
     }
 
@@ -481,10 +481,10 @@ public class ObituaryServiceTest {
         Long customerId = customer.getId();
         when(obituaryRepository.findByCustomerId(customerId)).thenReturn(new ArrayList<>());
 
-        Iterable<Obituary> result = obituaryService.getAllObituariesByCustomer(customerId);
+        List<Obituary> result = obituaryService.getAllObituariesByCustomer(customerId);
 
         assertNotNull(result);
-        assertEquals(0, ((List<?>) result).size());
+        assertTrue(result.isEmpty());
     }
 
     @Test
@@ -516,10 +516,10 @@ public class ObituaryServiceTest {
         obituaryList.add(obituary);
         when(obituaryRepository.findByCustomerDni(dni)).thenReturn(obituaryList);
 
-        Iterable<Obituary> result = obituaryService.findObituaryByCustomerDni(dni);
+        List<Obituary> result = obituaryService.findObituaryByCustomerDni(dni);
 
         assertNotNull(result);
-        assertEquals(1, ((List<?>) result).size());
+        assertEquals(1, result.size());
         verify(obituaryRepository, times(1)).findByCustomerDni(dni);
     }
 
@@ -528,10 +528,10 @@ public class ObituaryServiceTest {
         String dni = "12345678A";
         when(obituaryRepository.findByCustomerDni(dni)).thenReturn(new ArrayList<>());
 
-        Iterable<Obituary> result = obituaryService.findObituaryByCustomerDni(dni);
+        List<Obituary> result = obituaryService.findObituaryByCustomerDni(dni);
 
         assertNotNull(result);
-        assertEquals(0, ((List<?>) result).size());
+        assertTrue(result.isEmpty());
     }
 
 }
