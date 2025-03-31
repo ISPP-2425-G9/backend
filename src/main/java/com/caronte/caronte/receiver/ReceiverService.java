@@ -61,5 +61,29 @@ public class ReceiverService {
         return receiverRepository.save(receiver);
     }
     
+    @Transactional
+    public Receiver saveMessageReceiver(String name, String telephone, String email, Message message) {
+        Receiver receiver = new Receiver();
+        receiver.setName(name);
+        receiver.setTelephone(telephone);
+        receiver.setEmail(email);
+        receiver.setMessage(message);
+        return receiverRepository.save(receiver);
+    }
+
+    @Transactional
+    public Receiver updateMessageReceiver(Long id, String name, String telephone, String email) {
+        Receiver receiver = receiverRepository.findById(id).orElseThrow(() -> new RuntimeException("Receiver not found"));
+        if (!receiver.getName().equals(name)) {
+            receiver.setName(name);
+        }
+        if (!receiver.getTelephone().equals(telephone)) {
+            receiver.setTelephone(telephone);
+        }
+        if (!receiver.getEmail().equals(email)) {
+            receiver.setEmail(email);
+        }
+        return receiverRepository.save(receiver);
+    }
 
 }
