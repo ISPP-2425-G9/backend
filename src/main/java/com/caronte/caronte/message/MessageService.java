@@ -122,9 +122,33 @@ public class MessageService {
         return messageDtos;
     }
 
-    public Message getMessageById(Long message_id, Long customerId) {
-        return messageRepository.findById(message_id)
+    public Message getMessageById(Long messageId) {
+        return messageRepository.findById(messageId)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Message not found"));
+    }
+
+    public MessageRequestDto getMessageRequestDtoByMessageId(Long message_id, Long customerId) {
+        Message message = messageRepository.findById(message_id)
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Message not found"));
+        MessageRequestDto messageRequestDto = new MessageRequestDto();
+        messageRequestDto.setTitle(message.getTitle());
+        messageRequestDto.setBody(message.getBody());
+        messageRequestDto.setCustomImages(this.imageRepository.findAllByMessageId(message_id).stream()
+            .map(Image::getImageUrl)
+            .toList());
+        messageRequestDto.setIsLastWill(message.getIsLastWill());
+        List<Receiver> receivers = receiverRepository.findByMessageId(message_id);
+        List<MessageRequestDto.RecipientDto> recipientDtos = new ArrayList<>();
+        for (Receiver receiver : receivers) {
+            MessageRequestDto.RecipientDto recipientDto = new MessageRequestDto.RecipientDto();
+            recipientDto.setName(receiver.getName());
+            recipientDto.setTelephone(receiver.getTelephone());
+            recipientDto.setEmail(receiver.getEmail());
+            recipientDtos.add(recipientDto);
+        }
+        messageRequestDto.setRecipients(recipientDtos);
+
+        return messageRequestDto;
     }
 
     public Message updateMessage(Long message_id, MessageRequestDto request, Long customerId) {

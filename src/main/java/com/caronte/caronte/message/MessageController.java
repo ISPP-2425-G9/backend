@@ -102,9 +102,10 @@ public class MessageController {
         try {
             UserDetailsImpl userPrincipal = (UserDetailsImpl) authentication.getPrincipal();
             Long customerId = userPrincipal.getId();
-            Message message = messageService.getMessageById(message_id, customerId);
+            Message message = messageService.getMessageById(message_id);
+            MessageRequestDto messageDto = messageService.getMessageRequestDtoByMessageId(message_id, customerId);
             if (message.getCustomer().getId().equals(customerId)) {
-                return ResponseEntity.ok(message);
+                return ResponseEntity.ok(messageDto);
             } else {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN)
                                     .body(Map.of("error", "User not authorized to access this resource"));
