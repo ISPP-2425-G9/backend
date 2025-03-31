@@ -1,4 +1,8 @@
-package com.caronte.caronte.receiver;
+package com.caronte.caronte.receiver.DTOs;
+
+import static com.caronte.caronte.util.RegexContants.REGEX_TELEPHONE;
+
+import com.caronte.caronte.receiver.Receiver;
 
 import jakarta.persistence.Id;
 import jakarta.validation.constraints.Email;
@@ -21,11 +25,19 @@ public class ReceiverResponseDTO {
     String name; 
 
     @NotNull(message = "The telephone cannot be null")
-    @Pattern(regexp = "\\d{9,15}", message = "The phone number must contain between 9 and 15 numeric digits")
+    @Pattern(regexp = REGEX_TELEPHONE, message = "The phone number must contain 9 numeric digits")
     String telephone;
 
     @Email(message = "The email is not valid")
     @NotBlank(message = "The email cannot be empty")
     String email;
     
+    public static ReceiverResponseDTO parse(Receiver receiver){
+        ReceiverResponseDTO receiverResponseDTO = new ReceiverResponseDTO();
+        receiverResponseDTO.setId(receiver.getId());
+        receiverResponseDTO.setName(receiver.getName());
+        receiverResponseDTO.setTelephone(receiver.getTelephone());
+        receiverResponseDTO.setEmail(receiver.getEmail());
+        return receiverResponseDTO;
+    }
 }

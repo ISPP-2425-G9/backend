@@ -8,13 +8,14 @@ import org.hibernate.annotations.OnDeleteAction;
 import com.caronte.caronte.customer.Customer;
 import com.caronte.caronte.deathCertificate.DeathCertificate;
 import com.caronte.caronte.imageTemplate.ImageTemplate;
+import com.caronte.caronte.obituary.DTOs.ObituraryRequestDto;
 import com.caronte.caronte.util.BaseEntity;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.PrePersist;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -56,4 +57,35 @@ public class Obituary extends BaseEntity {
 
     @ManyToOne
     private DeathCertificate deathCertificate;
+
+    @JsonIgnore
+    public boolean hasCustomerId(Long customerId){
+        return this.getCustomer().getId() == customerId;
+    }
+
+    
+    /**
+     * If wordColor is null, it is set to "0,0,0" 
+     */
+    @JsonIgnore
+    public void setDefaultWordColorIfNull() {
+        if(this.wordColor == null)
+            this.wordColor = "0,0,0";
+    }
+
+    @JsonIgnore
+    public boolean isVerified(){
+        return this.getDeathCertificate() != null && this.getDeathCertificate().getIsVerified();
+    }
+
+    public void update(ObituraryRequestDto obituraryRequestDto) {
+        this.setBirthDate(obituraryRequestDto.getBirthDate());
+        this.setName(obituraryRequestDto.getName());
+        this.setBirthDate(obituraryRequestDto.getBirthDate());
+        this.setDeathDate(obituraryRequestDto.getDeathDate());
+        this.setFarewellMessage(obituraryRequestDto.getFarewellMessage());
+        this.setFarewellPhrase(obituraryRequestDto.getFarewellPhrase());
+        this.setIsMine(obituraryRequestDto.getIsMine());
+        this.setWordColor(obituraryRequestDto.getWordColor());
+    }
 }

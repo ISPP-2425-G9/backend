@@ -1,12 +1,13 @@
 package com.caronte.caronte.customer;
 
-import com.caronte.caronte.plan.Plan;
-import com.caronte.caronte.user.User;
+import java.util.Objects;
 
-import jakarta.persistence.CascadeType;
+import com.caronte.caronte.auth.payload.response.CustomerUpdateRequest;
+import com.caronte.caronte.user.User;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.OneToOne;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -21,6 +22,15 @@ public class Customer extends User {
     @Column(unique = true, nullable = false, length = 20)
     private String dni;
 
+    @JsonIgnore
+    public boolean hasDni(String dni) {
+        return Objects.equals(this.dni, dni);
+    }
 
+    public void update(CustomerUpdateRequest request) {
+        this.setEmail(request.getEmail());
+        this.setName(request.getFullName());
+        this.setTelephone(request.getTelephone());
+    }
 
 }

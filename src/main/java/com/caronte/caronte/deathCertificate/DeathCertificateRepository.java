@@ -6,7 +6,5 @@ import com.caronte.caronte.util.LongRepository;
 
 @Repository
 public interface DeathCertificateRepository extends LongRepository<DeathCertificate> {
-
-    
     
 }
