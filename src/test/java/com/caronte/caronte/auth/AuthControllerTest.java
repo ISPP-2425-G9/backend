@@ -1,5 +1,11 @@
 package com.caronte.caronte.auth;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -15,16 +21,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.web.servlet.MockMvc;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import com.caronte.caronte.admin.Admin;
-import com.caronte.caronte.auth.payload.response.CompanyUpdateRequest;
 import com.caronte.caronte.auth.payload.response.LoginRequest;
 import com.caronte.caronte.auth.payload.response.RegisterRequestCompany;
 import com.caronte.caronte.auth.payload.response.RegisterRequestCustomer;
@@ -100,6 +99,7 @@ public class AuthControllerTest {
         Authentication authentication = Mockito.mock(Authentication.class);
         Mockito.when(authenticationManager.authenticate(Mockito.any(UsernamePasswordAuthenticationToken.class)))
                .thenReturn(authentication);
+        Mockito.when(userService.findById(1L)).thenReturn(user);
         Mockito.when(authentication.getPrincipal()).thenReturn(userDetails);
         Mockito.when(jwtUtils.generateJwtToken(Mockito.any(Authentication.class))).thenReturn("dummy-jwt");
         Mockito.when(authService.getNameById(1L)).thenReturn("Test User");
@@ -386,6 +386,7 @@ public class AuthControllerTest {
         Authentication authentication = Mockito.mock(Authentication.class);
         Mockito.when(authenticationManager.authenticate(Mockito.any(UsernamePasswordAuthenticationToken.class)))
             .thenReturn(authentication);
+        Mockito.when(userService.findById(1L)).thenReturn(company);    
         Mockito.when(authentication.getPrincipal()).thenReturn(userDetails);
         Mockito.when(jwtUtils.generateJwtToken(Mockito.any(Authentication.class))).thenReturn("dummy-jwt");
         Mockito.when(authService.getNameById(1L)).thenReturn("Company A");
@@ -426,6 +427,7 @@ public class AuthControllerTest {
         Authentication authentication = Mockito.mock(Authentication.class);
         Mockito.when(authenticationManager.authenticate(Mockito.any(UsernamePasswordAuthenticationToken.class)))
             .thenReturn(authentication);
+        Mockito.when(userService.findById(1L)).thenReturn(customer);
         Mockito.when(authentication.getPrincipal()).thenReturn(userDetails);
         Mockito.when(jwtUtils.generateJwtToken(Mockito.any(Authentication.class))).thenReturn("dummy-jwt");
         Mockito.when(authService.getNameById(1L)).thenReturn("Customer A");
