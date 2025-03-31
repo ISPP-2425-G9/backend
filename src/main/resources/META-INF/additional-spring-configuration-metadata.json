@@ -10,6 +10,15 @@
     "description": "Expiration time of the JWT in milliseconds."
   },
   {
+    "name": "stripe.customer.premium.price.id",
+    "type": "java.lang.String",
+    "description": "A description for 'stripe.customer.premium.price.id'"
+  },
+  {
+    "name": "stripe.company.premium.price.id",
+    "type": "java.lang.String",
+    "description": "A description for 'stripe.company.premium.price.id'"
+  },
     "name": "stripe.api.key",
     "type": "java.lang.String",
     "description": "Stripe private key for making payments"
@@ -18,5 +27,10 @@
     "name": "stripe.obituary.price.id",
     "type": "java.lang.String",
     "description": "A description for 'stripe.obituary.price.id'"
+  },
+  {
+    "name": "cloudinary.url",
+    "type": "java.lang.String",
+    "description": "A description for 'cloudinary.url'"
   }
 ]}

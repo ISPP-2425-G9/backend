@@ -3,7 +3,12 @@ package com.caronte.caronte.user;
 import com.caronte.caronte.plan.Plan;
 import com.caronte.caronte.util.BaseEntity;
 
-import jakarta.persistence.*;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Inheritance;
+import jakarta.persistence.InheritanceType;
+import jakarta.persistence.OneToOne;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -18,7 +23,7 @@ public class User extends BaseEntity{
 
     @Column(nullable = false, unique = true)
     private String email;
-    
+
     @Column(nullable = false)
     private String password;
 
@@ -26,7 +31,7 @@ public class User extends BaseEntity{
     private String telephone;
 
     // Relationships
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne(cascade = CascadeType.ALL, optional = false)
     private Plan plan;
 
 }

@@ -1,5 +1,7 @@
 package com.caronte.caronte.configuration;
 
+import java.util.Arrays;
+
 import javax.sql.DataSource;
 
 import org.springframework.context.annotation.Bean;
@@ -15,14 +17,11 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import org.springframework.web.filter.CorsFilter;
 
 import com.caronte.caronte.configuration.authorization.Authorization;
 import com.caronte.caronte.configuration.jwt.AuthEntryPointJwt;
 import com.caronte.caronte.configuration.jwt.AuthTokenFilter;
 import com.caronte.caronte.configuration.services.UserDetailsServiceImpl;
-
-import java.util.Arrays;
 
 @Configuration
 public class SecurityConfig {
@@ -80,22 +79,9 @@ public class SecurityConfig {
     	return new BCryptPasswordEncoder();
     }
 
-    // ✅ Configuración CORS aplicada a todas las rutas protegidas
-    @Bean
-    public CorsFilter corsFilter() {
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        CorsConfiguration config = new CorsConfiguration();
-        config.setAllowCredentials(true);
-        config.setAllowedOrigins(Arrays.asList("http://localhost:8081")); // ✅ Asegurar que el frontend tiene acceso
-        config.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type")); // ✅ Permitir token JWT
-        config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        source.registerCorsConfiguration("/**", config);
-        return new CorsFilter(source);
-    }
-
     // ✅ Fuente de configuración de CORS para HttpSecurity
     @Bean
-    public UrlBasedCorsConfigurationSource corsConfigurationSource() {
+    UrlBasedCorsConfigurationSource corsConfigurationSource() {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowCredentials(true);

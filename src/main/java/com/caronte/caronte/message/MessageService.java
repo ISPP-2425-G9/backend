@@ -2,20 +2,23 @@ package com.caronte.caronte.message;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
 import com.caronte.caronte.customer.Customer;
 import com.caronte.caronte.customer.CustomerRepository;
 import com.caronte.caronte.image.Image;
 import com.caronte.caronte.image.ImageRepository;
+import com.caronte.caronte.message.DTOs.MessageRequestDto;
+import com.caronte.caronte.message.DTOs.MessageRequestDto.RecipientDto;
 import com.caronte.caronte.receiver.Receiver;
 import com.caronte.caronte.receiver.ReceiverRepository;
 import com.caronte.caronte.receiver.ReceiverService;
 import com.caronte.caronte.util.MediaHandler;
+import com.caronte.caronte.util.exceptions.ResourceNotFound;
+import com.caronte.caronte.util.exceptions.ResponseThrow;
 
 @Service
 public class MessageService {
@@ -25,61 +28,37 @@ public class MessageService {
     private final ReceiverRepository receiverRepository;
     private final ReceiverService receiverService;
     private final ImageRepository imageRepository;
+    private final MediaHandler mediaHandler;
 
-    public MessageService(MessageRepository messageRepository,
-                          CustomerRepository customerRepository,
-                          ReceiverService receiverService,
-                          ImageRepository imageRepository,
-                          ReceiverRepository receiverRepository) {
+    public MessageService(MessageRepository messageRepository, CustomerRepository customerRepository,
+            ReceiverService receiverService, ImageRepository imageRepository,
+            ReceiverRepository receiverRepository, MediaHandler mediaHandler) {
         this.imageRepository = imageRepository;
         this.messageRepository = messageRepository;
         this.customerRepository = customerRepository;
         this.receiverService = receiverService;
         this.receiverRepository = receiverRepository;
+        this.mediaHandler = mediaHandler;
     }
 
     @Transactional
     public Message createMessage(MessageRequestDto request, Long customerId) {
+        Customer customer = customerRepository.findById(customerId).orElseThrow(() -> ResourceNotFound.of("Customer"));
 
-        Customer customer = customerRepository.findById(customerId)
-                .orElseThrow(() -> new RuntimeException("Customer not found"));
-
-        Message message = new Message();
-        message.setTitle(request.getTitle());
-        message.setBody(request.getBody());
-
-        String uniqueCode = generateUniqueRandomCode();
-        message.setCode(uniqueCode);
-
-        message.setIsLastWill(false);
-        message.setCustomer(customer);
-
+        Message message = new Message(request, customer);
         Message savedMessage = messageRepository.save(message);
 
-        List<String> customImages = request.getCustomImages();
-        for (String customImage : customImages) {
-            String processedImageUrl;
-            if (customImage != null && customImage.startsWith("data:image/")) {
-                processedImageUrl = MediaHandler.uploadImageToCloudinary(MediaHandler.base64ToImage(customImage),"messages/");
-                
-                Image image = new Image();
-                image.setImageUrl(processedImageUrl);
-                image.setMessage(message);
-                imageRepository.save(image);
-            }
-        }
-       
+        List<Image> images = request.getCustomImages().stream()
+                .filter(customImage -> customImage != null && customImage.startsWith("data:image/"))
+                .map(customImage -> {
+                    String processedImageUrl = mediaHandler.uploadImageToCloudinary(customImage, "message");
+                    return new Image(processedImageUrl, message);
+                }).toList();
 
-        if (request.getRecipients() != null) {
-            for (MessageRequestDto.RecipientDto r : request.getRecipients()) {
-                receiverService.saveMessageReceiver(
-                        r.getName(),
-                        r.getTelephone(),
-                        r.getEmail(),
-                        savedMessage
-                );
-            }
-        }
+        imageRepository.saveAll(images);
+
+        List<Receiver> receivers = request.getRecipients().stream().map(r -> Receiver.parse(r, message)).toList();
+        receiverRepository.saveAll(receivers);
 
         return savedMessage;
     }
@@ -155,76 +134,53 @@ public class MessageService {
         Message message = messageRepository.findById(message_id)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Message not found"));
 
-        if (!message.getCustomer().getId().equals(customerId)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User not authorized to access this resource");
-        }
+        ResponseThrow.checkOrForbidden(message.hasCustomerWithId(customerId));
 
         message.setTitle(request.getTitle());
         message.setBody(request.getBody());
 
-        List<Image> images = this.imageRepository.findAllByMessageId(message_id);
-        for (Image image : images) {
-            MediaHandler.deleteImageFromCloudinary(image.getImageUrl()); //TODO borrar imagenen en Cloudinary
-            this.imageRepository.delete(image);
-        }
+        List<Image> oldImages = this.imageRepository.findAllByMessageId(messageId);
+        oldImages.forEach(oldImage -> mediaHandler.deleteImageFromCloudinary(oldImage.getImageUrl()));
+        this.imageRepository.deleteAll(oldImages);
 
-        List<String> customImages = request.getCustomImages();
-        for (String customImage : customImages) {
-            String processedImageUrl;
-            if (customImage != null && customImage.startsWith("data:image/")) {
-                processedImageUrl = MediaHandler.uploadImageToCloudinary(MediaHandler.base64ToImage(customImage),"messages/");
-                
-                Image image = new Image();
-                image.setImageUrl(processedImageUrl);
-                image.setMessage(message);
-                imageRepository.save(image);
-            }
-        }
-
-        if (request.getRecipients() != null) {
-            for (MessageRequestDto.RecipientDto r : request.getRecipients()) {
-            boolean recipientExists = receiverRepository.findByMessageId(message_id).stream()
-                .anyMatch(receiver -> receiver.getTelephone().equals(r.getTelephone()) || receiver.getEmail().equals(r.getEmail()));
-            if (!recipientExists) {
-                receiverService.saveMessageReceiver(
-                    r.getName(),
-                    r.getTelephone(),
-                    r.getEmail(),
-                    message
-                );
+        List<Image> newImages = request.getCustomImages().stream()
+            .filter(customImage -> customImage != null && customImage.startsWith("data:image/"))
+            .map(customImage -> {
+                String imageUrl = mediaHandler.uploadImageToCloudinary(customImage, "messages/");
+                return new Image(imageUrl, message);
+            }).toList();
+        imageRepository.saveAll(newImages);
+        
+        
+        for (RecipientDto recipient : request.getRecipients()) {
+            List<Receiver> receivers = receiverRepository.findByMessageId(messageId);
+            Optional<Receiver> existingReceiver = receivers.stream()
+                    .filter(receiver -> receiver.hasEqualEmailOrTelephone(recipient))
+                    .findFirst();
+        
+            if (existingReceiver.isPresent()) {
+                Receiver receiver = existingReceiver.get();
+                receiverService.updateMessageReceiver(receiver.getId(), recipient);
             } else {
-                receiverService.updateMessageReceiver(
-                    receiverRepository.findByMessageId(message_id).stream()
-                        .filter(receiver -> receiver.getTelephone().equals(r.getTelephone()) || receiver.getEmail().equals(r.getEmail()))
-                        .findFirst()
-                        .get()
-                        .getId(),
-                    r.getName(),
-                    r.getTelephone(),
-                    r.getEmail()
-                );
-            }
+                receiverService.saveObituaryReceiver(recipient, message);
             }
         }
+        
 
         return messageRepository.save(message);
     }
 
-    public void deleteMessage(Long message_id, Long customerId) {
-        Message message = messageRepository.findById(message_id)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Message not found"));
+    @Transactional
+    public void deleteMessage(Long messageId, Long customerId) {
+        Message message = messageRepository.findById(messageId).orElseThrow(() -> ResourceNotFound.of("Message"));
 
-        if (!message.getCustomer().getId().equals(customerId)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User not authorized to access this resource");
-        }
+        ResponseThrow.checkOrForbidden(message.hasCustomerWithId(customerId));
 
-        List<Image> images = this.imageRepository.findAllByMessageId(message_id);
-        for (Image image : images) {
-            MediaHandler.deleteImageFromCloudinary(image.getImageUrl()); //TODO borrar imagenen en Cloudinary
-            this.imageRepository.delete(image);
-        }
+        List<Image> images = this.imageRepository.findAllByMessageId(messageId);
+        images.forEach(image -> mediaHandler.deleteImageFromCloudinary(image.getImageUrl()));
+        this.imageRepository.deleteAll(images);
 
-        receiverRepository.findByMessageId(message_id).forEach(receiver -> receiverRepository.delete(receiver));
+        receiverRepository.findByMessageId(messageId).forEach(receiver -> receiverRepository.delete(receiver));
         messageRepository.delete(message);
     }
 }

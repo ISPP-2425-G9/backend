@@ -1,4 +1,4 @@
-package com.caronte.caronte.obituary;
+package com.caronte.caronte.obituary.DTOs;
 
 import lombok.Getter;
 

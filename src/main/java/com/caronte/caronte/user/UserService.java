@@ -1,23 +1,23 @@
 package com.caronte.caronte.user;
 
-import org.springframework.http.HttpStatus;
+import java.util.Optional;
+
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
 import com.caronte.caronte.auth.payload.response.UserChangePasswordRequest;
 import com.caronte.caronte.configuration.services.UserDetailsImpl;
-
-import java.util.Optional;
+import com.caronte.caronte.util.exceptions.ResourceNotFound;
+import com.caronte.caronte.util.exceptions.ResponseThrow;
 
 @Service
 public class UserService {
 
-    private UserRepository userRepository;
-    private PasswordEncoder passwordEncoder;
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
     public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
@@ -25,16 +25,58 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
+    public User findById(Long id) {
+        return userRepository.findById(id).orElseThrow(() -> ResourceNotFound.of("User", "ID", id));
+    }
+
+    @Transactional(readOnly = true)
+    public Optional<User> findByEmail(String email) {
+        return userRepository.findByEmail(email);
+    }
+
+    @Transactional(readOnly = true)
     public User findCurrentUser() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_ANONYMOUS"))) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not authenticated");
-        }
-
+        ResponseThrow.checkOrForbidden(auth.isAuthenticated(), "User is not authenticated");
         UserDetailsImpl userDetails = (UserDetailsImpl) auth.getPrincipal();
+        return userRepository.findById(userDetails.getId()).orElseThrow(() -> ResourceNotFound.of("User"));
+    }
 
-        return userRepository.findById(userDetails.getId())
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+    @Transactional(readOnly = true)
+    public Long findCurrentUserId() {
+        return findCurrentUser().getId();
+    }
+
+    @Transactional(readOnly = true)
+    public String findCurrentUserEmail() {
+        return findCurrentUser().getEmail();
+    }
+
+
+    @Transactional(readOnly = true)
+    public User authorizeUserOrAdmin(Long userId, String message){
+        User user = findCurrentUser();
+        UserDetailsImpl auth =  (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        ResponseThrow.checkOrBadRequest(user.getId() == userId || auth.isAdmin(), message);
+        return user;
+    }
+
+    @Transactional(readOnly = true)
+    public User authorizeUserOrAdmin(Long id){
+        return authorizeUserOrAdmin(id, "No puedes realizar acciones en la cuenta de otro usuario");
+    }
+
+
+    @Transactional(readOnly = true)
+    public User authorizeUser(Long userId, String message){
+        User user = findCurrentUser();
+        ResponseThrow.checkOrBadRequest(user.getId() == userId, message);
+        return user;
+    }
+
+    @Transactional(readOnly = true)
+    public User authorizeUser(Long id){
+        return authorizeUserOrAdmin(id, "No puedes realizar acciones en la cuenta de otro usuario");
     }
 
     @Transactional
@@ -42,25 +84,10 @@ public class UserService {
         userRepository.deleteById(id);
     }
 
-    public Long getPlanId(Long userId){
-        Optional<User> user = userRepository.findById(userId);
-        if (user.isPresent()){
-            return user.get().getPlan().getId();
-        }throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User con ID " + userId + " no encontrado");
-    }
     @Transactional
     public User changePassword(Long id, UserChangePasswordRequest request) {
-        User user = userRepository.findById(id)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
-
-        if (!request.getNewPassword().equals(request.getConfirmPassword())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "La contraseña no coinciden");
-        }
-        if (request.getNewPassword().length() < 6) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "La contraseña debe tener al menos 6 caracteres");
-        }
+        User user = userRepository.findById(id).orElseThrow(() -> ResourceNotFound.of("User"));
         user.setPassword(this.passwordEncoder.encode(request.getNewPassword()));
-
         return userRepository.save(user);
     }
 
