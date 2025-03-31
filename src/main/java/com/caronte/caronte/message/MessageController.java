@@ -62,9 +62,8 @@ public class MessageController {
         }
     }
 
-    @GetMapping("/{customer_id}/my_messages")
+    @GetMapping("/my-messages")
     public ResponseEntity<?> getMessagesByCustomerId(
-            @PathVariable Long customer_id,
             Authentication authentication) {
 
         if (authentication == null) {
@@ -75,10 +74,6 @@ public class MessageController {
         try {
             UserDetailsImpl userPrincipal = (UserDetailsImpl) authentication.getPrincipal();
             Long customerId = userPrincipal.getId();
-            if (!customerId.equals(customer_id)) {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                                    .body(Map.of("error", "User not authorized to access this resource"));
-            }
             List<MessageRequestDto> messages = messageService.getMessagesRequestDtoByCustomerId(customerId);
             
             return ResponseEntity.ok(messages);
