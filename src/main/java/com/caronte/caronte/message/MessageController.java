@@ -79,7 +79,7 @@ public class MessageController {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN)
                                     .body(Map.of("error", "User not authorized to access this resource"));
             }
-            List<Message> messages = messageService.getMessagesByCustomerId(customerId);
+            List<MessageRequestDto> messages = messageService.getMessagesRequestDtoByCustomerId(customerId);
             
             return ResponseEntity.ok(messages);
         } catch (Exception e) {

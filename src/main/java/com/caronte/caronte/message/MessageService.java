@@ -1,5 +1,6 @@
 package com.caronte.caronte.message;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.http.HttpStatus;
@@ -11,6 +12,7 @@ import com.caronte.caronte.customer.Customer;
 import com.caronte.caronte.customer.CustomerRepository;
 import com.caronte.caronte.image.Image;
 import com.caronte.caronte.image.ImageRepository;
+import com.caronte.caronte.receiver.Receiver;
 import com.caronte.caronte.receiver.ReceiverRepository;
 import com.caronte.caronte.receiver.ReceiverService;
 import com.caronte.caronte.util.MediaHandler;
@@ -91,8 +93,33 @@ public class MessageService {
         return code;
     }
 
-    public List<Message> getMessagesByCustomerId(Long customerId) {
-        return messageRepository.findAllByCustomerId(customerId);
+    public List<MessageRequestDto> getMessagesRequestDtoByCustomerId(Long customerId) {
+        List<Message> messages = messageRepository.findAllByCustomerId(customerId);
+        List<MessageRequestDto> messageDtos = new ArrayList<>();
+        for (Message message : messages) {
+            MessageRequestDto messageDto = new MessageRequestDto();
+            List<Image> images = imageRepository.findAllByMessageId(message.getId());
+            List<String> imageUrls = new ArrayList<>();
+            List<Receiver> receivers = receiverRepository.findByMessageId(message.getId());
+            messageDto.setTitle(message.getTitle());
+            messageDto.setBody(message.getBody());
+            messageDto.setCustomImages(new ArrayList<>());
+            messageDto.setIsLastWill(message.getIsLastWill());
+            messageDto.setCustomImages(imageUrls);
+            messageDto.setRecipients(new ArrayList<>());
+            for (Image image : images) {
+                imageUrls.add(image.getImageUrl());
+            }
+            for(Receiver receiver : receivers) {
+            MessageRequestDto.RecipientDto recipientDto = new MessageRequestDto.RecipientDto();
+            recipientDto.setName(receiver.getName());
+            recipientDto.setTelephone(receiver.getTelephone());
+            recipientDto.setEmail(receiver.getEmail());
+            messageDto.getRecipients().add(recipientDto);
+            }
+            messageDtos.add(messageDto);
+        }
+        return messageDtos;
     }
 
     public Message getMessageById(Long message_id, Long customerId) {
