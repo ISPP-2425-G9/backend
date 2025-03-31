@@ -8,8 +8,6 @@ import lombok.Setter;
 import java.time.LocalDate;
 import java.util.List;
 
-import org.springframework.cglib.core.Local;
-
 import com.caronte.caronte.deathCertificate.DeathCertificateRequestDTO;
 import com.fasterxml.jackson.annotation.JsonFormat;
 
