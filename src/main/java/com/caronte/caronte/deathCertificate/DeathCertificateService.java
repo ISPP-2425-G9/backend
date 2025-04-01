@@ -34,8 +34,7 @@ public class DeathCertificateService {
         this.customerRepository = customerRepository;
         this.mediaHandler = mediaHandler;
     }
-
-
+    
     @Transactional
     public DeathCertificate createDeathCertificateAndRelations(DeathCertificateRequestDTO request, Long customerId) {
         if(customerId != null) 

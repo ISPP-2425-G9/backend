@@ -27,7 +27,22 @@ public class AdminController{
 
     @GetMapping("/certificates/pending")
     @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<?> getAllObituariesByCustomer() {
+    public ResponseEntity<?> getAllPendingDeathCertificate() {
+        List<CertificateResponseDTO> deathCertificates = adminService.getAllPendingCertificates();
+        return ResponseEntity.ok(deathCertificates);
+    }
+
+
+    @GetMapping("/certificates/obituaries/{deathCertificateId}")
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseEntity<?> getAllObituariesByDeathCertificate() {
+        List<CertificateResponseDTO> deathCertificates = adminService.getAllPendingCertificates();
+        return ResponseEntity.ok(deathCertificates);
+    }
+
+    @GetMapping("/certificates/messages/{deathCertificateId}")
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseEntity<?> getAllMessagesByDeathCertificate() {
         List<CertificateResponseDTO> deathCertificates = adminService.getAllPendingCertificates();
         return ResponseEntity.ok(deathCertificates);
     }
