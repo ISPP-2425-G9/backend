@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.caronte.caronte.admin.DTOs.CertificateResponseDTO;
 import com.caronte.caronte.deathCertificate.DeathCertificate;
 import com.caronte.caronte.obituary.Obituary;
 
@@ -27,7 +28,7 @@ public class AdminController{
     @GetMapping("/certificates/pending")
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<?> getAllObituariesByCustomer() {
-        List<DeathCertificate> deathCertificates = adminService.getAllPendingCertificates();
+        List<CertificateResponseDTO> deathCertificates = adminService.getAllPendingCertificates();
         return ResponseEntity.ok(deathCertificates);
     }
 
