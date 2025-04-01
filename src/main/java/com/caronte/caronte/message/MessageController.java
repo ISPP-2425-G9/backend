@@ -5,6 +5,7 @@ import java.util.Map;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,11 +15,12 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
+import com.caronte.caronte.configuration.services.UserDetailsImpl;
 import com.caronte.caronte.message.DTOs.MessageRequestDto;
 import com.caronte.caronte.user.UserService;
 import com.caronte.caronte.util.ErrorHandler;
-import com.caronte.caronte.util.exceptions.ResponseThrow;
 
 import jakarta.validation.Valid;
 
@@ -69,16 +71,13 @@ public class MessageController {
     }
 
     @GetMapping("/{messageId}")
-    public ResponseEntity<?> getMessageById(@PathVariable Long messageId) {
-        Long customerId = userService.findCurrentUserId();
-        Message message = messageService.getMessageById(messageId, customerId);
-        ResponseThrow.checkOrForbidden(message.hasCustomerWithId(customerId), "User not authorized to access this resource");
-
+    public ResponseEntity<?> getMessageById(@PathVariable Long messageId,
+            Authentication authentication) {
         try {
             UserDetailsImpl userPrincipal = (UserDetailsImpl) authentication.getPrincipal();
             Long customerId = userPrincipal.getId();
-            Message message = messageService.getMessageById(message_id);
-            MessageRequestDto messageDto = messageService.getMessageRequestDtoByMessageId(message_id, customerId);
+            Message message = messageService.getMessageById(messageId);
+            MessageRequestDto messageDto = messageService.getMessageRequestDtoByMessageId(messageId, customerId);
             if (message.getCustomer().getId().equals(customerId)) {
                 return ResponseEntity.ok(messageDto);
             } else {

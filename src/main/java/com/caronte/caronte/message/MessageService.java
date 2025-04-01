@@ -1,8 +1,9 @@
 package com.caronte.caronte.message;
 
-import java.awt.image.BufferedImage;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -27,17 +28,20 @@ public class MessageService {
     private final ReceiverRepository receiverRepository;
     private final ReceiverService receiverService;
     private final ImageRepository imageRepository;
+    MediaHandler mediaHandler;
 
     public MessageService(MessageRepository messageRepository,
                           CustomerRepository customerRepository,
                           ReceiverService receiverService,
                           ImageRepository imageRepository,
-                          ReceiverRepository receiverRepository) {
+                          ReceiverRepository receiverRepository,
+                          MediaHandler mediaHandler) {
         this.imageRepository = imageRepository;
         this.messageRepository = messageRepository;
         this.customerRepository = customerRepository;
         this.receiverService = receiverService;
         this.receiverRepository = receiverRepository;
+        this.mediaHandler = mediaHandler;
     }
 
     @Transactional
@@ -60,18 +64,14 @@ public class MessageService {
 
         List<String> customImages = request.getCustomImages();
         for (String customImage : customImages) {
-            String processedImageUrl;
-            if (customImage != null && customImage.startsWith("data:image/")) {
-                BufferedImage bufferedImage = MediaHandler.base64ToImage(customImage);
-                if (bufferedImage.getWidth() * bufferedImage.getHeight() > 5 * 1024 * 1024) {
-                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Image size exceeds 5 MB");
-                }
-                processedImageUrl = MediaHandler.uploadImageToCloudinary(bufferedImage, customer.getDni() + "/messages/" + message.getId() + "/");                
+                String processedImageUrl = Optional.ofNullable(customImage)
+                    .filter(file -> file.startsWith("data:image/"))
+                    .orElseThrow(() -> new IllegalArgumentException("The death certificate is not a valid image"));
+                processedImageUrl = mediaHandler.uploadImageToCloudinary(processedImageUrl, customer.getDni() + "/messages/" + message.getId() + "/");                
                 Image image = new Image();
                 image.setImageUrl(processedImageUrl);
                 image.setMessage(message);
                 imageRepository.save(image);
-            }
         }
 
         if (request.getRecipients() != null) {
@@ -162,17 +162,22 @@ public class MessageService {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User not authorized to access this resource");
         }
 
+        Customer customer = customerRepository.findById(customerId)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Customer not found"));
+
         message.setTitle(request.getTitle());
         message.setBody(request.getBody());
 
         List<Image> existingImages = this.imageRepository.findAllByMessageId(message_id);
         List<String> requestImageUrls = request.getCustomImages();
 
-        for (Image image : existingImages) {
+        Iterator<Image> iterator = existingImages.iterator();
+        while (iterator.hasNext()) {
+            Image image = iterator.next();
             if (!requestImageUrls.contains(image.getImageUrl())) {
-                MediaHandler.deleteImageFromCloudinary(image.getImageUrl());
-                this.imageRepository.delete(image);
-                existingImages.remove(image);
+                mediaHandler.deleteImageFromCloudinary(image.getImageUrl());
+                imageRepository.delete(image);
+                iterator.remove();
             }
         }
 
@@ -180,10 +185,12 @@ public class MessageService {
             if (existingImages.stream().anyMatch(i -> i.getImageUrl().equals(customImage))) {
                 continue;
             }
-            String processedImageUrl;
             if (customImage != null && customImage.startsWith("data:image/")) {
-                processedImageUrl = MediaHandler.uploadImageToCloudinary(MediaHandler.base64ToImage(customImage),
-                        message.getCustomer().getDni() + "/messages/" + message.getId() + "/");
+                String processedImageUrl = Optional.ofNullable(customImage)
+                    .filter(file -> file.startsWith("data:image/"))
+                    .orElseThrow(() -> new IllegalArgumentException("The death certificate is not a valid image"));
+                processedImageUrl = mediaHandler.uploadImageToCloudinary(processedImageUrl, customer.getDni() + "/messages/" + message.getId() + "/");                
+                
                 
                 Image image = new Image();
                 image.setImageUrl(processedImageUrl);
@@ -222,8 +229,6 @@ public class MessageService {
     }
 
     public void deleteMessage(Long message_id, Long customerId) {
-        Customer customer = customerRepository.findById(customerId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Customer not found"));
         Message message = messageRepository.findById(message_id)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Message not found"));
 
@@ -233,10 +238,9 @@ public class MessageService {
 
         List<Image> images = this.imageRepository.findAllByMessageId(message_id);
         for (Image image : images) {
-            MediaHandler.deleteImageFromCloudinary(image.getImageUrl());
+            mediaHandler.deleteImageFromCloudinary(image.getImageUrl());
             this.imageRepository.delete(image);
         }
-        MediaHandler.deleteFolderFromCloudinary(customer.getDni() + "/messages/" + message_id);
         receiverRepository.findByMessageId(message_id).forEach(receiver -> receiverRepository.delete(receiver));
         messageRepository.delete(message);
     }
