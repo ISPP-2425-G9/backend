@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.caronte.caronte.obituary.DTOs.ObituraryRequestDto;
 import com.caronte.caronte.user.UserService;
+import com.stripe.exception.StripeException;
 
 import jakarta.validation.Valid;
 
@@ -34,7 +35,7 @@ public class ObituaryController {
 
     @PostMapping("/create")
     public ResponseEntity<String> createObituary(@RequestBody @Valid ObituraryRequestDto request,
-            Authentication authentication) {
+            Authentication authentication) throws StripeException {
         Long customerId = userService.findCurrentUserId();
         obituaryService.createObituaryWithReceivers(request, customerId);
         return ResponseEntity.ok("Obituary created successfully");
