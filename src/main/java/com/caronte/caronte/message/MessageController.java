@@ -66,7 +66,7 @@ public class MessageController {
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                                .body(Map.of("error", e.getMessage()));
+                                .body(Map.of("error", false));
         }
     }
 
@@ -89,6 +89,39 @@ public class MessageController {
             return ResponseEntity.status(e.getStatusCode()).body(Map.of("error", e.getReason()));
         } catch (Exception e) {
             e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                                .body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    @GetMapping("/{messageId}/is-owner")
+    public ResponseEntity<Map<String, ?>> isMessageOwner(@PathVariable Long messageId, Authentication authentication) {
+        if (authentication == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                                .body(Map.of("error", false));
+        }
+
+        try {
+            UserDetailsImpl userPrincipal = (UserDetailsImpl) authentication.getPrincipal();
+            Long customerId = userPrincipal.getId();
+            boolean isOwner = messageService.isOwner(messageId, customerId);
+
+            return ResponseEntity.ok(Map.of("isOwner", isOwner));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                                .body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    @GetMapping("/{messageId}/validate-code/{code}")
+    public ResponseEntity<Map<String, ?>> validateMessageCode(
+            @PathVariable Long messageId, 
+            @PathVariable String code) {
+        try {
+            boolean isValid = messageService.validateMessageCode(messageId, code);
+
+            return ResponseEntity.ok(Map.of("isValid", isValid));
+        } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                                 .body(Map.of("error", e.getMessage()));
         }

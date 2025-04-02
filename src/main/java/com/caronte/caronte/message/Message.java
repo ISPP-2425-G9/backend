@@ -34,7 +34,7 @@ public class Message extends BaseEntity {
     @Column(nullable = false, length = 2000)
     private String body;
 
-    @Column(nullable = false, length = 50)
+    @Column(nullable = false, length = 60)
     private String code;
 
     @Column(nullable = false)

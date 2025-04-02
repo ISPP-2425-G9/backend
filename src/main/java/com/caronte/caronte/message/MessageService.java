@@ -5,6 +5,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
@@ -28,19 +29,22 @@ public class MessageService {
     private final ReceiverService receiverService;
     private final ImageRepository imageRepository;
     MediaHandler mediaHandler;
+    PasswordEncoder passwordEncoder;
 
     public MessageService(MessageRepository messageRepository,
                           CustomerRepository customerRepository,
                           ReceiverService receiverService,
                           ImageRepository imageRepository,
                           ReceiverRepository receiverRepository,
-                          MediaHandler mediaHandler) {
+                          MediaHandler mediaHandler,
+                          PasswordEncoder passwordEncoder) {
         this.imageRepository = imageRepository;
         this.messageRepository = messageRepository;
         this.customerRepository = customerRepository;
         this.receiverService = receiverService;
         this.receiverRepository = receiverRepository;
         this.mediaHandler = mediaHandler;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Transactional
@@ -75,8 +79,16 @@ public class MessageService {
         do {
             int randomNumber = (int)(Math.random() * 100_000); // 00000 - 99999
             code = String.format("%05d", randomNumber);
+            code = passwordEncoder.encode(code);
         } while (messageRepository.existsByCode(code));
         return code;
+    }
+
+    public boolean validateMessageCode(Long messageId, String code) {
+        Message message = messageRepository.findById(messageId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Message not found"));
+
+        return passwordEncoder.matches(code, message.getCode());
     }
 
     public List<MessageRequestDto> getMessagesRequestDtoByCustomerId(Long customerId) {
@@ -152,10 +164,8 @@ public class MessageService {
         List<Image> existingImages = this.imageRepository.findAllByMessageId(message_id);
         List<String> requestImageUrls = request.getCustomImages();
     
-        // Eliminar imágenes que ya no están en el request
         existingImages = removeObsoleteImages(existingImages, requestImageUrls);
     
-        // Subir nuevas imágenes
         uploadNewImages(requestImageUrls, existingImages, message);
     
         if (request.getRecipients() != null) {
@@ -182,6 +192,14 @@ public class MessageService {
         messageRepository.delete(message);
     }
 
+    public boolean isOwner(Long messageId, Long customerId) {
+        Message message = messageRepository.findById(messageId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Message not found"));
+    
+        return message.getCustomer().getId().equals(customerId);
+    }
+    
+
     private List<Image> removeObsoleteImages(List<Image> existingImages, List<String> requestImageUrls) {
         Iterator<Image> iterator = existingImages.iterator();
         while (iterator.hasNext()) {
@@ -198,7 +216,7 @@ public class MessageService {
     private void uploadNewImages(List<String> requestImageUrls, List<Image> existingImages, Message message) {
         for (String customImage : requestImageUrls) {
             if (existingImages.stream().anyMatch(i -> i.getImageUrl().equals(customImage))) {
-                continue; // Skip if the image already exists
+                continue;
             }
     
             if (customImage != null && customImage.startsWith("data:image/")) {
