@@ -3,7 +3,6 @@ package com.caronte.caronte.message;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -62,28 +61,12 @@ public class MessageService {
 
         Message savedMessage = messageRepository.save(message);
 
-        List<String> customImages = request.getCustomImages();
-        for (String customImage : customImages) {
-                String processedImageUrl = Optional.ofNullable(customImage)
-                    .filter(file -> file.startsWith("data:image/"))
-                    .orElseThrow(() -> new IllegalArgumentException("The death certificate is not a valid image"));
-                processedImageUrl = mediaHandler.uploadImageToCloudinary(processedImageUrl, customer.getDni() + "/messages/" + message.getId() + "/");                
-                Image image = new Image();
-                image.setImageUrl(processedImageUrl);
-                image.setMessage(message);
-                imageRepository.save(image);
-        }
+        uploadNewImages(request.getCustomImages(), new ArrayList<>(), savedMessage);
 
         if (request.getRecipients() != null) {
-            for (MessageRequestDto.RecipientDto r : request.getRecipients()) {
-                receiverService.saveMessageReceiver(
-                        r.getName(),
-                        r.getTelephone(),
-                        r.getEmail(),
-                        savedMessage
-                );
-            }
+            updateRecipients(request, savedMessage);
         }
+
         return savedMessage;
     }
 
@@ -154,77 +137,31 @@ public class MessageService {
         return messageRequestDto;
     }
 
+    @Transactional
     public Message updateMessage(Long message_id, MessageRequestDto request, Long customerId) {
         Message message = messageRepository.findById(message_id)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Message not found"));
-
+    
         if (!message.getCustomer().getId().equals(customerId)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User not authorized to access this resource");
         }
-
-        Customer customer = customerRepository.findById(customerId)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Customer not found"));
-
+    
         message.setTitle(request.getTitle());
         message.setBody(request.getBody());
-
+    
         List<Image> existingImages = this.imageRepository.findAllByMessageId(message_id);
         List<String> requestImageUrls = request.getCustomImages();
-
-        Iterator<Image> iterator = existingImages.iterator();
-        while (iterator.hasNext()) {
-            Image image = iterator.next();
-            if (!requestImageUrls.contains(image.getImageUrl())) {
-                mediaHandler.deleteImageFromCloudinary(image.getImageUrl());
-                imageRepository.delete(image);
-                iterator.remove();
-            }
-        }
-
-        for (String customImage : requestImageUrls) {
-            if (existingImages.stream().anyMatch(i -> i.getImageUrl().equals(customImage))) {
-                continue;
-            }
-            if (customImage != null && customImage.startsWith("data:image/")) {
-                String processedImageUrl = Optional.ofNullable(customImage)
-                    .filter(file -> file.startsWith("data:image/"))
-                    .orElseThrow(() -> new IllegalArgumentException("The death certificate is not a valid image"));
-                processedImageUrl = mediaHandler.uploadImageToCloudinary(processedImageUrl, customer.getDni() + "/messages/" + message.getId() + "/");                
-                
-                
-                Image image = new Image();
-                image.setImageUrl(processedImageUrl);
-                image.setMessage(message);
-                imageRepository.save(image);    
-            }
-        }
-
+    
+        // Eliminar imágenes que ya no están en el request
+        existingImages = removeObsoleteImages(existingImages, requestImageUrls);
+    
+        // Subir nuevas imágenes
+        uploadNewImages(requestImageUrls, existingImages, message);
+    
         if (request.getRecipients() != null) {
-            for (MessageRequestDto.RecipientDto r : request.getRecipients()) {
-                boolean recipientExists = receiverRepository.findByMessageId(message_id).stream()
-                    .anyMatch(receiver -> receiver.getTelephone().equals(r.getTelephone()) || receiver.getEmail().equals(r.getEmail()));
-                if (!recipientExists) {
-                    receiverService.saveMessageReceiver(
-                        r.getName(),
-                        r.getTelephone(),
-                        r.getEmail(),
-                        message
-                    );
-                } else {
-                    receiverService.updateMessageReceiver(
-                        receiverRepository.findByMessageId(message_id).stream()
-                            .filter(receiver -> receiver.getTelephone().equals(r.getTelephone()) || receiver.getEmail().equals(r.getEmail()))
-                            .findFirst()
-                            .get()
-                            .getId(),
-                        r.getName(),
-                        r.getTelephone(),
-                        r.getEmail()
-                    );
-                }
-            }
+            updateRecipients(request, message);
         }
-
+    
         return messageRepository.save(message);
     }
 
@@ -243,5 +180,65 @@ public class MessageService {
         }
         receiverRepository.findByMessageId(message_id).forEach(receiver -> receiverRepository.delete(receiver));
         messageRepository.delete(message);
+    }
+
+    private List<Image> removeObsoleteImages(List<Image> existingImages, List<String> requestImageUrls) {
+        Iterator<Image> iterator = existingImages.iterator();
+        while (iterator.hasNext()) {
+            Image image = iterator.next();
+            if (!requestImageUrls.contains(image.getImageUrl())) {
+                mediaHandler.deleteImageFromCloudinary(image.getImageUrl());
+                imageRepository.delete(image);
+                iterator.remove();
+            }
+        }
+        return existingImages;
+    }
+    
+    private void uploadNewImages(List<String> requestImageUrls, List<Image> existingImages, Message message) {
+        for (String customImage : requestImageUrls) {
+            if (existingImages.stream().anyMatch(i -> i.getImageUrl().equals(customImage))) {
+                continue; // Skip if the image already exists
+            }
+    
+            if (customImage != null && customImage.startsWith("data:image/")) {
+                String processedImageUrl = mediaHandler.uploadImageToCloudinary(
+                    customImage,
+                    message.getCustomer().getDni() + "/messages/" + message.getId() + "/"
+                );
+    
+                Image image = new Image();
+                image.setImageUrl(processedImageUrl);
+                image.setMessage(message);
+                imageRepository.save(image);
+            }
+        }
+    }
+    
+    private void updateRecipients(MessageRequestDto request, Message message) {
+        for (MessageRequestDto.RecipientDto r : request.getRecipients()) {
+            boolean recipientExists = receiverRepository.findByMessageId(message.getId()).stream()
+                .anyMatch(receiver -> receiver.getTelephone().equals(r.getTelephone()) || receiver.getEmail().equals(r.getEmail()));
+    
+            if (!recipientExists) {
+                receiverService.saveMessageReceiver(
+                    r.getName(),
+                    r.getTelephone(),
+                    r.getEmail(),
+                    message
+                );
+            } else {
+                receiverService.updateMessageReceiver(
+                    receiverRepository.findByMessageId(message.getId()).stream()
+                        .filter(receiver -> receiver.getTelephone().equals(r.getTelephone()) || receiver.getEmail().equals(r.getEmail()))
+                        .findFirst()
+                        .get()
+                        .getId(),
+                    r.getName(),
+                    r.getTelephone(),
+                    r.getEmail()
+                );
+            }
+        }
     }
 }
