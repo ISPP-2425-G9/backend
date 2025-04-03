@@ -1,7 +1,12 @@
 package com.caronte.caronte.user;
 
+import java.time.LocalDateTime;
+
 import com.caronte.caronte.plan.Plan;
 import com.caronte.caronte.util.BaseEntity;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.stripe.exception.StripeException;
+import com.stripe.model.Subscription;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -34,4 +39,15 @@ public class User extends BaseEntity{
     @OneToOne(cascade = CascadeType.ALL, optional = false)
     private Plan plan;
 
+
+    @JsonIgnore
+    public LocalDateTime getExpiringDate() throws StripeException{
+        if(this.getPlan().isPremium()) {
+            Subscription subscription = Subscription.retrieve(plan.getSubscriptionId());
+            Long currentPeriodEnd = subscription.getCurrentPeriodEnd();
+            return LocalDateTime.ofEpochSecond(currentPeriodEnd, 0, java.time.ZoneOffset.UTC);
+        } else {
+            return null;
+        }
+    }
 }

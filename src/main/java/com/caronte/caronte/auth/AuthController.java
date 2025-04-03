@@ -35,6 +35,7 @@ import com.caronte.caronte.customer.CustomerService;
 import com.caronte.caronte.user.User;
 import com.caronte.caronte.user.UserService;
 import com.caronte.caronte.util.ErrorHandler;
+import com.stripe.exception.StripeException;
 
 import jakarta.validation.Valid;
 
@@ -62,7 +63,7 @@ public class AuthController {
 	@PostMapping("/login")
 	public ResponseEntity<JwtResponse> authenticateUser(
 			@Valid @RequestBody LoginRequest loginRequest,
-			BindingResult bindingResult) {
+			BindingResult bindingResult) throws StripeException {
 		ErrorHandler errors = ErrorHandler.catchError(bindingResult);
         errors.throwIfHasErrors();
 
@@ -72,6 +73,7 @@ public class AuthController {
 		UserDetailsImpl userDetailsImpl = (UserDetailsImpl) authentication.getPrincipal();
         String jwt = jwtUtils.generateJwtToken(authentication);
 		User user = userService.findById(userDetailsImpl.getId());
+		
         JwtResponse jwtResponse = new JwtResponse(jwt, user);
         return ResponseEntity.ok().body(jwtResponse);
 	}
@@ -79,7 +81,7 @@ public class AuthController {
 	@PostMapping("/customers/signup")
 	public ResponseEntity<JwtResponse> registerCustomer(
 			@Valid @RequestBody RegisterRequestCustomer registerRequest,
-			BindingResult bindingResult) {
+			BindingResult bindingResult) throws StripeException {
 		ErrorHandler errors = ErrorHandler.catchError(bindingResult);
 		Customer customer = authService.validateAndBuildCustomer(registerRequest, errors);
         errors.throwIfHasErrors();
@@ -92,7 +94,7 @@ public class AuthController {
 	@PostMapping("/companies/signup")
 	public ResponseEntity<JwtResponse> registerCompany(
 			@Valid @RequestBody RegisterRequestCompany registerRequest,
-			BindingResult bindingResult) {
+			BindingResult bindingResult) throws StripeException {
 		ErrorHandler errors = ErrorHandler.catchError(bindingResult);
 		Company company = authService.validateAndBuildCompany(registerRequest, errors);
         errors.throwIfHasErrors();
@@ -112,7 +114,7 @@ public class AuthController {
 	@PutMapping("/customers/{customerId}")
 	public ResponseEntity<JwtResponse> updateCustomer(
 			@PathVariable Long customerId,
-			@RequestBody @Valid CustomerUpdateRequest request) {
+			@RequestBody @Valid CustomerUpdateRequest request) throws StripeException {
 		userService.authorizeUserOrAdmin(customerId);
 		userService.findByEmail(request.getEmail())
 			.filter(user -> Objects.equals(user.getId(), customerId))
@@ -128,7 +130,7 @@ public class AuthController {
 
 	@PutMapping("/password/{userId}")
 	public ResponseEntity<JwtResponse> updateCustomer(@PathVariable Long userId,
-			@RequestBody @Valid UserChangePasswordRequest request) {
+			@RequestBody @Valid UserChangePasswordRequest request) throws StripeException {
         userService.authorizeUserOrAdmin(userId);
         User user = userService.changePassword(userId, request);
         UserDetailsImpl userDetails = UserDetailsImpl.build(user);
@@ -147,7 +149,7 @@ public class AuthController {
 	@PutMapping("/companies/{companyId}")
 	public ResponseEntity<JwtResponse> updateCompany(
 			@PathVariable Long companyId,
-			@RequestBody @Valid CompanyUpdateRequest request) throws AccessDeniedException {
+			@RequestBody @Valid CompanyUpdateRequest request) throws AccessDeniedException, StripeException {
         userService.authorizeUser(companyId);
 		userService.findByEmail(request.getEmail())
 			.filter(user -> Objects.equals(user.getId(), companyId))
