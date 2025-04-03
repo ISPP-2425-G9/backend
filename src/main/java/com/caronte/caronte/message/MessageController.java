@@ -6,7 +6,6 @@ import java.util.Map;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -20,7 +19,6 @@ import org.springframework.web.server.ResponseStatusException;
 import com.caronte.caronte.configuration.services.UserDetailsImpl;
 import com.caronte.caronte.message.DTOs.MessageRequestDto;
 import com.caronte.caronte.user.UserService;
-import com.caronte.caronte.util.ErrorHandler;
 
 import jakarta.validation.Valid;
 
@@ -37,10 +35,12 @@ public class MessageController {
     }
 
     @PostMapping
-    public ResponseEntity<Map<String, Long>> createMessage(
-            @Valid @RequestBody MessageRequestDto request, BindingResult bindingResult) {
-        ErrorHandler errorHandler = ErrorHandler.catchError(bindingResult);
-        errorHandler.throwIfHasErrors();
+    public ResponseEntity<Map<String, ?>> createMessage(
+            @Valid @RequestBody MessageRequestDto request, Authentication authentication) {
+        if (authentication == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                                .body(Map.of("error", "User not authenticated"));
+        }
         
         Long customerId = userService.findCurrentUserId();
         Message createdMessage = messageService.createMessage(request, customerId);
@@ -73,6 +73,12 @@ public class MessageController {
     @GetMapping("/{messageId}")
     public ResponseEntity<?> getMessageById(@PathVariable Long messageId,
             Authentication authentication) {
+
+        if (authentication == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                                .body(Map.of("error", "User not authenticated"));
+        }
+
         try {
             UserDetailsImpl userPrincipal = (UserDetailsImpl) authentication.getPrincipal();
             Long customerId = userPrincipal.getId();
@@ -128,12 +134,15 @@ public class MessageController {
     }
 
     @PutMapping("/{messageId}")
-    public ResponseEntity<Message> updateMessage(
+    public ResponseEntity<?> updateMessage(
             @PathVariable Long messageId,
             @Valid @RequestBody MessageRequestDto request,
-            BindingResult bindingResult) {
-        ErrorHandler errorHandler = ErrorHandler.catchError(bindingResult);
-        errorHandler.throwIfHasErrors();
+            Authentication authentication) {
+        
+        if (authentication == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                                .body(Map.of("error", "User not authenticated"));
+        }
 
         Long customerId = userService.findCurrentUserId();
         Message updatedMessage = messageService.updateMessage(messageId, request, customerId);
@@ -141,7 +150,12 @@ public class MessageController {
     }
 
     @DeleteMapping("/{messageId}")
-    public ResponseEntity<?> deleteMessage(@PathVariable Long messageId) {
+    public ResponseEntity<?> deleteMessage(@PathVariable Long messageId, Authentication authentication) {
+        if (authentication == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                                .body(Map.of("error", "User not authenticated"));
+        }
+
         Long customerId = userService.findCurrentUserId();
         messageService.deleteMessage(messageId, customerId);
         return ResponseEntity.ok().build();
