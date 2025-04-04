@@ -15,6 +15,8 @@ import lombok.Setter;
 @Setter
 public class MessageRequestDto {
 
+    private Long messageId = null;
+
     private String title;
 
     private String body;

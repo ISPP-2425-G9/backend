@@ -99,6 +99,7 @@ public class MessageService {
             List<Image> images = imageRepository.findAllByMessageId(message.getId());
             List<String> imageUrls = new ArrayList<>();
             List<Receiver> receivers = receiverRepository.findByMessageId(message.getId());
+            messageDto.setMessageId(message.getId());
             messageDto.setTitle(message.getTitle());
             messageDto.setBody(message.getBody());
             messageDto.setCustomImages(new ArrayList<>());
@@ -129,6 +130,7 @@ public class MessageService {
         Message message = messageRepository.findById(message_id)
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Message not found"));
         MessageRequestDto messageRequestDto = new MessageRequestDto();
+        messageRequestDto.setMessageId(message.getId());
         messageRequestDto.setTitle(message.getTitle());
         messageRequestDto.setBody(message.getBody());
         messageRequestDto.setCustomImages(this.imageRepository.findAllByMessageId(message_id).stream()
