@@ -129,8 +129,8 @@ public class MessageController {
                 MessageRequestDto messageDto = messageService.getMessageRequestDtoByMessageId(messageId);
                 return ResponseEntity.ok(messageDto);
             } else {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                                    .body(Map.of("error", "User not authorized to access this resource"));
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                                    .body(Map.of("error", "Invalid code"));
             }
 
         } catch (Exception e) {
