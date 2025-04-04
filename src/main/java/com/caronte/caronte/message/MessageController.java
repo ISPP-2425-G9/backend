@@ -103,8 +103,7 @@ public class MessageController {
     @GetMapping("/{messageId}/is-owner")
     public ResponseEntity<Map<String, ?>> isMessageOwner(@PathVariable Long messageId, Authentication authentication) {
         if (authentication == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                                .body(Map.of("error", false));
+            return ResponseEntity.ok(Map.of("isOwner", false));
         }
 
         try {
