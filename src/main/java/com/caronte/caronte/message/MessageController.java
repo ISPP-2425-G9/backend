@@ -83,7 +83,7 @@ public class MessageController {
             UserDetailsImpl userPrincipal = (UserDetailsImpl) authentication.getPrincipal();
             Long customerId = userPrincipal.getId();
             Message message = messageService.getMessageById(messageId);
-            MessageRequestDto messageDto = messageService.getMessageRequestDtoByMessageId(messageId, customerId);
+            MessageRequestDto messageDto = messageService.getMessageRequestDtoByMessageId(messageId);
             if (message.getCustomer().getId().equals(customerId)) {
                 return ResponseEntity.ok(messageDto);
             } else {
@@ -120,13 +120,20 @@ public class MessageController {
     }
 
     @GetMapping("/{messageId}/validate-code/{code}")
-    public ResponseEntity<Map<String, ?>> validateMessageCode(
+    public ResponseEntity<?> validateMessageCode(
             @PathVariable Long messageId, 
             @PathVariable String code) {
         try {
             boolean isValid = messageService.validateMessageCode(messageId, code);
 
-            return ResponseEntity.ok(Map.of("isValid", isValid));
+            if (isValid) {
+                MessageRequestDto messageDto = messageService.getMessageRequestDtoByMessageId(messageId);
+                return ResponseEntity.ok(messageDto);
+            } else {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                                    .body(Map.of("error", "User not authorized to access this resource"));
+            }
+
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                                 .body(Map.of("error", e.getMessage()));

@@ -126,7 +126,7 @@ public class MessageService {
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Message not found"));
     }
 
-    public MessageRequestDto getMessageRequestDtoByMessageId(Long message_id, Long customerId) {
+    public MessageRequestDto getMessageRequestDtoByMessageId(Long message_id) {
         Message message = messageRepository.findById(message_id)
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Message not found"));
         MessageRequestDto messageRequestDto = new MessageRequestDto();
