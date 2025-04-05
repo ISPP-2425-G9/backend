@@ -19,6 +19,7 @@ import com.caronte.caronte.receiver.Receiver;
 import com.caronte.caronte.receiver.ReceiverRepository;
 import com.caronte.caronte.receiver.ReceiverService;
 import com.caronte.caronte.util.MediaHandler;
+import com.caronte.caronte.util.exceptions.ResourceNotFound;
 
 @Service
 public class MessageService {
@@ -47,11 +48,28 @@ public class MessageService {
         this.passwordEncoder = passwordEncoder;
     }
 
+    public Message getMessageById(Long messageId) {
+            return messageRepository.findById(messageId)
+                .orElseThrow(() -> ResourceNotFound.of("Message", "id", messageId));
+    }
+
+    public MessageRequestDto getMessageRequestDtoByMessageId(Long messageId) {
+            Message message = getMessageById(messageId);
+            return convertToDto(message);
+    }
+    
+    public List<MessageRequestDto> getMessagesRequestDtoByCustomerId(Long customerId) {
+        List<Message> messages = messageRepository.findAllByCustomerId(customerId);
+        return messages.stream()
+                .map(this::convertToDto)
+                .toList();
+    }
+
     @Transactional
     public Message createMessage(MessageRequestDto request, Long customerId) {
 
         Customer customer = customerRepository.findById(customerId)
-                .orElseThrow(() -> new RuntimeException("Customer not found"));
+                .orElseThrow(() -> ResourceNotFound.of("Customer", "id", customerId));
 
         Message message = new Message();
         message.setTitle(request.getTitle());
@@ -74,87 +92,9 @@ public class MessageService {
         return savedMessage;
     }
 
-    private String generateUniqueRandomCode() {
-        String code;
-        do {
-            int randomNumber = (int)(Math.random() * 100_000); // 00000 - 99999
-            code = String.format("%05d", randomNumber);
-            code = passwordEncoder.encode(code);
-        } while (messageRepository.existsByCode(code));
-        return code;
-    }
-
-    public boolean validateMessageCode(Long messageId, String code) {
-        Message message = messageRepository.findById(messageId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Message not found"));
-
-        return passwordEncoder.matches(code, message.getCode());
-    }
-
-    public List<MessageRequestDto> getMessagesRequestDtoByCustomerId(Long customerId) {
-        List<Message> messages = messageRepository.findAllByCustomerId(customerId);
-        List<MessageRequestDto> messageDtos = new ArrayList<>();
-        for (Message message : messages) {
-            MessageRequestDto messageDto = new MessageRequestDto();
-            List<Image> images = imageRepository.findAllByMessageId(message.getId());
-            List<String> imageUrls = new ArrayList<>();
-            List<Receiver> receivers = receiverRepository.findByMessageId(message.getId());
-            messageDto.setMessageId(message.getId());
-            messageDto.setTitle(message.getTitle());
-            messageDto.setBody(message.getBody());
-            messageDto.setCustomImages(new ArrayList<>());
-            messageDto.setIsLastWill(message.getIsLastWill());
-            messageDto.setCustomImages(imageUrls);
-            messageDto.setRecipients(new ArrayList<>());
-            for (Image image : images) {
-                imageUrls.add(image.getImageUrl());
-            }
-            for(Receiver receiver : receivers) {
-            MessageRequestDto.RecipientDto recipientDto = new MessageRequestDto.RecipientDto();
-            recipientDto.setName(receiver.getName());
-            recipientDto.setTelephone(receiver.getTelephone());
-            recipientDto.setEmail(receiver.getEmail());
-            messageDto.getRecipients().add(recipientDto);
-            }
-            messageDtos.add(messageDto);
-        }
-        return messageDtos;
-    }
-
-    public Message getMessageById(Long messageId) {
-        return messageRepository.findById(messageId)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Message not found"));
-    }
-
-    public MessageRequestDto getMessageRequestDtoByMessageId(Long message_id) {
-        Message message = messageRepository.findById(message_id)
-        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Message not found"));
-        MessageRequestDto messageRequestDto = new MessageRequestDto();
-        messageRequestDto.setMessageId(message.getId());
-        messageRequestDto.setTitle(message.getTitle());
-        messageRequestDto.setBody(message.getBody());
-        messageRequestDto.setCustomImages(this.imageRepository.findAllByMessageId(message_id).stream()
-            .map(Image::getImageUrl)
-            .toList());
-        messageRequestDto.setIsLastWill(message.getIsLastWill());
-        List<Receiver> receivers = receiverRepository.findByMessageId(message_id);
-        List<MessageRequestDto.RecipientDto> recipientDtos = new ArrayList<>();
-        for (Receiver receiver : receivers) {
-            MessageRequestDto.RecipientDto recipientDto = new MessageRequestDto.RecipientDto();
-            recipientDto.setName(receiver.getName());
-            recipientDto.setTelephone(receiver.getTelephone());
-            recipientDto.setEmail(receiver.getEmail());
-            recipientDtos.add(recipientDto);
-        }
-        messageRequestDto.setRecipients(recipientDtos);
-
-        return messageRequestDto;
-    }
-
     @Transactional
     public Message updateMessage(Long message_id, MessageRequestDto request, Long customerId) {
-        Message message = messageRepository.findById(message_id)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Message not found"));
+        Message message = this.getMessageById(message_id);
     
         if (!message.getCustomer().getId().equals(customerId)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User not authorized to access this resource");
@@ -178,8 +118,7 @@ public class MessageService {
     }
 
     public void deleteMessage(Long message_id, Long customerId) {
-        Message message = messageRepository.findById(message_id)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Message not found"));
+        Message message = this.getMessageById(message_id);
 
         if (!message.getCustomer().getId().equals(customerId)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User not authorized to access this resource");
@@ -193,28 +132,35 @@ public class MessageService {
         receiverRepository.findByMessageId(message_id).forEach(receiver -> receiverRepository.delete(receiver));
         messageRepository.delete(message);
     }
-
-    public boolean isOwner(Long messageId, Long customerId) {
-        Message message = messageRepository.findById(messageId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Message not found"));
     
-        return message.getCustomer().getId().equals(customerId);
+    private MessageRequestDto convertToDto(Message message) {
+        MessageRequestDto dto = new MessageRequestDto();
+        dto.setMessageId(message.getId());
+        dto.setTitle(message.getTitle());
+        dto.setBody(message.getBody());
+        dto.setIsLastWill(message.getIsLastWill());
+    
+        List<String> imageUrls = imageRepository.findAllByMessageId(message.getId()).stream()
+            .map(Image::getImageUrl)
+            .toList();
+        dto.setCustomImages(imageUrls);
+    
+        List<MessageRequestDto.RecipientDto> recipients = receiverRepository.findByMessageId(message.getId()).stream()
+            .map(this::convertToRecipientDto)
+            .toList();
+        dto.setRecipients(recipients);
+    
+        return dto;
     }
     
-
-    private List<Image> removeObsoleteImages(List<Image> existingImages, List<String> requestImageUrls) {
-        Iterator<Image> iterator = existingImages.iterator();
-        while (iterator.hasNext()) {
-            Image image = iterator.next();
-            if (!requestImageUrls.contains(image.getImageUrl())) {
-                mediaHandler.deleteImageFromCloudinary(image.getImageUrl());
-                imageRepository.delete(image);
-                iterator.remove();
-            }
-        }
-        return existingImages;
+    private MessageRequestDto.RecipientDto convertToRecipientDto(Receiver receiver) {
+        MessageRequestDto.RecipientDto recipientDto = new MessageRequestDto.RecipientDto();
+        recipientDto.setName(receiver.getName());
+        recipientDto.setTelephone(receiver.getTelephone());
+        recipientDto.setEmail(receiver.getEmail());
+        return recipientDto;
     }
-    
+
     private void uploadNewImages(List<String> requestImageUrls, List<Image> existingImages, Message message) {
         for (String customImage : requestImageUrls) {
             if (existingImages.stream().anyMatch(i -> i.getImageUrl().equals(customImage))) {
@@ -234,7 +180,7 @@ public class MessageService {
             }
         }
     }
-    
+
     private void updateRecipients(MessageRequestDto request, Message message) {
         for (MessageRequestDto.RecipientDto r : request.getRecipients()) {
             boolean recipientExists = receiverRepository.findByMessageId(message.getId()).stream()
@@ -260,5 +206,40 @@ public class MessageService {
                 );
             }
         }
+    }
+
+    private List<Image> removeObsoleteImages(List<Image> existingImages, List<String> requestImageUrls) {
+        Iterator<Image> iterator = existingImages.iterator();
+        while (iterator.hasNext()) {
+            Image image = iterator.next();
+            if (!requestImageUrls.contains(image.getImageUrl())) {
+                mediaHandler.deleteImageFromCloudinary(image.getImageUrl());
+                imageRepository.delete(image);
+                iterator.remove();
+            }
+        }
+        return existingImages;
+    }
+
+    private String generateUniqueRandomCode() {
+        String code;
+        int randomNumber = (int)(Math.random() * 100_000); // 00000 - 99999
+        code = String.format("%05d", randomNumber);
+        code = passwordEncoder.encode(code);
+        return code;
+    }
+
+    public boolean validateMessageCode(Long messageId, String code) {
+        Message message = messageRepository.findById(messageId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Message not found"));
+
+        return passwordEncoder.matches(code, message.getCode());
+    }
+
+    public boolean isOwner(Long messageId, Long customerId) {
+        Message message = messageRepository.findById(messageId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Message not found"));
+    
+        return message.getCustomer().getId().equals(customerId);
     }
 }

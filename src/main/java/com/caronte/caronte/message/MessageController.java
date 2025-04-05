@@ -5,7 +5,6 @@ import java.util.Map;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -16,7 +15,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
-import com.caronte.caronte.configuration.services.UserDetailsImpl;
 import com.caronte.caronte.message.DTOs.MessageRequestDto;
 import com.caronte.caronte.user.UserService;
 
@@ -34,54 +32,11 @@ public class MessageController {
         this.userService = userService;
     }
 
-    @PostMapping
-    public ResponseEntity<Map<String, ?>> createMessage(
-            @Valid @RequestBody MessageRequestDto request, Authentication authentication) {
-        if (authentication == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                                .body(Map.of("error", "User not authenticated"));
-        }
-        
-        Long customerId = userService.findCurrentUserId();
-        Message createdMessage = messageService.createMessage(request, customerId);
-        
-        return ResponseEntity.status(HttpStatus.CREATED).body(Map.of("messageId", createdMessage.getId()));
-    }
-
-    @GetMapping("/my-messages")
-    public ResponseEntity<?> getMessagesByCustomerId(
-            Authentication authentication) {
-
-        if (authentication == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                                .body(Map.of("error", "User not authenticated"));
-        }
-
-        try {
-            UserDetailsImpl userPrincipal = (UserDetailsImpl) authentication.getPrincipal();
-            Long customerId = userPrincipal.getId();
-            List<MessageRequestDto> messages = messageService.getMessagesRequestDtoByCustomerId(customerId);
-            
-            return ResponseEntity.ok(messages);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                                .body(Map.of("error", false));
-        }
-    }
-
     @GetMapping("/{messageId}")
-    public ResponseEntity<?> getMessageById(@PathVariable Long messageId,
-            Authentication authentication) {
-
-        if (authentication == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                                .body(Map.of("error", "User not authenticated"));
-        }
+    public ResponseEntity<?> getMessageById(@PathVariable Long messageId) {
 
         try {
-            UserDetailsImpl userPrincipal = (UserDetailsImpl) authentication.getPrincipal();
-            Long customerId = userPrincipal.getId();
+            Long customerId = userService.findCurrentUserId();
             Message message = messageService.getMessageById(messageId);
             MessageRequestDto messageDto = messageService.getMessageRequestDtoByMessageId(messageId);
             if (message.getCustomer().getId().equals(customerId)) {
@@ -100,15 +55,54 @@ public class MessageController {
         }
     }
 
-    @GetMapping("/{messageId}/is-owner")
-    public ResponseEntity<Map<String, ?>> isMessageOwner(@PathVariable Long messageId, Authentication authentication) {
-        if (authentication == null) {
-            return ResponseEntity.ok(Map.of("isOwner", false));
-        }
+    @GetMapping("/my-messages")
+    public ResponseEntity<?> getMessagesByCustomerId() {
 
         try {
-            UserDetailsImpl userPrincipal = (UserDetailsImpl) authentication.getPrincipal();
-            Long customerId = userPrincipal.getId();
+            Long customerId = userService.findCurrentUserId();
+            List<MessageRequestDto> messages = messageService.getMessagesRequestDtoByCustomerId(customerId);
+            
+            return ResponseEntity.ok(messages);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                                .body(Map.of("error", false));
+        }
+    }
+
+    @PostMapping
+    public ResponseEntity<Map<String, ?>> createMessage(
+            @Valid @RequestBody MessageRequestDto request) {
+        
+        Long customerId = userService.findCurrentUserId();
+        Message createdMessage = messageService.createMessage(request, customerId);
+        
+        return ResponseEntity.status(HttpStatus.CREATED).body(Map.of("messageId", createdMessage.getId()));
+    }
+
+    @PutMapping("/{messageId}")
+    public ResponseEntity<?> updateMessage(
+            @PathVariable Long messageId,
+            @Valid @RequestBody MessageRequestDto request) {
+
+        Long customerId = userService.findCurrentUserId();
+        Message updatedMessage = messageService.updateMessage(messageId, request, customerId);
+        return ResponseEntity.ok(updatedMessage);
+    }
+
+    @DeleteMapping("/{messageId}")
+    public ResponseEntity<?> deleteMessage(@PathVariable Long messageId) {
+
+        Long customerId = userService.findCurrentUserId();
+        messageService.deleteMessage(messageId, customerId);
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/{messageId}/is-owner")
+    public ResponseEntity<Map<String, ?>> isMessageOwner(@PathVariable Long messageId) {
+
+        try {
+            Long customerId = userService.findCurrentUserId();
             boolean isOwner = messageService.isOwner(messageId, customerId);
 
             return ResponseEntity.ok(Map.of("isOwner", isOwner));
@@ -137,33 +131,5 @@ public class MessageController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                                 .body(Map.of("error", e.getMessage()));
         }
-    }
-
-    @PutMapping("/{messageId}")
-    public ResponseEntity<?> updateMessage(
-            @PathVariable Long messageId,
-            @Valid @RequestBody MessageRequestDto request,
-            Authentication authentication) {
-        
-        if (authentication == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                                .body(Map.of("error", "User not authenticated"));
-        }
-
-        Long customerId = userService.findCurrentUserId();
-        Message updatedMessage = messageService.updateMessage(messageId, request, customerId);
-        return ResponseEntity.ok(updatedMessage);
-    }
-
-    @DeleteMapping("/{messageId}")
-    public ResponseEntity<?> deleteMessage(@PathVariable Long messageId, Authentication authentication) {
-        if (authentication == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                                .body(Map.of("error", "User not authenticated"));
-        }
-
-        Long customerId = userService.findCurrentUserId();
-        messageService.deleteMessage(messageId, customerId);
-        return ResponseEntity.ok().build();
     }
 }

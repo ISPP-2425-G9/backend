@@ -57,6 +57,9 @@ public class SecurityConfig {
 				.requestMatchers("/api/auth/customers/signup", "/api/auth/companies/signup").anonymous()
 				.requestMatchers("/api/auth/customers/**").hasAnyAuthority(ADMIN, CUSTOMER, CUSTOMER_FREE, CUSTOMER_PREMIUM) // ✅ Permitir acceso a clientes autenticados
 				.requestMatchers("/api/auth/companies/**").hasAnyAuthority(ADMIN, COMPANY, COMPANY_FREE, COMPANY_PREMIUM) // ✅ Permitir acceso a empresas autenticadas
+				.requestMatchers("/api/messages/*/validate-code/*").permitAll()
+				.requestMatchers("/api/messages/**").hasAnyAuthority(ADMIN, CUSTOMER, CUSTOMER_FREE, CUSTOMER_PREMIUM)
+
 				.anyRequest().permitAll()
 			)
 			.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
