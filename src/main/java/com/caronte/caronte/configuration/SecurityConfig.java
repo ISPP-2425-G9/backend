@@ -53,6 +53,7 @@ public class SecurityConfig {
 			.headers(headers -> headers.frameOptions(frameOptions -> frameOptions.disable()))
 			.exceptionHandling(exepciontHandling -> exepciontHandling.authenticationEntryPoint(unauthorizedHandler))
 			.authorizeHttpRequests(authorizeRequests -> authorizeRequests
+				.requestMatchers("/api/status").permitAll()
 				.requestMatchers("/api/auth/login").anonymous()
 				.requestMatchers("/api/auth/customers/signup", "/api/auth/companies/signup").anonymous()
 				.requestMatchers("/api/auth/customers/**").hasAnyAuthority(ADMIN, CUSTOMER, CUSTOMER_FREE, CUSTOMER_PREMIUM) // ✅ Permitir acceso a clientes autenticados
