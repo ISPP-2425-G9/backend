@@ -28,7 +28,7 @@ public class Message extends BaseEntity {
 
     private static final int CODE_LENGTH = 5;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 80)
     private String title;
 
     @Column(nullable = false, length = 2000)
