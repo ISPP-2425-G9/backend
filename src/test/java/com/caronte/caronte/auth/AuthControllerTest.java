@@ -433,15 +433,86 @@ public class AuthControllerTest {
                .andExpect(jsonPath("$.name").value("Customer A"));
     }
     
-    @Test
-    void testUpdateCustomerByAdmin() {
 
+    // REVISAR
+    @Test
+    void testUpdateCustomerByAdmin() throws Exception {
+        Long customerId = 1L;
+        CustomerUpdateRequest request = new CustomerUpdateRequest();
+        request.setEmail("updated@example.com");
+        request.setFullName("Updated Name");
+        request.setTelephone("555555555");
+
+        Customer customer = new Customer();
+        customer.setId(customerId);
+        customer.setEmail("updated@example.com");
+        customer.setName("Updated Name");
+        customer.setTelephone("555555555");
+        customer.setIsActive(true);
+        customer.setDni("12345678X");
+        customer.setPlan(Plan.newPlanFree());
+
+        Admin admin = new Admin();
+        admin.setId(99L);
+        admin.setEmail("admin@example.com");
+        admin.setName("Admin User");
+        admin.setPassword("encodedPassword");
+
+        Authentication auth = new UsernamePasswordAuthenticationToken(
+                admin,
+                null,
+                List.of(new SimpleGrantedAuthority("ADMIN"))
+        );
+        SecurityContextHolder.getContext().setAuthentication(auth);
+        
+        Mockito.when(userService.findCurrentUser()).thenReturn(admin);
+        when(customerService.update(customerId, request)).thenReturn(customer);
+
+        mockMvc.perform(put("/api/auth/admin/customers/{customerId}", customerId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(asJsonString(request)))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.id").value(customerId))
+            .andExpect(jsonPath("$.email").value("updated@example.com"))
+            .andExpect(jsonPath("$.name").value("Updated Name"))
+            .andExpect(jsonPath("$.telephone").value("555555555"));
     }
 
-    
+    // REVISAR
     @Test
     void testGetCompanies() throws Exception {
+        Company company1 = new Company();
+        company1.setId(1L);
+        company1.setName("Company A");
+        company1.setEmail("companya@example.com");
+        company1.setAddress("Address A");
+        company1.setCity("City A");
+        company1.setZipCode("ZipA");
+        company1.setNif("NIFA");
+        company1.setPlan(Plan.newPlanFree());
+        company1.setCompanyType(CompanyType.OTRO);
+
+        Company company2 = new Company();
+        company2.setId(2L);
+        company2.setName("Company B");
+        company2.setEmail("companyb@example.com");
+        company2.setAddress("Address B");
+        company2.setCity("City B");
+        company2.setZipCode("ZipB");
+        company2.setNif("NIFB");
+        company2.setPlan(Plan.newPlanFree());
+        company2.setCompanyType(CompanyType.OTRO);
+
+        List<Company> companies = List.of(company1, company2);
+        when(companyService.findAll()).thenReturn(companies);
+
+        mockMvc.perform(get("/api/auth/admin/companies")
+                .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$[0].name").value("Company A"))
+            .andExpect(jsonPath("$[1].name").value("Company B"));
     }
+
 
     @Test
     void testGetCompanyByAdmin() throws Exception {
@@ -481,9 +552,63 @@ public class AuthControllerTest {
 
         
 
+    // REVISAR
     @Test
     void testUpdateCompanyByAdmin() throws Exception {
-       
+        Long companyId = 1L;
+        CompanyUpdateRequest request = new CompanyUpdateRequest();
+        request.setName("New Company Name");
+        request.setEmail("newcompany@example.com");
+        request.setTelephone("987654321");
+        request.setAddress("New Address");
+        request.setCity("New City");
+        request.setZipCode("54321");
+        request.setImageUrl("new_image_url");
+        request.setDescription("New Description");
+        request.setPassword("newPassword123");
+
+        Company updatedCompany = new Company();
+        updatedCompany.setId(companyId);
+        updatedCompany.setName("New Company Name");
+        updatedCompany.setEmail("newcompany@example.com");
+        updatedCompany.setTelephone("987654321");
+        updatedCompany.setAddress("New Address");
+        updatedCompany.setCity("New City");
+        updatedCompany.setZipCode("54321");
+        updatedCompany.setImageUrl("new_image_url");
+        updatedCompany.setDescription("New Description");
+        updatedCompany.setNif("A1234567B");
+        updatedCompany.setPlan(Plan.newPlanFree());
+        updatedCompany.setCompanyType(CompanyType.OTRO);
+
+        Admin admin = new Admin();
+        admin.setId(99L);
+        admin.setEmail("admin@example.com");
+        admin.setName("Admin User");
+        admin.setPassword("encodedPassword");
+
+        Authentication auth = new UsernamePasswordAuthenticationToken(
+                admin,
+                null,
+                List.of(new SimpleGrantedAuthority("ADMIN"))
+        );
+        SecurityContextHolder.getContext().setAuthentication(auth);
+        when(userService.findCurrentUser()).thenReturn(admin);
+        when(companyService.update(companyId, request)).thenReturn(updatedCompany);
+
+        mockMvc.perform(put("/api/auth/admin/companies/{companyId}", companyId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(asJsonString(request)))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.id").value(companyId))
+            .andExpect(jsonPath("$.name").value("New Company Name"))
+            .andExpect(jsonPath("$.email").value("newcompany@example.com"))
+            .andExpect(jsonPath("$.telephone").value("987654321"))
+            .andExpect(jsonPath("$.address").value("New Address"))
+            .andExpect(jsonPath("$.city").value("New City"))
+            .andExpect(jsonPath("$.zipCode").value("54321"))
+            .andExpect(jsonPath("$.imageUrl").value("new_image_url"))
+            .andExpect(jsonPath("$.description").value("New Description"));
     }
 
     @Test
