@@ -90,8 +90,12 @@ public class MessageService {
 
         uploadNewImages(request.getCustomImages(), new ArrayList<>(), savedMessage);
 
+        //Esto es necesario crearlo desde 0 por la relación entre receiver y message NO SE PUEDE ACTUALIZAR
+        //Con la funcion anterior si creas dos mensajes y se lo quieres enviar a la misma persona, uno de los dos no le llega 
         if (request.getRecipients() != null) {
-            updateRecipients(request, savedMessage);
+            for (MessageRequestDto.RecipientDto r : request.getRecipients()){
+                receiverService.saveMessageReceiver(r.getName(), r.getTelephone(), r.getEmail(), savedMessage);
+            }
         }
 
         return savedMessage;
@@ -112,7 +116,7 @@ public class MessageService {
         existingImages = removeObsoleteImages(existingImages, requestImageUrls);
     
         uploadNewImages(requestImageUrls, existingImages, message);
-    
+
         if (request.getRecipients() != null) {
             updateRecipients(request, message);
         }
@@ -183,30 +187,22 @@ public class MessageService {
     }
 
     private void updateRecipients(MessageRequestDto request, Message message) {
-        for (MessageRequestDto.RecipientDto r : request.getRecipients()) {
-            boolean recipientExists = receiverRepository.findByMessageId(message.getId()).stream()
-                .anyMatch(receiver -> receiver.getTelephone().equals(r.getTelephone()) || receiver.getEmail().equals(r.getEmail()));
-    
-            if (!recipientExists) {
-                receiverService.saveMessageReceiver(
-                    r.getName(),
-                    r.getTelephone(),
-                    r.getEmail(),
-                    message
-                );
-            } else {
-                receiverService.updateMessageReceiver(
-                    receiverRepository.findByMessageId(message.getId()).stream()
-                        .filter(receiver -> receiver.getTelephone().equals(r.getTelephone()) || receiver.getEmail().equals(r.getEmail()))
-                        .findFirst()
-                        .get()
-                        .getId(),
-                    r.getName(),
-                    r.getTelephone(),
-                    r.getEmail()
-                );
+        for (MessageRequestDto.RecipientDto r : request.getRecipients()) { 
+            //Un receptor existe si tiene el mismo nombre y email
+            //Si existe se actualiza 
+            //Si no existe se crea uno nuevo
+            Receiver receiverExistent = receiverRepository.findByMessageIdAndNameAndEmail(message.getId(), r.getName(), r.getEmail()).orElse(null);
+            if (receiverExistent == null) receiverService.saveMessageReceiver(r.getName(),r.getTelephone(),r.getEmail(),message);
+            else receiverService.updateMessageReceiver(receiverExistent.getId(),r.getName(),r.getTelephone(),r.getEmail());  
+        }
+        for (Receiver receiver : receiverRepository.findByMessageId(message.getId())) {
+            //Tras actualizar y crear los nuevos, borramos los que hay en base de datos pero no en el request
+            //Si no existe en la request pero si en la base de datos se elimina
+            if (request.getRecipients().stream().noneMatch(r -> r.getName().equals(receiver.getName()) && r.getEmail().equals(receiver.getEmail()))) {
+                receiverRepository.delete(receiver);
             }
         }
+
     }
 
     private List<Image> removeObsoleteImages(List<Image> existingImages, List<String> requestImageUrls) {
