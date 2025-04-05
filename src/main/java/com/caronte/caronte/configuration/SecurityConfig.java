@@ -68,24 +68,24 @@ public class SecurityConfig {
 				.requestMatchers("/api/companies/companiesTypes").hasAnyAuthority(COMPANY, CUSTOMER)
 				.requestMatchers("/api/companies/premium").authenticated()
 				// Contacts
-				.requestMatchers("/api/contacts/**").hasAnyAuthority(CUSTOMER_PREMIUM)
+				.requestMatchers("/api/contacts/**").hasAuthority(CUSTOMER_PREMIUM)
 				// Death Certificate		
 				.requestMatchers("/api/deathCertificate/all").hasAuthority(ADMIN)	
-				.requestMatchers("/api/deathCertificate/obituary/*").hasAnyAuthority("")		
+				.requestMatchers("/api/deathCertificate/obituary/*").hasAuthority(CUSTOMER)		
 				.requestMatchers("/api/deathCertificate/upload").anonymous()
-				.requestMatchers("/api/deathCertificate/upload/loggedInUser").hasAnyAuthority(CUSTOMER_PREMIUM)
+				.requestMatchers("/api/deathCertificate/upload/loggedInUser").hasAuthority(CUSTOMER_PREMIUM)
 				// Messages				
-				.requestMatchers("/api/messages/**").hasAnyAuthority(CUSTOMER_PREMIUM)
+				.requestMatchers("/api/messages/**").hasAuthority(CUSTOMER_PREMIUM)
 				// Obituary				
-				.requestMatchers("/api/obituary/**").hasAnyAuthority(CUSTOMER)
+				.requestMatchers("/api/obituary/**").hasAuthority(CUSTOMER)
 				// Plans				
 				.requestMatchers("/api/plans/*").authenticated()
 				// Receivers				
-				.requestMatchers("/api/receiver/getReceivers/obituary/*").hasAnyAuthority(CUSTOMER)
+				.requestMatchers("/api/receiver/getReceivers/obituary/*").hasAuthority(CUSTOMER)
 				// Status				
 				.requestMatchers("/api/status").permitAll()
 				// Templates				
-				.requestMatchers("/api/templates/urls").hasAnyAuthority(CUSTOMER)
+				.requestMatchers("/api/templates/urls").hasAuthority(CUSTOMER)
 				.anyRequest().denyAll()
 			)
 			.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
