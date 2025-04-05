@@ -21,12 +21,14 @@ import org.springframework.test.web.servlet.MockMvc;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import com.caronte.caronte.admin.Admin;
 import com.caronte.caronte.auth.payload.response.CompanyUpdateRequest;
+import com.caronte.caronte.auth.payload.response.CustomerUpdateRequest;
 import com.caronte.caronte.auth.payload.response.LoginRequest;
 import com.caronte.caronte.auth.payload.response.RegisterRequestCompany;
 import com.caronte.caronte.auth.payload.response.RegisterRequestCustomer;
@@ -228,15 +230,42 @@ public class AuthControllerTest {
             .andExpect(jsonPath("$.name").value("Customer A"));
     }
 
+    // Revisar
+    @Test
+    void testUpdateCustomer() throws Exception {
+        Long customerId = 1L;
+        CustomerUpdateRequest request = new CustomerUpdateRequest();
+        request.setEmail("new@example.com");
+        request.setFullName("New Name");
+        request.setTelephone("123456789");
     
-    @Test
-    void testUpdateCustomer() {
+        Customer customer = new Customer();
+        customer.setId(customerId);
+        customer.setEmail("new@example.com");
+        customer.setName("New Name");
+        customer.setTelephone("123456789");
+        customer.setIsActive(true);
+        customer.setDni("12345678X");
+        customer.setPlan(Plan.newPlanFree());
 
+    
+        when(userService.findByEmail("new@example.com")).thenReturn(Optional.of(customer));
+        when(customerService.update(customerId, request)).thenReturn(customer);
+        when(jwtUtils.generateJwtToken(Mockito.any(UserDetailsImpl.class))).thenReturn("dummy-jwt");
+        when(userService.findCurrentUser()).thenReturn(customer);
+    
+        mockMvc.perform(put("/api/auth/customers/{customerId}", customerId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(asJsonString(request)))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.token").value("dummy-jwt"))
+            .andExpect(jsonPath("$.id").value(customerId))
+            .andExpect(jsonPath("$.username").value("new@example.com"))
+            .andExpect(jsonPath("$.name").value("New Name"));
     }
-    @Test
-    void testUpdateCustomerPassword() {
+    
+    
 
-    }
 
     // REVISAR
     @Test
