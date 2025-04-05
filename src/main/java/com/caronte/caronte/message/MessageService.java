@@ -4,11 +4,9 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
 import com.caronte.caronte.customer.Customer;
 import com.caronte.caronte.customer.CustomerRepository;
@@ -20,6 +18,7 @@ import com.caronte.caronte.receiver.ReceiverRepository;
 import com.caronte.caronte.receiver.ReceiverService;
 import com.caronte.caronte.util.MediaHandler;
 import com.caronte.caronte.util.exceptions.ResourceNotFound;
+import com.caronte.caronte.util.exceptions.ResponseThrow;
 
 @Service
 public class MessageService {
@@ -53,9 +52,15 @@ public class MessageService {
                 .orElseThrow(() -> ResourceNotFound.of("Message", "id", messageId));
     }
 
-    public MessageRequestDto getMessageRequestDtoByMessageId(Long messageId) {
+    public MessageRequestDto getMessageRequestDtoByMessageId(Long customerId, Long messageId) {
             Message message = getMessageById(messageId);
+            ResponseThrow.checkOrForbidden(message.hasCustomerWithId(customerId));
             return convertToDto(message);
+    }
+
+    public MessageRequestDto getMessageRequestDtoByMessageId(Long messageId) {
+        Message message = getMessageById(messageId);
+        return convertToDto(message);
     }
     
     public List<MessageRequestDto> getMessagesRequestDtoByCustomerId(Long customerId) {
@@ -95,10 +100,8 @@ public class MessageService {
     @Transactional
     public Message updateMessage(Long message_id, MessageRequestDto request, Long customerId) {
         Message message = this.getMessageById(message_id);
-    
-        if (!message.getCustomer().getId().equals(customerId)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User not authorized to access this resource");
-        }
+
+        ResponseThrow.checkOrForbidden(message.hasCustomerWithId(customerId), "User not authorized to access this resource");
     
         message.setTitle(request.getTitle());
         message.setBody(request.getBody());
@@ -120,9 +123,7 @@ public class MessageService {
     public void deleteMessage(Long message_id, Long customerId) {
         Message message = this.getMessageById(message_id);
 
-        if (!message.getCustomer().getId().equals(customerId)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User not authorized to access this resource");
-        }
+        ResponseThrow.checkOrForbidden(message.hasCustomerWithId(customerId), "User not authorized to access this resource");
 
         List<Image> images = this.imageRepository.findAllByMessageId(message_id);
         for (Image image : images) {
@@ -230,16 +231,12 @@ public class MessageService {
     }
 
     public boolean validateMessageCode(Long messageId, String code) {
-        Message message = messageRepository.findById(messageId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Message not found"));
-
+        Message message = messageRepository.findById(messageId).orElseThrow(() -> ResourceNotFound.of("Message not found"));
         return passwordEncoder.matches(code, message.getCode());
     }
 
     public boolean isOwner(Long messageId, Long customerId) {
-        Message message = messageRepository.findById(messageId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Message not found"));
-    
+        Message message = messageRepository.findById(messageId).orElseThrow(() -> ResourceNotFound.of("Message not found"));
         return message.getCustomer().getId().equals(customerId);
     }
 }
