@@ -6,6 +6,7 @@ import javax.sql.DataSource;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -53,12 +54,37 @@ public class SecurityConfig {
 			.headers(headers -> headers.frameOptions(frameOptions -> frameOptions.disable()))
 			.exceptionHandling(exepciontHandling -> exepciontHandling.authenticationEntryPoint(unauthorizedHandler))
 			.authorizeHttpRequests(authorizeRequests -> authorizeRequests
-				.requestMatchers("/api/status").permitAll()
+				// Auth
+				.requestMatchers(HttpMethod.DELETE, "/api/auth/*").authenticated()
+				.requestMatchers("/api/auth/admin/**").hasAuthority(ADMIN)
+				.requestMatchers("/api/auth/companies/**").hasAnyAuthority(COMPANY)
+				.requestMatchers("/api/auth/customers/**").hasAnyAuthority(CUSTOMER)
+				.requestMatchers("/api/auth/companies/signup", "/api/auth/customers/signup").anonymous()
 				.requestMatchers("/api/auth/login").anonymous()
-				.requestMatchers("/api/auth/customers/signup", "/api/auth/companies/signup").anonymous()
-				.requestMatchers("/api/auth/customers/**").hasAnyAuthority(ADMIN, CUSTOMER, CUSTOMER_FREE, CUSTOMER_PREMIUM) // ✅ Permitir acceso a clientes autenticados
-				.requestMatchers("/api/auth/companies/**").hasAnyAuthority(ADMIN, COMPANY, COMPANY_FREE, COMPANY_PREMIUM) // ✅ Permitir acceso a empresas autenticadas
-				.anyRequest().permitAll()
+				.requestMatchers(HttpMethod.PUT, "/api/auth/password/*").authenticated()
+				// Companies
+				.requestMatchers("/api/companies/companiesTypes").hasAnyAuthority(COMPANY, CUSTOMER)
+				.requestMatchers("/api/companies/premium").authenticated()
+				// Contacts
+				.requestMatchers("/api/contacts/**").hasAnyAuthority(CUSTOMER_PREMIUM)
+				// Death Certificate		
+				.requestMatchers("/api/deathCertificate/all").hasAuthority(ADMIN)	
+				.requestMatchers("/api/deathCertificate/obituary/*").hasAnyAuthority("")		
+				.requestMatchers("/api/deathCertificate/upload").anonymous()
+				.requestMatchers("/api/deathCertificate/upload/loggedInUser").hasAnyAuthority(CUSTOMER_PREMIUM)
+				// Messages				
+				.requestMatchers("/api/messages/**").hasAnyAuthority(CUSTOMER_PREMIUM)
+				// Obituary				
+				.requestMatchers("/api/obituary/**").hasAnyAuthority(CUSTOMER)
+				// Plans				
+				.requestMatchers("/api/plans/*").authenticated()
+				// Receivers				
+				.requestMatchers("/api/receiver/getReceivers/obituary/*").hasAnyAuthority(CUSTOMER)
+				// Status				
+				.requestMatchers("/api/status").permitAll()
+				// Templates				
+				.requestMatchers("/api/templates/urls").hasAnyAuthority(CUSTOMER)
+				.anyRequest().denyAll()
 			)
 			.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
 
