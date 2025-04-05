@@ -54,6 +54,8 @@ public class SecurityConfig {
 			.headers(headers -> headers.frameOptions(frameOptions -> frameOptions.disable()))
 			.exceptionHandling(exepciontHandling -> exepciontHandling.authenticationEntryPoint(unauthorizedHandler))
 			.authorizeHttpRequests(authorizeRequests -> authorizeRequests
+				// Swagger
+				.requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html", "/swagger-resources/**", "/webjars/**").permitAll()				
 				// Auth
 				.requestMatchers(HttpMethod.DELETE, "/api/auth/*").authenticated()
 				.requestMatchers("/api/auth/admin/**").hasAuthority(ADMIN)
