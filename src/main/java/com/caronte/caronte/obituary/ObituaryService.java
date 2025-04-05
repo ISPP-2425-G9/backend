@@ -87,10 +87,7 @@ public class ObituaryService {
         if (!request.getIsMine()) {
             deathCertificate = certificateManagement(request, customer, customerId);
         } else {
-            ResponseThrow.checkOrBadRequest(Objects.nonNull(request.getPaymentMethodId()), 
-                "When you are creating an obituary for another person, you must enter a paymentMethodId in the body");
             request.setDeathDate(null);
-            this.stripeService.pay(request.getPaymentMethodId(), customer.getEmail());
         }
 
 
@@ -101,6 +98,13 @@ public class ObituaryService {
         request.setDefaultWordColorIfNull();
 
         Obituary obituary = saveObituary(request, customImageUrl, customer, imageTemplate, deathCertificate);
+
+        // After the obituary is created, payment is made. If there is an error, a rollback will be made.
+        if(!obituary.getIsMine()){
+            ResponseThrow.checkOrBadRequest(Objects.nonNull(request.getPaymentMethodId()), 
+            "When you are creating an obituary for another person, you must enter a paymentMethodId in the body");
+            this.stripeService.pay(request.getPaymentMethodId(), customer.getEmail());
+        }
 
         List<ObituraryRequestDto.ContactDto> contacts = request.getContacts();
         List<Receiver> receivers = contacts.stream().map(contactDto -> Receiver.parse(contactDto, obituary)).toList();

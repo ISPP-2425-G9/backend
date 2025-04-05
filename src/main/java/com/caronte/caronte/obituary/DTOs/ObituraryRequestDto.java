@@ -68,7 +68,6 @@ public class ObituraryRequestDto {
         private String email;
     }
 
-    // TODO: concordar con pago en backend
     private String paymentMethodId;
 
     public Obituary parse(){

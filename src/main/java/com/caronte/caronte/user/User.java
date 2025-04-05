@@ -41,7 +41,7 @@ public class User extends BaseEntity{
 
 
     @JsonIgnore
-    public LocalDateTime getExpiringDate() throws StripeException{
+    public LocalDateTime getExpiringDate() throws StripeException {
         if(this.getPlan().isPremium()) {
             Subscription subscription = Subscription.retrieve(plan.getSubscriptionId());
             Long currentPeriodEnd = subscription.getCurrentPeriodEnd();
