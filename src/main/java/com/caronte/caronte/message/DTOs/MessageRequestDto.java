@@ -3,6 +3,7 @@ package com.caronte.caronte.message.DTOs;
 import java.util.List;
 import static com.caronte.caronte.util.RegexContants.REGEX_TELEPHONE;
 
+
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
