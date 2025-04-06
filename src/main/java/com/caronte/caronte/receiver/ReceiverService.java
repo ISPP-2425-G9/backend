@@ -97,9 +97,9 @@ public class ReceiverService {
     @Transactional
     public void sendMessage(List<Receiver> receivers , Message message) {
         String code = aesCipher.decrypt(message.getCode());
-        String messageBody = "Has recibido un mensaje de Caronte. \n \\n" + 
+        String messageBody = "Has recibido un mensaje de Caronte. \n" + 
                 "El codigo para acceder al mensaje es: " + code + "\n" +
-                " Puedes revisarlo aquí: " + domain + "/messages?messageId=" + message.getId();      
+                "Puedes revisarlo aquí: " + domain + "/messages?messageId=" + message.getId();      
         for (Receiver receiver : receivers) {
             try {
                 emailService.sendEmail(receiver.getEmail(), "Mensaje de " + message.getCustomer().getName(),
