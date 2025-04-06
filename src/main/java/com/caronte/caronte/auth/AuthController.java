@@ -35,6 +35,7 @@ import com.caronte.caronte.customer.CustomerService;
 import com.caronte.caronte.user.User;
 import com.caronte.caronte.user.UserService;
 import com.caronte.caronte.util.ErrorHandler;
+import com.stripe.exception.StripeException;
 
 import jakarta.validation.Valid;
 
@@ -205,7 +206,7 @@ public class AuthController {
 	}
 
 	@DeleteMapping("/admin/users/{userId}")
- 	public ResponseEntity<?> deleteAdmin(@PathVariable Long userId) {
+ 	public ResponseEntity<?> deleteAdmin(@PathVariable Long userId) throws StripeException {
  		userService.delete(userId);
         return ResponseEntity.noContent().build();
  	}

@@ -72,10 +72,12 @@ public class SecurityConfig {
 				// Death Certificate		
 				.requestMatchers("/api/deathCertificate/all").hasAuthority(ADMIN)	
 				.requestMatchers("/api/deathCertificate/obituary/*").hasAuthority(CUSTOMER)		
-				.requestMatchers("/api/deathCertificate/upload").anonymous()
-				.requestMatchers("/api/deathCertificate/upload/loggedInUser").hasAuthority(CUSTOMER_PREMIUM)
+				.requestMatchers("/api/deathCertificate/upload").permitAll()
+				.requestMatchers("/api/deathCertificate/upload/loggedInUser").permitAll()
 				// Messages				
-				.requestMatchers("/api/messages/**").hasAuthority(CUSTOMER_PREMIUM)
+				.requestMatchers("/api/messages/*/validate-code/*").permitAll()
+				.requestMatchers("/api/messages", "/api/messages/*").hasAuthority(CUSTOMER_PREMIUM)
+
 				// Obituary				
 				.requestMatchers("/api/obituary/**").hasAuthority(CUSTOMER)
 				// Plans				
@@ -85,7 +87,7 @@ public class SecurityConfig {
 				// Status				
 				.requestMatchers("/api/status").permitAll()
 				// Templates				
-				.requestMatchers("/api/templates/urls").hasAuthority(CUSTOMER)
+				.requestMatchers("/api/templates/urls").permitAll()
 				.anyRequest().denyAll()
 			)
 			.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);

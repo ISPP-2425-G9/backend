@@ -82,6 +82,8 @@ public class ObituaryService {
         if (!request.getIsMine()) {
             deathCertificate = certificateManagement(request, customer, customerId);
         } else {
+            ResponseThrow.checkOrForbidden(customer.getPlan().isPremium(), 
+            "If you want to create a obituary by yourself, you must be premium");
             request.setDeathDate(null);
         }
 
