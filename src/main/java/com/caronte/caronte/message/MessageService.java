@@ -191,7 +191,7 @@ public class MessageService {
             //Un receptor existe si tiene el mismo nombre y email
             //Si existe se actualiza 
             //Si no existe se crea uno nuevo
-            Receiver receiverExistent = receiverRepository.findByMessageIdAndTelephoneAndEmail(message.getId(), r.getTelephone(), r.getEmail()).orElse(null);
+            Receiver receiverExistent = receiverRepository.findByMessageIdAndTelephoneOrEmail(message.getId(), r.getTelephone(), r.getEmail()).orElse(null);
             if (receiverExistent == null) receiverService.saveReceiverByRecipientDto(r, message);
             else receiverService.updateMessageReceiver(receiverExistent.getId(),r);
         }
