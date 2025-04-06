@@ -8,6 +8,7 @@ import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
 import com.caronte.caronte.customer.Customer;
+import com.caronte.caronte.deathCertificate.DeathCertificate;
 import com.caronte.caronte.message.DTOs.MessageRequestDto;
 import com.caronte.caronte.util.BaseEntity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -54,6 +55,9 @@ public class Message extends BaseEntity {
                         .mapToObj(_ -> String.valueOf(random.nextInt(10)))
                         .collect(Collectors.joining());
     }
+
+    @ManyToOne
+    private DeathCertificate deathCertificate;
 
     @ManyToOne
     @JoinColumn(nullable = false)
