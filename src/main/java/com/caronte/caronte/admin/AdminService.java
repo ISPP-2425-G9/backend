@@ -177,11 +177,4 @@ public class AdminService {
         deathCertificateRepository.delete(deathCertificate);
     }
 
-
-    
-    
-
-
-
-
 }

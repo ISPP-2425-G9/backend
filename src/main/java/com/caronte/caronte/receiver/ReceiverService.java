@@ -12,6 +12,7 @@ import com.caronte.caronte.message.DTOs.MessageRequestDto.RecipientDto;
 import com.caronte.caronte.obituary.Obituary;
 import com.caronte.caronte.obituary.DTOs.ObituraryRequestDto.ContactDto;
 import com.caronte.caronte.receiver.DTOs.ReceiverResponseDTO;
+import com.caronte.caronte.util.AESCipher;
 import com.caronte.caronte.util.exceptions.ResourceNotFound;
 
 @Service
@@ -22,9 +23,11 @@ public class ReceiverService {
 
     private final ReceiverRepository receiverRepository;
     private final EmailService emailService;
-    public ReceiverService(ReceiverRepository receiverRepository, EmailService emailService) {
+    private final AESCipher aesCipher;
+    public ReceiverService(ReceiverRepository receiverRepository, EmailService emailService, AESCipher aesCipher) {
         this.emailService = emailService;
         this.receiverRepository = receiverRepository;
+        this.aesCipher = aesCipher;
         
     }
   
@@ -93,7 +96,10 @@ public class ReceiverService {
 
     @Transactional
     public void sendMessage(List<Receiver> receivers , Message message) {
-        String messageBody = "Has recibido un mensaje de Caronte. Puedes revisarlo aquí: " + domain + "/messages?messageId=" + message.getId();      
+        String code = aesCipher.decrypt(message.getCode());
+        String messageBody = "Has recibido un mensaje de Caronte. \n \\n" + 
+                "El codigo para acceder al mensaje es: " + code + "\n" +
+                " Puedes revisarlo aquí: " + domain + "/messages?messageId=" + message.getId();      
         for (Receiver receiver : receivers) {
             try {
                 emailService.sendEmail(receiver.getEmail(), "Mensaje de " + message.getCustomer().getName(),
