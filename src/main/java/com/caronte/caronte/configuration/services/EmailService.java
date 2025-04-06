@@ -137,7 +137,7 @@ public class EmailService {
     public void sendEmail(String to, String subject, String body) throws MessagingException {
         MimeMessage mimeMessage = mailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, false);
-    
+        helper.setFrom(defaultFrom);
         helper.setTo(to);
         helper.setSubject(subject);
         helper.setText(body);
