@@ -1,5 +1,6 @@
 package com.caronte.caronte.admin;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,6 +22,11 @@ import com.caronte.caronte.message.MessageRepository;
 import com.caronte.caronte.obituary.Obituary;
 import com.caronte.caronte.obituary.ObituaryRepository;
 import com.caronte.caronte.obituary.ObituaryService;
+import com.caronte.caronte.obituary.DTOs.ObituraryRequestDto;
+import com.caronte.caronte.receiver.Receiver;
+import com.caronte.caronte.receiver.ReceiverRepository;
+import com.caronte.caronte.receiver.ReceiverService;
+import com.caronte.caronte.receiver.DTOs.ReceiverResponseDTO;
 import com.caronte.caronte.user.UserService;
 
 
@@ -33,14 +39,20 @@ public class AdminService {
     private final ObituaryService obituaryService;
     private final MessageRepository messageRepository;
     private final ImageRepository imageRepository;
+    private final ReceiverService receiverService;
+    private final ReceiverRepository receiverRepository;
 
 
     public AdminService(DeathCertificateRepository deathCertificateRepository, 
         ObituaryRepository obituaryRepository, UserService userService, 
         CustomerRepository customerRepository, ObituaryService obituaryService,
         MessageRepository messageRepository,
-        ImageRepository imageRepository) {
+        ImageRepository imageRepository,
+        ReceiverService receiverService,
+        ReceiverRepository receiverRepository) {
 
+        this.receiverRepository = receiverRepository;
+        this.receiverService = receiverService;
         this.imageRepository = imageRepository;
         this.messageRepository = messageRepository;
         this.obituaryRepository = obituaryRepository;
@@ -93,9 +105,8 @@ public class AdminService {
     @Transactional
     public List<MessageResponseDTO> getAllMessagesByCertificateId(Long deathCertificateId) {
         userService.authorizeAdmin("User is not admin");
-        Customer customer = obituaryService.getCustomerByCertificateId(deathCertificateId);
         List<MessageResponseDTO> response = new ArrayList<>();
-        List<Message> messagesFromDB = messageRepository.findAllByCustomerId(customer.getId());
+        List<Message> messagesFromDB = messageRepository.findAllByDeathCertificateId(deathCertificateId);
 
         for (Message message : messagesFromDB) {
             List<Image> images = imageRepository.findAllByMessageId(message.getId());
@@ -103,12 +114,11 @@ public class AdminService {
             messageResponse.setId(message.getId());
             messageResponse.setTitle(message.getTitle());
             messageResponse.setBody(message.getBody());
-            messageResponse.setImages(images);
+            messageResponse.setImages(images.stream().map(x -> x.getImageUrl()).toList());
             response.add(messageResponse); 
         }
         return response;
     }
-
     
     @Transactional
     public List<ObituaryResponseDTO> getAllObituariesByCertificateId(Long deathCertificateId){
@@ -121,9 +131,50 @@ public class AdminService {
             obituaryResponse.setName(obituary.getName());
             obituaryResponse.setFarewellMessage(obituary.getFarewellMessage());
             obituaryResponse.setFarewellPhrase(obituary.getFarewellPhrase());
+            obituaryResponse.setCustomImage(obituary.getCustomImageUrl());
             obituariesResponse.add(obituaryResponse);
         }
-        return null;
+        return obituariesResponse;
+    }
+
+    @Transactional
+    public void verificateDeathCertificate(Long deathCertificateId, LocalDate deathDate){
+        userService.authorizeAdmin("User is not admin");
+        DeathCertificate deathCertificate = deathCertificateRepository.findById(deathCertificateId).orElse(null);
+        
+        deathCertificate.setIsVerified(true);
+        deathCertificateRepository.save(deathCertificate);
+        
+        List<Obituary> obituaries = obituaryRepository.findByDeathCertificateId(deathCertificateId);
+        List<Message> messages = messageRepository.findAllByDeathCertificateId(deathCertificateId);
+
+        for(Obituary obituary : obituaries) {
+            List<Receiver> receivers = receiverService.getReceiversByObituary(obituary);
+            receiverService.sendObituary(receivers, obituary);
+        } 
+
+        for(Message message : messages) {
+            List<Receiver> receivers = receiverRepository.findByMessageId(message.getId());
+            receiverService.sendMessage(receivers, message);
+        }
+    }
+
+    @Transactional
+    public void disapproveCertificate(Long deathCertificateId) {
+        userService.authorizeAdmin("User is not admin");
+        DeathCertificate deathCertificate = deathCertificateRepository.findById(deathCertificateId).orElse(null);
+        List<Obituary> obituaries = obituaryRepository.findByDeathCertificateId(deathCertificateId);
+        List<Message> messages = messageRepository.findAllByDeathCertificateId(deathCertificateId);
+        for(Obituary obituary : obituaries) {
+            obituary.setDeathCertificate(null);
+            obituaryRepository.save(obituary);
+        } 
+
+        for(Message message : messages) {
+            message.setDeathCertificate(null);
+            messageRepository.save(message);
+        }
+        deathCertificateRepository.delete(deathCertificate);
     }
 
 

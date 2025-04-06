@@ -2,6 +2,7 @@ package com.caronte.caronte.receiver;
 
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,12 +17,15 @@ import com.caronte.caronte.util.exceptions.ResourceNotFound;
 @Service
 public class ReceiverService {
 
+    @Value("${app.domain}")
+    private String domain;
+
     private final ReceiverRepository receiverRepository;
     private final EmailService emailService;
-
     public ReceiverService(ReceiverRepository receiverRepository, EmailService emailService) {
         this.emailService = emailService;
         this.receiverRepository = receiverRepository;
+        
     }
   
     @Transactional(readOnly = true)
@@ -29,6 +33,12 @@ public class ReceiverService {
         List<Receiver> receiversList = receiverRepository.findByObituary(obituary);
         List<ReceiverResponseDTO> receivers = receiversList.stream().map(ReceiverResponseDTO::parse).toList();
         return receivers;
+    }
+
+    @Transactional(readOnly = true)
+    public List<Receiver> getReceiversByObituary(Obituary obituary) {
+        List<Receiver> receiversList = receiverRepository.findByObituary(obituary);
+        return receiversList;
     }
 
     @Transactional
@@ -65,7 +75,7 @@ public class ReceiverService {
     }
 
     @Transactional
-    public void notifyReceivers(List<Receiver> receivers, Obituary obituary) {
+    public void sendObituary(List<Receiver> receivers, Obituary obituary) {
         for (Receiver receiver : receivers) {
             try {
                 byte[] pdfBytes = emailService.generateObituaryPdf(obituary);
@@ -73,6 +83,21 @@ public class ReceiverService {
                 emailService.sendEmailWithAttachment(receiver.getEmail(), "Esquela de " + obituary.getName(),
                         "Adjunto encontrarás la esquela de " + obituary.getName(),
                         pdfBytes, "esquela_" + obituary.getName() + ".pdf");
+
+                System.out.println("Email enviado a: " + receiver.getEmail());
+            } catch (Exception e) {
+                System.out.println("Error al notificar por email a: " + receiver.getEmail() + " - " + e.getMessage());
+            }
+        }
+    }
+
+    @Transactional
+    public void sendMessage(List<Receiver> receivers , Message message) {
+        String messageBody = "Has recibido un mensaje de Caronte. Puedes revisarlo aquí: " + domain + "/messages?messageId=" + message.getId();      
+        for (Receiver receiver : receivers) {
+            try {
+                emailService.sendEmail(receiver.getEmail(), "Mensaje de " + message.getCustomer().getName(),
+                        messageBody);
 
                 System.out.println("Email enviado a: " + receiver.getEmail());
             } catch (Exception e) {

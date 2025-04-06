@@ -15,6 +15,6 @@ public class MessageResponseDTO {
     private String title;
     private String body; 
 
-    private List<Image> images; 
+    private List<String> images; 
     
 }

@@ -1,5 +1,6 @@
 package com.caronte.caronte.obituary;
 
+import java.security.MessageDigest;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -14,6 +15,8 @@ import com.caronte.caronte.deathCertificate.DeathCertificateService;
 import com.caronte.caronte.deathCertificate.DTOs.DeathCertificateRequestDTO;
 import com.caronte.caronte.imageTemplate.ImageTemplate;
 import com.caronte.caronte.imageTemplate.ImageTemplateRepository;
+import com.caronte.caronte.message.Message;
+import com.caronte.caronte.message.MessageRepository;
 import com.caronte.caronte.obituary.DTOs.ObituraryRequestDto;
 import com.caronte.caronte.receiver.Receiver;
 import com.caronte.caronte.receiver.ReceiverRepository;
@@ -33,11 +36,12 @@ public class ObituaryService {
     private final ReceiverRepository receiverRepository;
     private final DeathCertificateService deathCertificateService;
     private final MediaHandler mediaHandler;
+    private final MessageRepository messageRepository;
 
     public ObituaryService(ObituaryRepository obituaryRepository, CustomerRepository customerRepository,
             ReceiverRepository receiverRepository, ImageTemplateRepository imageTemplateRepository,
             DeathCertificateService deathCertificateService, MediaHandler mediaHandler,
-            ReceiverService receiverService) {
+            ReceiverService receiverService, MessageRepository messageRepository) {
         this.receiverRepository = receiverRepository;
         this.customerRepository = customerRepository;
         this.obituaryRepository = obituaryRepository;
@@ -45,7 +49,8 @@ public class ObituaryService {
         this.deathCertificateService = deathCertificateService;
         this.mediaHandler = mediaHandler;
         this.receiverService = receiverService;
-    }
+        this.messageRepository = messageRepository;
+        }
 
     @Transactional(readOnly = true)
     public Obituary findById(Long id) {
@@ -104,7 +109,6 @@ public class ObituaryService {
         List<ObituraryRequestDto.ContactDto> contacts = request.getContacts();
         List<Receiver> receivers = contacts.stream().map(contactDto -> Receiver.parse(contactDto, obituary)).toList();
         receivers = receiverRepository.saveAll(receivers);
-        receiverService.notifyReceivers(receivers, obituary);
 
         return obituary;
     }
@@ -198,7 +202,9 @@ public class ObituaryService {
     @Transactional(readOnly = true)
     public Customer getCustomerByCertificateId(Long deathCertificateId) {
         List<Obituary> obituaries = obituaryRepository.findByDeathCertificateId(deathCertificateId);
+        List<Message> messages = messageRepository.findAllByDeathCertificateId(deathCertificateId);
         Customer customer = null;
+        if(!messages.isEmpty()) customer = messages.get(0).getCustomer();
         for (Obituary obituary : obituaries) {
             if (obituary.getIsMine()) {
                 customer = obituary.getCustomer();

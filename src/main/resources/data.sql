@@ -128,18 +128,6 @@ INSERT INTO emergency_contact (id, email, name, telephone, customer_id) VALUES
 (3, 'contacto3@caronte.site', 'Contacto Tres', '674945638', 5),
 (4, 'contacto4@caronte.site', 'Contacto Cuatro', '645767999', 5);
 
-INSERT INTO message (id ,body, code, is_last_will, title, customer_id) VALUES 
-(1, 'Este es el último mensaje de prueba.', 'MSG001', 1, 'Última Voluntad 1', 5),
-(2, 'Otro mensaje de prueba.', 'MSG002', 0, 'Mensaje General', 6);
-
-INSERT INTO image (id, image_url, message_id) VALUES 
-(1, 'https://static.nationalgeographicla.com/files/styles/image_3200/public/comedy-wildlife-awards-squirel-stop.jpg', 1),
-(2, 'https://static.nationalgeographicla.com/files/styles/image_3200/public/comedy-wildlife-awards-squirel-stop.jpg', 2);
-
-INSERT INTO video (id, video_url, message_id) VALUES 
-(1, 'https://www.youtube.com/watch?v=9bZkp7q19f0', 1),
-(2, 'https://www.youtube.com/watch?v=9bZkp7q19f0', 2);
-
 INSERT INTO image_template (id , image_url) VALUES (1 ,'https://res.cloudinary.com/ds02duuid/image/upload/v1741707864/images/obituaries/templates/fbrpmmujaksc5dbbrbbi.jpg'),
  (2 ,'https://res.cloudinary.com/ds02duuid/image/upload/v1741707864/images/obituaries/templates/jqqcvnp28w3adaymwkcr.jpg'),
  (3, 'https://res.cloudinary.com/ds02duuid/image/upload/v1741707864/images/obituaries/templates/pl6ual71zcpcsfiv8n3q.jpg');
@@ -147,9 +135,22 @@ INSERT INTO image_template (id , image_url) VALUES (1 ,'https://res.cloudinary.c
 INSERT INTO death_certificate(id, url, is_verified) VALUES (1, 'https://res.cloudinary.com/ds02duuid/image/upload/v1741707864/images/obituaries/death_certificates/1.jpg',0); 
 INSERT INTO obituary (id, name, birth_date, death_date, custom_image_url, farewell_message, farewell_phrase, is_mine, customer_id, image_template_id, death_certificate_id, word_color) VALUES 
 (1, 'Nombre Ejemplo 1', '1980-01-01', '2023-01-01', 'https://static.nationalgeographicla.com/files/styles/image_3200/public/comedy-wildlife-awards-squirel-stop.jpg', 'Mensaje de despedida 1', 'Frase de despedida 1', 1, 5, 1, 1 , NULL),
-(2, 'Nombre Ejemplo 2', '1975-05-15', '2022-12-20', 'https://static.nationalgeographicla.com/files/styles/image_3200/public/comedy-wildlife-awards-squirel-stop.jpg', 'Mensaje de despedida 2', 'Frase de despedida 2', 0, 6, 1, NULL, NULL);
+(2, 'Nombre Ejemplo 2', '1975-05-15', '2022-12-20', 'https://static.nationalgeographicla.com/files/styles/image_3200/public/comedy-wildlife-awards-squirel-stop.jpg', 'Mensaje de despedida 2', 'Frase de despedida 2', 0, 6, 1, 1, NULL);
 
+INSERT INTO message (id ,body, code, is_last_will, title, customer_id, death_certificate_id ) VALUES 
+(1, 'Este es el último mensaje de prueba.', 'MSG001', 1, 'Última Voluntad 1', 5,1),
+(2, 'Otro mensaje de prueba.', 'MSG002', 0, 'Mensaje General', 5,1),
+(3, 'Otro mensaje de prueba.', 'MSG003', 0, 'Mensaje General', 5,1);
+
+INSERT INTO image (id, image_url, message_id) VALUES 
+(1, 'https://static.nationalgeographicla.com/files/styles/image_3200/public/comedy-wildlife-awards-squirel-stop.jpg', 1),
+(2, 'https://static.nationalgeographicla.com/files/styles/image_3200/public/comedy-wildlife-awards-squirel-stop.jpg', 1),
+(3, 'https://static.nationalgeographicla.com/files/styles/image_3200/public/comedy-wildlife-awards-squirel-stop.jpg', 3);
+
+INSERT INTO video (id, video_url, message_id) VALUES 
+(1, 'https://www.youtube.com/watch?v=9bZkp7q19f0', 1),
+(2, 'https://www.youtube.com/watch?v=9bZkp7q19f0', 2);
 INSERT INTO receiver (id, message_id, obituary_id, telephone, name, email) VALUES 
-(1, 1, NULL, '678945638', 'Reciver Uno', 'reciver1@caronte.site'),
-(3, 2, NULL, '678945638', 'Reciver Uno', 'reciver1@caronte.site'),
-(2, NULL, 1, '643767999', 'Reciver Dos', 'reciver2@caronte.site');
+(1, 1, 1, '678945634', 'Reciver Uno', 'isaacsolpad@gmail.com'),
+(3, 1 , 1, '678945638', 'Reciver Uno', 'javrodrei@alum.us.es'),
+(2, 1, 1, '643767999', 'Reciver Dos', 'javierrodriguezreina@gmail.com');
