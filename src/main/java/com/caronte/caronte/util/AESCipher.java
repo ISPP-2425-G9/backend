@@ -3,17 +3,20 @@ package com.caronte.caronte.util;
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.util.Base64;
 
 @Component
 public class AESCipher {
-    private static final String SECRET_KEY = "1234567890123456";
+    
+    @Value("${security.aes.secret-key}")
+    private String secretKey;
 
     public String encrypt(String data) {
         try {
-            SecretKeySpec key = new SecretKeySpec(SECRET_KEY.getBytes(), "AES");
+            SecretKeySpec key = new SecretKeySpec(secretKey.getBytes(), "AES");
             Cipher cipher = Cipher.getInstance("AES");
             cipher.init(Cipher.ENCRYPT_MODE, key);
             byte[] encrypted = cipher.doFinal(data.getBytes());
@@ -25,7 +28,7 @@ public class AESCipher {
 
     public String decrypt(String encryptedData) {
         try {
-            SecretKeySpec key = new SecretKeySpec(SECRET_KEY.getBytes(), "AES");
+            SecretKeySpec key = new SecretKeySpec(secretKey.getBytes(), "AES");
             Cipher cipher = Cipher.getInstance("AES");
             cipher.init(Cipher.DECRYPT_MODE, key);
             byte[] original = cipher.doFinal(Base64.getDecoder().decode(encryptedData));
