@@ -187,22 +187,21 @@ public class MessageService {
     }
 
     private void updateRecipients(MessageRequestDto request, Message message) {
+
+        for (Receiver receiver : receiverRepository.findByMessageId(message.getId())) {
+            //Si no existe en la request pero si en la base de datos se elimina
+            if (request.getRecipients().stream().noneMatch(r -> r.getTelephone().equals(receiver.getTelephone()) && r.getEmail().equals(receiver.getEmail()))) {
+                receiverRepository.delete(receiver);
+            }
+        }
         for (MessageRequestDto.RecipientDto r : request.getRecipients()) { 
-            //Un receptor existe si tiene el mismo nombre y email
+            //Un receptor existe si tiene el mismo telefono y email
             //Si existe se actualiza 
             //Si no existe se crea uno nuevo
             Receiver receiverExistent = receiverRepository.findByMessageIdAndTelephoneOrEmail(message.getId(), r.getTelephone(), r.getEmail()).orElse(null);
             if (receiverExistent == null) receiverService.saveReceiverByRecipientDto(r, message);
             else receiverService.updateMessageReceiver(receiverExistent.getId(),r);
         }
-        for (Receiver receiver : receiverRepository.findByMessageId(message.getId())) {
-            //Tras actualizar y crear los nuevos, borramos los que hay en base de datos pero no en el request
-            //Si no existe en la request pero si en la base de datos se elimina
-            if (request.getRecipients().stream().noneMatch(r -> r.getTelephone().equals(receiver.getTelephone()) && r.getEmail().equals(receiver.getEmail()))) {
-                receiverRepository.delete(receiver);
-            }
-        }
-
     }
 
     private List<Image> removeObsoleteImages(List<Image> existingImages, List<String> requestImageUrls) {
