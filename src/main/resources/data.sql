@@ -138,9 +138,9 @@ INSERT INTO obituary (id, name, birth_date, death_date, custom_image_url, farewe
 (2, 'Nombre Ejemplo 2', '1975-05-15', '2022-12-20', 'https://static.nationalgeographicla.com/files/styles/image_3200/public/comedy-wildlife-awards-squirel-stop.jpg', 'Mensaje de despedida 2', 'Frase de despedida 2', 0, 6, 1, 1, NULL);
 
 INSERT INTO message (id ,body, code, is_last_will, title, customer_id, death_certificate_id ) VALUES 
-(1, 'Este es el último mensaje de prueba.', 'M5RMO9SiEldBeoWOJ/+PAw==', 1, 'Última Voluntad 1', 5,1),
-(2, 'Otro mensaje de prueba.', 'M5RMO9SiEldBeoWOJ/+PAw==', 0, 'Mensaje General', 5,1),
-(3, 'Otro mensaje de prueba.', 'M5RMO9SiEldBeoWOJ/+PAw==', 0, 'Mensaje General', 5,1);
+(1, 'Este es el último mensaje de prueba.', 'f/y2K0Ea56RQbdLqmUiLCw==', 1, 'Última Voluntad 1', 5,1),
+(2, 'Otro mensaje de prueba.', 'f/y2K0Ea56RQbdLqmUiLCw==', 0, 'Mensaje General', 5,1),
+(3, 'Otro mensaje de prueba.', 'f/y2K0Ea56RQbdLqmUiLCw==', 0, 'Mensaje General', 5,1);
 
 INSERT INTO image (id, image_url, message_id) VALUES 
 (1, 'https://static.nationalgeographicla.com/files/styles/image_3200/public/comedy-wildlife-awards-squirel-stop.jpg', 1),
