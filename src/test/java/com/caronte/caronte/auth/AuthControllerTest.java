@@ -1,9 +1,12 @@
 package com.caronte.caronte.auth;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -32,6 +35,7 @@ import com.caronte.caronte.auth.payload.response.CustomerUpdateRequest;
 import com.caronte.caronte.auth.payload.response.LoginRequest;
 import com.caronte.caronte.auth.payload.response.RegisterRequestCompany;
 import com.caronte.caronte.auth.payload.response.RegisterRequestCustomer;
+import com.caronte.caronte.auth.payload.response.UserChangePasswordRequest;
 import com.caronte.caronte.company.Company;
 import com.caronte.caronte.company.CompanyRepository;
 import com.caronte.caronte.company.CompanyService;
@@ -43,6 +47,7 @@ import com.caronte.caronte.customer.CustomerService;
 import com.caronte.caronte.plan.Plan;
 import com.caronte.caronte.user.User;
 import com.caronte.caronte.user.UserService;
+import com.caronte.caronte.util.exceptions.ErrorHandlerException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class AuthControllerTest {
@@ -121,6 +126,11 @@ public class AuthControllerTest {
     }
 
     @Test
+    void testAuthenticateUserValidationError() throws Exception {
+
+    }
+
+    @Test
     void testRegisterCustomer() throws Exception {
         RegisterRequestCustomer request = new RegisterRequestCustomer();
         request.setName("Customer A");
@@ -159,6 +169,34 @@ public class AuthControllerTest {
             .andExpect(jsonPath("$.id").value(1))
             .andExpect(jsonPath("$.username").value("customerA@example.com"))
             .andExpect(jsonPath("$.name").value("Customer A"));
+    }
+
+
+    @Test
+    public void testRegisterCustomerValidationError() throws Exception {
+        RegisterRequestCustomer request = new RegisterRequestCustomer();
+        request.setName("");
+        request.setEmail("invalid-email");      
+        request.setPassword1("pass123");
+        request.setPassword2("pass123");
+        request.setTelephone("");               
+        request.setDni("1234");                  
+        ObjectMapper objectMapper = new ObjectMapper();
+        String requestJson = objectMapper.writeValueAsString(request);
+    
+        Exception exception = assertThrows(Exception.class, () -> {
+            mockMvc.perform(post("/api/auth/customers/signup")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(requestJson))
+                    .andReturn();
+        });
+    
+        Throwable rootCause = exception;
+        while (rootCause.getCause() != null) {
+            rootCause = rootCause.getCause();
+        }
+        assertTrue(rootCause instanceof ErrorHandlerException,
+            "The root cause must be ErrorHandlerException");
     }
 
     @Test
@@ -209,6 +247,48 @@ public class AuthControllerTest {
             .andExpect(jsonPath("$.name").value("Company A"));
     }
 
+
+    @Test
+    public void testRegisterCompanyValidationError() throws Exception {
+        RegisterRequestCompany request = new RegisterRequestCompany();
+        request.setName("");
+        request.setEmail("invalid-email");
+        request.setPassword1("");
+        request.setPassword2("");
+        request.setTelephone("");
+        request.setAddress("");
+        request.setCity("");
+        request.setZipCode("1234");
+        request.setNif("1234");
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        String requestJson = objectMapper.writeValueAsString(request);
+
+        Exception exception = assertThrows(Exception.class, () -> {
+            mockMvc.perform(post("/api/auth/companies/signup")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(requestJson))
+                    .andReturn();
+        });
+
+        Throwable rootCause = exception;
+        while (rootCause.getCause() != null) {
+            rootCause = rootCause.getCause();
+        }
+        assertTrue(rootCause instanceof ErrorHandlerException);
+        ErrorHandlerException ehe = (ErrorHandlerException) rootCause;
+        Map<String, List<String>> errors = ehe.getErrorHandler().getErrors();
+        assertEquals("El nombre es requerido", errors.get("name").get(0));
+        assertEquals("Invalid email format", errors.get("email").get(0));
+        assertEquals("Password1 es requerido", errors.get("password1").get(0));
+        assertEquals("Password2 es requerido", errors.get("password2").get(0));
+        assertEquals("El teléfono es requerido", errors.get("telephone").get(0));
+        assertEquals("La dirección es requerida", errors.get("address").get(0));
+        assertEquals("La ciudad es requerida", errors.get("city").get(0));
+        assertEquals("Formato de código postal invalido", errors.get("zipCode").get(0));
+        assertEquals("Formato de NIF invalido", errors.get("nif").get(0));
+    }
+
     @Test
     void testGetCustomer() throws Exception {
         Long customerId = 1L;
@@ -230,7 +310,10 @@ public class AuthControllerTest {
             .andExpect(jsonPath("$.name").value("Customer A"));
     }
 
-    // Revisar
+    @Test
+    void testGetCustomerNotFound() throws Exception {
+    }
+
     @Test
     void testUpdateCustomer() throws Exception {
         Long customerId = 1L;
@@ -263,11 +346,38 @@ public class AuthControllerTest {
             .andExpect(jsonPath("$.username").value("new@example.com"))
             .andExpect(jsonPath("$.name").value("New Name"));
     }
-    
-    
+
+    @Test
+    void testUpdatePasswordCustomer() throws Exception {
+        Long userId = 1L;
+        UserChangePasswordRequest request = new UserChangePasswordRequest();
+        request.setNewPassword("newPassword");
+        request.setConfirmPassword("newPassword");
+
+        Customer customer = new Customer();
+        customer.setId(1L);
+        customer.setName("Customer");
+        customer.setEmail("customer@example.com");
+        customer.setDni("12345678A");
+        customer.setIsActive(true);
+        customer.setPlan(Plan.newPlanFree());
 
 
-    // REVISAR
+        when(userService.changePassword(userId, request)).thenReturn(customer);
+        when(jwtUtils.generateJwtToken(Mockito.any(UserDetailsImpl.class))).thenReturn("dummy-jwt");
+
+        mockMvc.perform(put("/api/auth/password/{userId}", userId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(asJsonString(request)))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.token").value("dummy-jwt"))
+            .andExpect(jsonPath("$.id").value(userId))
+            .andExpect(jsonPath("$.username").value("customer@example.com"))
+            .andExpect(jsonPath("$.name").value("Customer"));
+    }
+
+    
+    
     @Test
     void testGetCompany() throws Exception {
         Long companyId = 1L;
@@ -296,6 +406,10 @@ public class AuthControllerTest {
         mockMvc.perform(get("/api/auth/companies/{companyId}", companyId))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.name").value("Company A"));
+    }
+
+    @Test
+    void testGetCompanyNotFound() throws Exception {
     }
 
     @Test
@@ -354,6 +468,10 @@ public class AuthControllerTest {
         mockMvc.perform(delete("/api/auth/{userId}", userId))
             .andExpect(status().isNoContent());
         Mockito.verify(userService).delete(userId);
+    }
+
+    @Test
+    void testDeleteUserNotFound() throws Exception {
     }
 
 
@@ -434,7 +552,6 @@ public class AuthControllerTest {
     }
     
 
-    // REVISAR
     @Test
     void testUpdateCustomerByAdmin() throws Exception {
         Long customerId = 1L;
@@ -478,7 +595,6 @@ public class AuthControllerTest {
             .andExpect(jsonPath("$.telephone").value("555555555"));
     }
 
-    // REVISAR
     @Test
     void testGetCompanies() throws Exception {
         Company company1 = new Company();
@@ -550,9 +666,6 @@ public class AuthControllerTest {
                .andExpect(jsonPath("$.name").value("Company A"));
     }
 
-        
-
-    // REVISAR
     @Test
     void testUpdateCompanyByAdmin() throws Exception {
         Long companyId = 1L;
@@ -642,5 +755,8 @@ public class AuthControllerTest {
 
         Mockito.verify(userService).delete(userId);
     }
+
+    @Test
+    void testDeleteAdminUserNotFound() throws Exception {}
 
 }
