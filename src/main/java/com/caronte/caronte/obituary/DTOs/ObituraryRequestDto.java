@@ -1,7 +1,6 @@
 package com.caronte.caronte.obituary.DTOs;
 
-import static com.caronte.caronte.util.RegexContants.REGEX_RGB;
-import static com.caronte.caronte.util.RegexContants.REGEX_TELEPHONE;
+import static com.caronte.caronte.util.RegexContants.*;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -68,6 +67,8 @@ public class ObituraryRequestDto {
         @NotBlank(message = "The email cannot be empty")
         private String email;
     }
+
+    private String paymentMethodId;
 
     public Obituary parse(){
         Obituary obituary = new Obituary();
