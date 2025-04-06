@@ -3,6 +3,7 @@ package com.caronte.caronte.auth;
 import java.nio.file.AccessDeniedException;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -64,16 +65,16 @@ public class AuthController {
 			@Valid @RequestBody LoginRequest loginRequest,
 			BindingResult bindingResult) {
 		ErrorHandler errors = ErrorHandler.catchError(bindingResult);
-        errors.throwIfHasErrors();
+		errors.throwIfHasErrors();
 
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(loginRequest.getId(), loginRequest.getPassword()));
-        SecurityContextHolder.getContext().setAuthentication(authentication);
+		Authentication authentication = authenticationManager.authenticate(
+				new UsernamePasswordAuthenticationToken(loginRequest.getId(), loginRequest.getPassword()));
+		SecurityContextHolder.getContext().setAuthentication(authentication);
 		UserDetailsImpl userDetailsImpl = (UserDetailsImpl) authentication.getPrincipal();
-        String jwt = jwtUtils.generateJwtToken(authentication);
+		String jwt = jwtUtils.generateJwtToken(authentication);
 		User user = userService.findById(userDetailsImpl.getId());
-        JwtResponse jwtResponse = new JwtResponse(jwt, user);
-        return ResponseEntity.ok().body(jwtResponse);
+		JwtResponse jwtResponse = new JwtResponse(jwt, user);
+		return ResponseEntity.ok().body(jwtResponse);
 	}
 
 	@PostMapping("/customers/signup")
@@ -82,11 +83,11 @@ public class AuthController {
 			BindingResult bindingResult) {
 		ErrorHandler errors = ErrorHandler.catchError(bindingResult);
 		Customer customer = authService.validateAndBuildCustomer(registerRequest, errors);
-        errors.throwIfHasErrors();
+		errors.throwIfHasErrors();
 
-        authService.save(customer);
-        LoginRequest loginRequest = LoginRequest.of(registerRequest.getEmail(), registerRequest.getPassword1());
-        return this.authenticateUser(loginRequest, bindingResult);
+		authService.save(customer);
+		LoginRequest loginRequest = LoginRequest.of(registerRequest.getEmail(), registerRequest.getPassword1());
+		return this.authenticateUser(loginRequest, bindingResult);
 	}
 
 	@PostMapping("/companies/signup")
@@ -95,16 +96,16 @@ public class AuthController {
 			BindingResult bindingResult) {
 		ErrorHandler errors = ErrorHandler.catchError(bindingResult);
 		Company company = authService.validateAndBuildCompany(registerRequest, errors);
-        errors.throwIfHasErrors();
+		errors.throwIfHasErrors();
 
-        authService.save(company);
-        LoginRequest loginRequest = LoginRequest.of(registerRequest.getEmail(), registerRequest.getPassword1());
-        return this.authenticateUser(loginRequest, bindingResult);
+		authService.save(company);
+		LoginRequest loginRequest = LoginRequest.of(registerRequest.getEmail(), registerRequest.getPassword1());
+		return this.authenticateUser(loginRequest, bindingResult);
 	}
 
 	@GetMapping("/customers/{customerId}")
 	public ResponseEntity<Customer> getCustomer(@PathVariable Long customerId) {
-        userService.authorizeUserOrAdmin(customerId, "You can't access this data");
+		userService.authorizeUserOrAdmin(customerId, "You can't access this data");
 		Customer customer = customerService.findById(customerId);
 		return ResponseEntity.ok().body(customer);
 	}
@@ -112,29 +113,30 @@ public class AuthController {
 	@PutMapping("/customers/{customerId}")
 	public ResponseEntity<JwtResponse> updateCustomer(
 			@PathVariable Long customerId,
-			@RequestBody @Valid CustomerUpdateRequest request) {
+			@RequestBody @Valid CustomerUpdateRequest request) throws AccessDeniedException {
 		userService.authorizeUserOrAdmin(customerId);
-		userService.findByEmail(request.getEmail())
-			.filter(user -> Objects.equals(user.getId(), customerId))
-			.orElseThrow(() -> new IllegalAccessError("This email is of other user"));
-		
+		Optional<User> existingUser = userService.findByEmail(request.getEmail());
+		if (existingUser.isPresent() && !Objects.equals(existingUser.get().getId(), customerId)) {
+			throw new AccessDeniedException("Este email ya está en uso");
+		}
+
 		Customer customer = customerService.update(customerId, request);
 		UserDetailsImpl userDetails = UserDetailsImpl.build(customer);
 		String jwt = jwtUtils.generateJwtToken(userDetails);
 		User user = userService.findCurrentUser();
-        JwtResponse jwtResponse = new JwtResponse(jwt, user);
+		JwtResponse jwtResponse = new JwtResponse(jwt, user);
 		return ResponseEntity.ok().body(jwtResponse);
 	}
 
 	@PutMapping("/password/{userId}")
 	public ResponseEntity<JwtResponse> updateCustomer(@PathVariable Long userId,
 			@RequestBody @Valid UserChangePasswordRequest request) {
-        userService.authorizeUserOrAdmin(userId);
-        User user = userService.changePassword(userId, request);
-        UserDetailsImpl userDetails = UserDetailsImpl.build(user);
+		userService.authorizeUserOrAdmin(userId);
+		User user = userService.changePassword(userId, request);
+		UserDetailsImpl userDetails = UserDetailsImpl.build(user);
 		String jwt = jwtUtils.generateJwtToken(userDetails);
-        JwtResponse jwtResponse = new JwtResponse(jwt, user);
-        return ResponseEntity.ok().body(jwtResponse);
+		JwtResponse jwtResponse = new JwtResponse(jwt, user);
+		return ResponseEntity.ok().body(jwtResponse);
 	}
 
 	@GetMapping("/companies/{companyId}")
@@ -148,17 +150,18 @@ public class AuthController {
 	public ResponseEntity<JwtResponse> updateCompany(
 			@PathVariable Long companyId,
 			@RequestBody @Valid CompanyUpdateRequest request) throws AccessDeniedException {
-        userService.authorizeUser(companyId);
-		userService.findByEmail(request.getEmail())
-			.filter(user -> Objects.equals(user.getId(), companyId))
-			.orElseThrow(() -> new AccessDeniedException("This email is of other user"));
+		userService.authorizeUser(companyId);
+		Optional<User> existingUser = userService.findByEmail(request.getEmail());
+		if (existingUser.isPresent() && !Objects.equals(existingUser.get().getId(), companyId)) {
+			throw new AccessDeniedException("Este email ya está en uso");
+		}
 
-        Company company = companyService.update(companyId, request);
-        UserDetailsImpl userDetails = UserDetailsImpl.build(company);
-        String jwt = jwtUtils.generateJwtToken(userDetails);
+		Company company = companyService.update(companyId, request);
+		UserDetailsImpl userDetails = UserDetailsImpl.build(company);
+		String jwt = jwtUtils.generateJwtToken(userDetails);
 		User user = userService.findCurrentUser();
-        JwtResponse jwtResponse = new JwtResponse(jwt, user);
-        return ResponseEntity.ok().body(jwtResponse);
+		JwtResponse jwtResponse = new JwtResponse(jwt, user);
+		return ResponseEntity.ok().body(jwtResponse);
 	}
 
 	@DeleteMapping("/{userId}")
@@ -198,16 +201,16 @@ public class AuthController {
 	}
 
 	@PutMapping("/admin/companies/{companyId}")
-	public ResponseEntity<Company> updateCompanyByAdmin( @PathVariable Long companyId,
+	public ResponseEntity<Company> updateCompanyByAdmin(@PathVariable Long companyId,
 			@RequestBody @Valid CompanyUpdateRequest request) {
 		Company company = companyService.update(companyId, request);
-        return ResponseEntity.ok(company);
+		return ResponseEntity.ok(company);
 	}
 
 	@DeleteMapping("/admin/users/{userId}")
- 	public ResponseEntity<?> deleteAdmin(@PathVariable Long userId) {
- 		userService.delete(userId);
-        return ResponseEntity.noContent().build();
- 	}
+	public ResponseEntity<?> deleteAdmin(@PathVariable Long userId) {
+		userService.delete(userId);
+		return ResponseEntity.noContent().build();
+	}
 
 }

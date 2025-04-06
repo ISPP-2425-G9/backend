@@ -128,6 +128,18 @@ INSERT INTO emergency_contact (id, email, name, telephone, customer_id) VALUES
 (3, 'contacto3@caronte.site', 'Contacto Tres', '674945638', 5),
 (4, 'contacto4@caronte.site', 'Contacto Cuatro', '645767999', 5);
 
+INSERT INTO message (id ,body, code, is_last_will, title, customer_id) VALUES 
+(1, 'Este es el último mensaje de prueba.', '$2a$10$HdUtnm/nonemwceoG1fG7O1Y2qaFfwiZh01qHGOooUWQvxGBpSUWu', 1, 'Última Voluntad 1', 5),
+(2, 'Otro mensaje de prueba.', '$2a$10$opWzHqxzkMbtf9eoSwwF3eGG26.EfFjfpm96rFDv1VSl1hvIjzPA2', 0, 'Mensaje General', 6);
+
+INSERT INTO image (id, image_url, message_id) VALUES 
+(1, 'https://static.nationalgeographicla.com/files/styles/image_3200/public/comedy-wildlife-awards-squirel-stop.jpg', 1),
+(2, 'https://static.nationalgeographicla.com/files/styles/image_3200/public/comedy-wildlife-awards-squirel-stop.jpg', 2);
+
+INSERT INTO video (id, video_url, message_id) VALUES 
+(1, 'https://www.youtube.com/watch?v=9bZkp7q19f0', 1),
+(2, 'https://www.youtube.com/watch?v=9bZkp7q19f0', 2);
+
 INSERT INTO image_template (id , image_url) VALUES (1 ,'https://res.cloudinary.com/ds02duuid/image/upload/v1741707864/images/obituaries/templates/fbrpmmujaksc5dbbrbbi.jpg'),
  (2 ,'https://res.cloudinary.com/ds02duuid/image/upload/v1741707864/images/obituaries/templates/jqqcvnp28w3adaymwkcr.jpg'),
  (3, 'https://res.cloudinary.com/ds02duuid/image/upload/v1741707864/images/obituaries/templates/pl6ual71zcpcsfiv8n3q.jpg');
@@ -150,6 +162,7 @@ INSERT INTO image (id, image_url, message_id) VALUES
 INSERT INTO video (id, video_url, message_id) VALUES 
 (1, 'https://www.youtube.com/watch?v=9bZkp7q19f0', 1),
 (2, 'https://www.youtube.com/watch?v=9bZkp7q19f0', 2);
+
 INSERT INTO receiver (id, message_id, obituary_id, telephone, name, email) VALUES 
 (1, 1, 1, '678945634', 'Reciver Uno', 'isaacsolpad@gmail.com'),
 (3, 1 , 1, '678945638', 'Reciver Uno', 'javrodrei@alum.us.es'),

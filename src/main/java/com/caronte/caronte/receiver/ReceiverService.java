@@ -48,7 +48,7 @@ public class ReceiverService {
     }
 
     @Transactional
-    public Receiver saveMessageReceiver(RecipientDto recipientDto, Message message) {
+    public Receiver saveReceiverByRecipientDto(RecipientDto recipientDto, Message message) {
         Receiver receiver = Receiver.parse(recipientDto, message);
         return receiverRepository.save(receiver);
     }
@@ -107,5 +107,13 @@ public class ReceiverService {
     }
 
     
-
+    @Transactional
+    public Receiver saveMessageReceiver(String name, String telephone, String email, Message message) {
+        Receiver receiver = new Receiver();
+        receiver.setName(name);
+        receiver.setTelephone(telephone);
+        receiver.setEmail(email);
+        receiver.setMessage(message);
+        return receiverRepository.save(receiver);
+    }
 }
