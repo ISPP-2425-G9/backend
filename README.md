@@ -4,82 +4,82 @@
 
 [![Codacy Badge](https://app.codacy.com/project/badge/Coverage/2194b57b5519495bbc0ba348cf27a296)](https://app.codacy.com/gh/ISPP-2425-G9/backend/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_coverage)
 
-## Descripción
-Caronte es una aplicación backend desarrollada con Spring Boot que utiliza una base de datos MySQL para gestionar y almacenar datos relacionados con coches.
+## Description
+Caronte is a backend application developed with Spring Boot that uses a MySQL database to manage and store data related to cars.
 
-## Requisitos
+## Requirements
 
 - **Java 23**
 - **MySQL**
 - **Maven**
 
-### Requisitos en Ubuntu
+### Requirements on Ubuntu
 
-1. **Instalar Java 23:**
-   Para instalar Java 23 en Ubuntu, sigue estos pasos:
+1. **Install Java 23:**
+   To install Java 23 on Ubuntu, follow these steps:
 
    ```bash
    sudo apt update
    sudo apt install openjdk-23-jdk
    ```
 
-   Verifica la instalación con:
+   Verify the installation with:
 
    ```bash
    java -version
    ```
 
-2. **Instalar Maven:**
-   Para instalar Maven en Ubuntu:
+2. **Install Maven:**
+   To install Maven on Ubuntu:
 
    ```bash
    sudo apt update
    sudo apt install maven
    ```
 
-   Verifica la instalación con:
+   Verify the installation with:
 
    ```bash
    mvn -v
    ```
 
-### Requisitos en Windows
+### Requirements on Windows
 
-1. **Instalar Java 23:**
-   - Ve a la [página de descargas de OpenJDK](https://jdk.java.net/23/) y descarga el instalador para Windows.
-   - Ejecuta el instalador y sigue las instrucciones para completar la instalación.
-   - Después de instalarlo, agrega el directorio `bin` de Java a las variables de entorno (en **System Properties** -> **Environment Variables** -> **Path**).
+1. **Install Java 23:**
+   - Go to the [OpenJDK download page](https://jdk.java.net/23/) and download the installer for Windows.
+   - Run the installer and follow the instructions to complete the installation.
+   - After installation, add Java’s `bin` directory to the environment variables (in **System Properties** -> **Environment Variables** -> **Path**).
 
-   Verifica la instalación con:
+   Verify the installation with:
 
    ```bash
    java -version
    ```
 
-2. **Instalar Maven:**
-   - Descarga Maven desde la [página oficial de Maven](https://maven.apache.org/download.cgi).
-   - Extrae el archivo ZIP y configura las variables de entorno (en **System Properties** -> **Environment Variables** -> **Path**).
+2. **Install Maven:**
+   - Download Maven from the [official Maven page](https://maven.apache.org/download.cgi).
+   - Extract the ZIP file and configure the environment variables (in **System Properties** -> **Environment Variables** -> **Path**).
 
-   Verifica la instalación con:
+   Verify the installation with:
 
    ```bash
    mvn -v
    ```
 
-## Instalación
+## Installation
 
-### Paso 1: Clonar el repositorio
+### Step 1: Clone the repository
 
-Clona el repositorio en tu máquina:
+Clone the repository on your machine:
 
 ```bash
 git clone git@github.com:ISPP-2425-G9/backend.git
 cd caronte
 ```
 
-### Paso 2: Configurar la base de datos
+### Step 2: Configure the database
 
-1. Crea la base de datos y el usuario en MySQL (o tu base de datos preferida):
+1. Create the database and user in MySQL (or your preferred database):
 
     ```bash
     mysql -u root -p
@@ -92,25 +92,24 @@ cd caronte
     FLUSH PRIVILEGES;
     ```
 
-### Paso 3: Construir el proyecto
+### Step 3: Build the project
 
-1. **Instalar dependencias y construir el proyecto**:
+1. **Install dependencies and build the project:**
 
-    En la terminal, dentro del directorio del proyecto, ejecuta:
+    In the terminal, inside the project directory, run:
 
     ```bash
     mvn clean install
     ```
 
-    Este comando descargará las dependencias necesarias y generará el archivo JAR del proyecto.
+    This command will download the necessary dependencies and generate the project's JAR file.
 
-### Paso 4: Ejecutar la aplicación
+### Step 4: Run the application
 
-1. Para ejecutar la aplicación Spring Boot, utiliza el siguiente comando:
+1. To run the Spring Boot application, use the following command:
 
     ```bash
     mvn spring-boot:run
     ```
 
-    Esto iniciará el servidor en `http://localhost:8080`.
-
+    This will start the server at `http://localhost:8080`.

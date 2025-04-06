@@ -96,8 +96,6 @@ public class EmailService {
                 .setTextAlignment(TextAlignment.CENTER)
                 .setMarginBottom(20);
         document.add(dates);
-
-        // 4. Frase de despedida
         String farewellPhrase = obituary.getFarewellPhrase();
         if (farewellPhrase != null && !farewellPhrase.isBlank()) {
             Paragraph phrase = new Paragraph("\"" + farewellPhrase + "\"")
@@ -108,8 +106,6 @@ public class EmailService {
                     .setMarginBottom(10);
             document.add(phrase);
         }
-
-        // 5. Mensaje
         String farewellMessage = obituary.getFarewellMessage();
         if (farewellMessage != null && !farewellMessage.isBlank()) {
             Paragraph message = new Paragraph(farewellMessage)
@@ -140,7 +136,7 @@ public class EmailService {
     @Transactional
     public void sendEmail(String to, String subject, String body) throws MessagingException {
         MimeMessage mimeMessage = mailSender.createMimeMessage();
-        MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, false); // false = no multipart
+        MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, false);
     
         helper.setTo(to);
         helper.setSubject(subject);
@@ -157,7 +153,7 @@ public class EmailService {
             int b = Integer.parseInt(rgb[2].trim());
             return new DeviceRgb(r, g, b);
         } catch (Exception e) {
-            return new DeviceRgb(0, 0, 0); // Color black by default
+            return new DeviceRgb(0, 0, 0);
         }
     }
 }

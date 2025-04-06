@@ -13,7 +13,7 @@ import lombok.Setter;
 public class DeathCertificate extends BaseEntity{
 
     @Column(nullable = false, length = 512)
-    private String url; 
+    private String url;
 
     @Column(nullable = false)
     private Boolean isVerified;

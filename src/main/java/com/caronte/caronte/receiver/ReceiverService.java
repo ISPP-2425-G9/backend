@@ -2,6 +2,7 @@ package com.caronte.caronte.receiver;
 
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -11,17 +12,23 @@ import com.caronte.caronte.message.DTOs.MessageRequestDto.RecipientDto;
 import com.caronte.caronte.obituary.Obituary;
 import com.caronte.caronte.obituary.DTOs.ObituraryRequestDto.ContactDto;
 import com.caronte.caronte.receiver.DTOs.ReceiverResponseDTO;
+import com.caronte.caronte.util.AESCipher;
 import com.caronte.caronte.util.exceptions.ResourceNotFound;
 
 @Service
 public class ReceiverService {
 
+    @Value("${app.domain}")
+    private String domain;
+
     private final ReceiverRepository receiverRepository;
     private final EmailService emailService;
-
-    public ReceiverService(ReceiverRepository receiverRepository, EmailService emailService) {
+    private final AESCipher aesCipher;
+    public ReceiverService(ReceiverRepository receiverRepository, EmailService emailService, AESCipher aesCipher) {
         this.emailService = emailService;
         this.receiverRepository = receiverRepository;
+        this.aesCipher = aesCipher;
+        
     }
   
     @Transactional(readOnly = true)
@@ -31,6 +38,12 @@ public class ReceiverService {
         return receivers;
     }
 
+    @Transactional(readOnly = true)
+    public List<Receiver> getReceiversByObituary(Obituary obituary) {
+        List<Receiver> receiversList = receiverRepository.findByObituary(obituary);
+        return receiversList;
+    }
+
     @Transactional
     public Receiver saveObituaryReceiver(ContactDto contactDto, Obituary obituary) {
         Receiver receiver = Receiver.parse(contactDto, obituary);
@@ -38,7 +51,7 @@ public class ReceiverService {
     }
 
     @Transactional
-    public Receiver saveMessageReceiver(RecipientDto recipientDto, Message message) {
+    public Receiver saveReceiverByRecipientDto(RecipientDto recipientDto, Message message) {
         Receiver receiver = Receiver.parse(recipientDto, message);
         return receiverRepository.save(receiver);
     }
@@ -65,7 +78,7 @@ public class ReceiverService {
     }
 
     @Transactional
-    public void notifyReceivers(List<Receiver> receivers, Obituary obituary) {
+    public void sendObituary(List<Receiver> receivers, Obituary obituary) {
         for (Receiver receiver : receivers) {
             try {
                 byte[] pdfBytes = emailService.generateObituaryPdf(obituary);
@@ -81,6 +94,32 @@ public class ReceiverService {
         }
     }
 
-    
+    @Transactional
+    public void sendMessage(List<Receiver> receivers , Message message) {
+        String code = aesCipher.decrypt(message.getCode());
+        String messageBody = "Has recibido un mensaje de Caronte. \n" + 
+                "El codigo para acceder al mensaje es: " + code + "\n" +
+                "Puedes revisarlo aquí: " + domain + "/messages?messageId=" + message.getId();      
+        for (Receiver receiver : receivers) {
+            try {
+                emailService.sendEmail(receiver.getEmail(), "Mensaje de " + message.getCustomer().getName(),
+                        messageBody);
 
+                System.out.println("Email enviado a: " + receiver.getEmail());
+            } catch (Exception e) {
+                System.out.println("Error al notificar por email a: " + receiver.getEmail() + " - " + e.getMessage());
+            }
+        }
+    }
+
+    
+    @Transactional
+    public Receiver saveMessageReceiver(String name, String telephone, String email, Message message) {
+        Receiver receiver = new Receiver();
+        receiver.setName(name);
+        receiver.setTelephone(telephone);
+        receiver.setEmail(email);
+        receiver.setMessage(message);
+        return receiverRepository.save(receiver);
+    }
 }

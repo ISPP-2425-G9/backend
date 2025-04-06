@@ -5,7 +5,6 @@ import java.util.Map;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -17,7 +16,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.caronte.caronte.message.DTOs.MessageRequestDto;
 import com.caronte.caronte.user.UserService;
-import com.caronte.caronte.util.ErrorHandler;
 import com.caronte.caronte.util.exceptions.ResponseThrow;
 
 import jakarta.validation.Valid;
@@ -34,48 +32,29 @@ public class MessageController {
         this.userService = userService;
     }
 
-    @PostMapping
-    public ResponseEntity<Map<String, Long>> createMessage(
-            @Valid @RequestBody MessageRequestDto request, BindingResult bindingResult) {
-        ErrorHandler errorHandler = ErrorHandler.catchError(bindingResult);
-        errorHandler.throwIfHasErrors();
-        
-        Long customerId = userService.findCurrentUserId();
-        Message createdMessage = messageService.createMessage(request, customerId);
-        
-        return ResponseEntity.status(HttpStatus.CREATED).body(Map.of("messageId", createdMessage.getId()));
-    }
-
-    @GetMapping("/{customerId}/my_messages")
-    public ResponseEntity<?> getMessagesByCustomerId(@PathVariable Long customerId) {
-        try {
-            userService.authorizeUser(customerId);
-            List<Message> messages = messageService.getMessagesByCustomerId(customerId); 
-            return ResponseEntity.ok(messages);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                                .body(Map.of("error", e.getMessage()));
-        }
-    }
-
     @GetMapping("/{messageId}")
     public ResponseEntity<?> getMessageById(@PathVariable Long messageId) {
         Long customerId = userService.findCurrentUserId();
-        Message message = messageService.getMessageById(messageId, customerId);
-        ResponseThrow.checkOrForbidden(message.hasCustomerWithId(customerId), "User not authorized to access this resource");
+        MessageRequestDto messageDto = messageService.getMessageRequestDtoByMessageId(customerId,messageId);
+        return ResponseEntity.ok(messageDto);
+    }
 
-        return ResponseEntity.ok(message);
+    @GetMapping("/my-messages")
+    public ResponseEntity<?> getMessagesByCustomerId() {
+        Long customerId = userService.findCurrentUserId();
+        List<MessageRequestDto> messages = messageService.getMessagesRequestDtoByCustomerId(customerId);
+        return ResponseEntity.ok(messages);
+    }
+
+    @PostMapping
+    public ResponseEntity<Map<String, ?>> createMessage(@Valid @RequestBody MessageRequestDto request) {
+        Long customerId = userService.findCurrentUserId();
+        Message createdMessage = messageService.createMessage(request, customerId);
+        return ResponseEntity.status(HttpStatus.CREATED).body(Map.of("messageId", createdMessage.getId()));
     }
 
     @PutMapping("/{messageId}")
-    public ResponseEntity<Message> updateMessage(
-            @PathVariable Long messageId,
-            @Valid @RequestBody MessageRequestDto request,
-            BindingResult bindingResult) {
-        ErrorHandler errorHandler = ErrorHandler.catchError(bindingResult);
-        errorHandler.throwIfHasErrors();
-
+    public ResponseEntity<?> updateMessage(@PathVariable Long messageId, @Valid @RequestBody MessageRequestDto request) {
         Long customerId = userService.findCurrentUserId();
         Message updatedMessage = messageService.updateMessage(messageId, request, customerId);
         return ResponseEntity.ok(updatedMessage);
@@ -86,5 +65,20 @@ public class MessageController {
         Long customerId = userService.findCurrentUserId();
         messageService.deleteMessage(messageId, customerId);
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/{messageId}/is-owner")
+    public ResponseEntity<Map<String, ?>> isMessageOwner(@PathVariable Long messageId) {
+        Long customerId = userService.findCurrentUserId();
+        boolean isOwner = messageService.isOwner(messageId, customerId);
+        return ResponseEntity.ok(Map.of("isOwner", isOwner));
+    }
+
+    @GetMapping("/{messageId}/validate-code/{code}")
+    public ResponseEntity<?> validateMessageCode(@PathVariable Long messageId, @PathVariable String code) {
+        boolean isValid = messageService.validateMessageCode(messageId, code);
+        ResponseThrow.checkOrBadRequest(isValid, code);
+        MessageRequestDto messageDto = messageService.getMessageRequestDtoByMessageId(messageId);
+        return ResponseEntity.ok(messageDto);
     }
 }

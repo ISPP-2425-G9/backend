@@ -14,4 +14,7 @@ public interface ObituaryRepository extends LongRepository<Obituary> {
 
     @Query("SELECT o FROM Obituary o WHERE o.customer.dni = :customerDni")
     List<Obituary> findByCustomerDni(String customerDni);
+
+    @Query("SELECT o FROM Obituary o WHERE o.deathCertificate.id = :deathCertificateId")
+    List<Obituary> findByDeathCertificateId(Long deathCertificateId);
 }
