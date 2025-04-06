@@ -20,9 +20,9 @@ public interface ReceiverRepository extends LongRepository<Receiver> {
     @Query("SELECT r FROM Receiver r WHERE r.message.id = :messageId")
     List<Receiver> findByMessageId(Long messageId);
 
-    @Query("SELECT r FROM Receiver r WHERE r.message.id = :messageId AND r.name = :name AND r.email = :email")
-    Optional<Receiver> findByMessageIdAndNameAndEmail(@Param("messageId") Long messageId, 
-                                                  @Param("name") String name, 
+    @Query("SELECT r FROM Receiver r WHERE r.message.id = :messageId AND r.telephone = :telephone AND r.email = :email")
+    Optional<Receiver> findByMessageIdAndTelephoneAndEmail(@Param("messageId") Long messageId, 
+                                                  @Param("telephone") String telephone, 
                                                   @Param("email") String email);
 
 }
