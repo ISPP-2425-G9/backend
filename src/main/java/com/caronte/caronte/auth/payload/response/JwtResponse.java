@@ -22,22 +22,24 @@ public class JwtResponse {
 	private String username;
 	private List<String> roles;
 	private String name;
-	private LocalDateTime experedPlanDate;
+	private LocalDateTime expiredPlanDate;
 
-	public JwtResponse(String accessToken, Long id, String username, List<String> roles, String name, LocalDateTime experedPlanDate) {
+	public JwtResponse(String accessToken, Long id, String username, List<String> roles, String name, LocalDateTime expiredPlanDate) {
 		this.token = accessToken;
 		this.id = id;
 		this.username = username;
 		this.roles = roles;
 		this.name = name;
+		this.expiredPlanDate = expiredPlanDate;
 	}
 
-	public JwtResponse(String accessToken, UserDetailsImpl userDetailsImpl, String name, LocalDateTime experedPlanDate) {
+	public JwtResponse(String accessToken, UserDetailsImpl userDetailsImpl, String name, LocalDateTime expiredPlanDate) {
 		this.token = accessToken;
 		this.id = userDetailsImpl.getId();
 		this.username = userDetailsImpl.getUsername();
 		this.roles = userDetailsImpl.getAuthorities().stream().map(GrantedAuthority::getAuthority).toList();
 		this.name = name;
+		this.expiredPlanDate = expiredPlanDate;
 	}
 
 	public JwtResponse(String accessToken, User user) throws StripeException {
@@ -47,7 +49,7 @@ public class JwtResponse {
 		this.username = userDetailsImpl.getUsername();
 		this.roles = userDetailsImpl.getAuthorities().stream().map(GrantedAuthority::getAuthority).toList();
 		this.name = user.getName();
-		this.experedPlanDate = user.getExpiringDate();
+		this.expiredPlanDate = user.getExpiringDate();
 	}
 
 
