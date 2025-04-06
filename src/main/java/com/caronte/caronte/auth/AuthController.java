@@ -117,7 +117,7 @@ public class AuthController {
 		userService.authorizeUserOrAdmin(customerId);
 		Optional<User> existingUser = userService.findByEmail(request.getEmail());
 		if (existingUser.isPresent() && !Objects.equals(existingUser.get().getId(), customerId)) {
-			throw new AccessDeniedException("This email is already used by another user");
+			throw new AccessDeniedException("Este email ya está en uso");
 		}
 
 		Customer customer = customerService.update(customerId, request);
@@ -153,7 +153,7 @@ public class AuthController {
 		userService.authorizeUser(companyId);
 		Optional<User> existingUser = userService.findByEmail(request.getEmail());
 		if (existingUser.isPresent() && !Objects.equals(existingUser.get().getId(), companyId)) {
-			throw new AccessDeniedException("This email is already used by another user");
+			throw new AccessDeniedException("Este email ya está en uso");
 		}
 
 		Company company = companyService.update(companyId, request);
