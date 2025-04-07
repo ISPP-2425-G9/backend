@@ -152,6 +152,8 @@ INSERT INTO video (id, video_url, message_id) VALUES
 (2, 'https://www.youtube.com/watch?v=9bZkp7q19f0', 2);
 
 INSERT INTO receiver (id, message_id, obituary_id, telephone, name, email) VALUES 
-(1, 1, 1, '678945634', 'Reciver Uno', 'isaacsolpad@gmail.com'),
-(3, 1 , 1, '678945638', 'Reciver Uno', 'manolito@gmail.com'),
-(2, 1, 2, '643767999', 'Reciver Dos', 'javierrodriguezreina@gmail.com');
+(1, 1, NULL, '678945634', 'Reciver Uno', 'javierrodriguezreina@gmail.com'),
+(2, 2, NULL, '643767999', 'Reciver Dos', 'javierrodriguezreina@gmail.com'),
+(3, 3, NULL, '643767999', 'Reciver Dos', 'javierrodriguezreina@gmail.com'),
+(4, NULL, 1, '643767999', 'Reciver Dos', 'javierrodriguezreina@gmail.com'),
+(5, NULL, 2, '643767999', 'Reciver Dos', 'javierrodriguezreina@gmail.com');
