@@ -12,6 +12,6 @@ public interface MessageRepository extends LongRepository<Message> {
 
     List<Message> findAllByCustomerId(Long customerId);
 
-
+    List<Message> findAllByDeathCertificateId(Long deathCertificateId);
 
 }

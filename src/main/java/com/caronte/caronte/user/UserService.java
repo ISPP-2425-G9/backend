@@ -94,4 +94,10 @@ public class UserService {
         return userRepository.save(user);
     }
 
+    @Transactional(readOnly = true)
+    public void authorizeAdmin(String message){
+        UserDetailsImpl auth =  (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        ResponseThrow.checkOrBadRequest(auth.isAdmin(), message);
+    }
+
 }

@@ -64,7 +64,7 @@ public class AuthController {
 	@PostMapping("/login")
 	public ResponseEntity<JwtResponse> authenticateUser(
 			@Valid @RequestBody LoginRequest loginRequest,
-			BindingResult bindingResult) {
+			BindingResult bindingResult) throws StripeException {
 		ErrorHandler errors = ErrorHandler.catchError(bindingResult);
 		errors.throwIfHasErrors();
 
@@ -81,7 +81,7 @@ public class AuthController {
 	@PostMapping("/customers/signup")
 	public ResponseEntity<JwtResponse> registerCustomer(
 			@Valid @RequestBody RegisterRequestCustomer registerRequest,
-			BindingResult bindingResult) {
+			BindingResult bindingResult) throws StripeException {
 		ErrorHandler errors = ErrorHandler.catchError(bindingResult);
 		Customer customer = authService.validateAndBuildCustomer(registerRequest, errors);
 		errors.throwIfHasErrors();
@@ -94,7 +94,7 @@ public class AuthController {
 	@PostMapping("/companies/signup")
 	public ResponseEntity<JwtResponse> registerCompany(
 			@Valid @RequestBody RegisterRequestCompany registerRequest,
-			BindingResult bindingResult) {
+			BindingResult bindingResult) throws StripeException {
 		ErrorHandler errors = ErrorHandler.catchError(bindingResult);
 		Company company = authService.validateAndBuildCompany(registerRequest, errors);
 		errors.throwIfHasErrors();
@@ -114,7 +114,7 @@ public class AuthController {
 	@PutMapping("/customers/{customerId}")
 	public ResponseEntity<JwtResponse> updateCustomer(
 			@PathVariable Long customerId,
-			@RequestBody @Valid CustomerUpdateRequest request) throws AccessDeniedException {
+			@RequestBody @Valid CustomerUpdateRequest request) throws AccessDeniedException, StripeException {
 		userService.authorizeUserOrAdmin(customerId);
 		Optional<User> existingUser = userService.findByEmail(request.getEmail());
 		if (existingUser.isPresent() && !Objects.equals(existingUser.get().getId(), customerId)) {
@@ -131,10 +131,10 @@ public class AuthController {
 
 	@PutMapping("/password/{userId}")
 	public ResponseEntity<JwtResponse> updateCustomer(@PathVariable Long userId,
-			@RequestBody @Valid UserChangePasswordRequest request) {
-		userService.authorizeUserOrAdmin(userId);
-		User user = userService.changePassword(userId, request);
-		UserDetailsImpl userDetails = UserDetailsImpl.build(user);
+			@RequestBody @Valid UserChangePasswordRequest request) throws StripeException {
+    userService.authorizeUserOrAdmin(userId);
+    User user = userService.changePassword(userId, request);
+    UserDetailsImpl userDetails = UserDetailsImpl.build(user);
 		String jwt = jwtUtils.generateJwtToken(userDetails);
 		JwtResponse jwtResponse = new JwtResponse(jwt, user);
 		return ResponseEntity.ok().body(jwtResponse);
@@ -150,14 +150,13 @@ public class AuthController {
 	@PutMapping("/companies/{companyId}")
 	public ResponseEntity<JwtResponse> updateCompany(
 			@PathVariable Long companyId,
-			@RequestBody @Valid CompanyUpdateRequest request) throws AccessDeniedException {
-		userService.authorizeUser(companyId);
-		Optional<User> existingUser = userService.findByEmail(request.getEmail());
-		if (existingUser.isPresent() && !Objects.equals(existingUser.get().getId(), companyId)) {
-			throw new AccessDeniedException("Este email ya está en uso");
-		}
+    			@RequestBody @Valid CompanyUpdateRequest request) throws AccessDeniedException, StripeException {
+    		userService.authorizeUser(companyId);
+		userService.findByEmail(request.getEmail())
+			.filter(user -> Objects.equals(user.getId(), companyId))
+			.orElseThrow(() -> new AccessDeniedException("This email is of other user"));
 
-		Company company = companyService.update(companyId, request);
+  		Company company = companyService.update(companyId, request);
 		UserDetailsImpl userDetails = UserDetailsImpl.build(company);
 		String jwt = jwtUtils.generateJwtToken(userDetails);
 		User user = userService.findCurrentUser();
