@@ -62,11 +62,7 @@ public class Obituary extends BaseEntity {
     public boolean hasCustomerId(Long customerId){
         return this.getCustomer().getId() == customerId;
     }
-
     
-    /**
-     * If wordColor is null, it is set to "0,0,0" 
-     */
     @JsonIgnore
     public void setDefaultWordColorIfNull() {
         if(this.wordColor == null)
