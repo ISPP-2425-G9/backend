@@ -153,6 +153,7 @@ public class AdminService {
 
         for(Obituary obituary : obituaries) {
             List<Receiver> receivers = receiverService.getReceiversByObituary(obituary);
+            obituary.setDeathDate(deathDate);
             receiverService.sendObituary(receivers, obituary);
         } 
 
