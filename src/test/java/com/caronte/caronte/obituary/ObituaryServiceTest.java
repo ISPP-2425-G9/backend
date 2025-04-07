@@ -17,6 +17,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.caronte.caronte.configuration.services.StripeService;
 import com.caronte.caronte.customer.Customer;
 import com.caronte.caronte.customer.CustomerRepository;
 import com.caronte.caronte.deathCertificate.DeathCertificate;
@@ -32,6 +33,7 @@ import com.caronte.caronte.receiver.ReceiverRepository;
 import com.caronte.caronte.receiver.ReceiverService;
 import com.caronte.caronte.util.MediaHandler;
 import com.caronte.caronte.util.exceptions.ResourceNotFound;
+import com.stripe.exception.StripeException;
 
 @SpringBootTest
 public class ObituaryServiceTest {
@@ -55,7 +57,10 @@ public class ObituaryServiceTest {
     private MediaHandler mediaHandler;
 
     @MockitoBean
-    private ReceiverService receiverService; // <--- Esto debe ser @MockBean también
+    private StripeService stripeService;
+
+    @MockitoBean
+    private ReceiverService receiverService; 
 
     @MockitoBean
     private DeathCertificateService deathCertificateService;
@@ -137,7 +142,7 @@ public class ObituaryServiceTest {
     }
 
     @Test
-    public void testCreateObituaryWithReceiversIsMineTrue() {
+    public void testCreateObituaryWithReceiversIsMineTrue() throws StripeException {
         // Arrange
         Customer customer = new Customer();
         customer.setId(1L);
@@ -167,6 +172,7 @@ public class ObituaryServiceTest {
         obituary.setFarewellMessage(requestDto.getFarewellMessage());
         obituary.setFarewellPhrase(requestDto.getFarewellPhrase());
         obituary.setCustomImageUrl(requestDto.getCustomImage());
+        obituary.setIsMine(requestDto.getIsMine());
         obituary.setCustomer(customer);
         obituary.setImageTemplate(imageTemplate);
         List<Receiver> receivers = contacts.stream().map(contactDto -> Receiver.parse(contactDto, obituary)).toList();
@@ -196,23 +202,34 @@ public class ObituaryServiceTest {
     }
 
     @Test
-    public void testCreateObituaryWithReceiversIsMineFalse() {
+    public void testCreateObituaryWithReceiversIsMineFalse() throws StripeException {
 
         when(customerRepository.findById(1L)).thenReturn(Optional.of(customer));
         when(imageTemplateRepository.findById(1L)).thenReturn(Optional.of(imageTemplate));
-
-        requestDto.setIsMine(false);
-        requestDto.setDeathDate(LocalDate.of(2023, 3, 1));
-
+        doNothing().when(stripeService).pay(anyString(), anyString());
         DeathCertificateRequestDTO deathCertificateRequestDTO = new DeathCertificateRequestDTO();
         deathCertificateRequestDTO.setDni("12345678Z");
         deathCertificateRequestDTO.setFile("https://example.com/certificate.pdf");
         deathCertificateRequestDTO.setIsVerificate(true);
 
+        requestDto.setIsMine(false);
+        requestDto.setDeathDate(LocalDate.of(2023, 3, 1));
         requestDto.setDeathCertificate(deathCertificateRequestDTO);
+        requestDto.setPaymentMethodId("pm_14abdfdd13...");
+
+        Obituary obituary = new Obituary();
+        obituary.setName(requestDto.getName());
+        obituary.setFarewellMessage(requestDto.getFarewellMessage());
+        obituary.setFarewellPhrase(requestDto.getFarewellPhrase());
+        obituary.setCustomImageUrl(requestDto.getCustomImage());
+        obituary.setIsMine(requestDto.getIsMine());
+        obituary.setCustomer(customer);
+        obituary.setImageTemplate(imageTemplate);
+
 
         when(deathCertificateService.createDeathCertificateAndRelations(any(DeathCertificateRequestDTO.class),
                 anyLong())).thenReturn(certificate);
+        
         when(obituaryRepository.saveAndFlush(any(Obituary.class))).thenReturn(obituary2);
         Obituary obituary_test = obituaryService.createObituaryWithReceivers(requestDto, customer.getId());
 
@@ -230,7 +247,7 @@ public class ObituaryServiceTest {
     }
 
     @Test
-    public void testCreateObituaryWithDefaultWordColor() {
+    public void testCreateObituaryWithDefaultWordColor() throws StripeException {
 
         when(customerRepository.findById(1L)).thenReturn(Optional.of(customer));
         when(imageTemplateRepository.findById(1L)).thenReturn(Optional.of(imageTemplate));
@@ -251,7 +268,7 @@ public class ObituaryServiceTest {
     }
 
     @Test
-    public void testCreateObituaryWithNoContacts() {
+    public void testCreateObituaryWithNoContacts() throws StripeException {
 
         when(customerRepository.findById(1L)).thenReturn(Optional.of(customer));
         when(imageTemplateRepository.findById(1L)).thenReturn(Optional.of(imageTemplate));
@@ -270,7 +287,7 @@ public class ObituaryServiceTest {
     }
 
     @Test
-    public void testCreateObituaryWithMultipleContacts() {
+    public void testCreateObituaryWithMultipleContacts() throws StripeException {
         ContactDto contact1 = new ContactDto();
         contact1.setName("Contacto1");
         contact1.setPhone("123456789");

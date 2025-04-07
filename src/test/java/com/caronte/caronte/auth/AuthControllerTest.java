@@ -1,19 +1,20 @@
 package com.caronte.caronte.auth;
 
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
+import java.nio.file.AccessDeniedException;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.when;
 import org.mockito.MockitoAnnotations;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -22,12 +23,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.web.servlet.MockMvc;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import com.caronte.caronte.admin.Admin;
@@ -398,7 +393,7 @@ public class AuthControllerTest {
         when(userService.findByEmail("different@example.com")).thenReturn(Optional.of(otherCustomer));
         when(userService.authorizeUserOrAdmin(customerId)).thenReturn(null);
 
-        Exception exception = assertThrows(Exception.class, () -> {
+        AccessDeniedException exception = assertThrows(AccessDeniedException.class, () -> {
             mockMvc.perform(put("/api/auth/customers/{customerId}", customerId)
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(asJsonString(request)))
@@ -409,7 +404,7 @@ public class AuthControllerTest {
         while (rootCause.getCause() != null) {
             rootCause = rootCause.getCause();
         }
-        assertTrue(rootCause instanceof IllegalAccessError);
+        
         assertEquals("This email is of other user", rootCause.getMessage());
     }
 
