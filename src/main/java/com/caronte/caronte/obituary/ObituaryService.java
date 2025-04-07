@@ -21,6 +21,8 @@ import com.caronte.caronte.obituary.DTOs.ObituraryRequestDto;
 import com.caronte.caronte.receiver.Receiver;
 import com.caronte.caronte.receiver.ReceiverRepository;
 import com.caronte.caronte.receiver.ReceiverService;
+import com.caronte.caronte.user.User;
+import com.caronte.caronte.user.UserService;
 import com.caronte.caronte.util.MediaHandler;
 import com.caronte.caronte.util.exceptions.ResourceNotFound;
 import com.caronte.caronte.util.exceptions.ResponseThrow;
@@ -37,11 +39,12 @@ public class ObituaryService {
     private final DeathCertificateService deathCertificateService;
     private final MediaHandler mediaHandler;
     private final MessageRepository messageRepository;
+    private final UserService userService;
 
     public ObituaryService(ObituaryRepository obituaryRepository, CustomerRepository customerRepository,
             ReceiverRepository receiverRepository, ImageTemplateRepository imageTemplateRepository,
             DeathCertificateService deathCertificateService, MediaHandler mediaHandler,
-            ReceiverService receiverService, MessageRepository messageRepository) {
+            ReceiverService receiverService, MessageRepository messageRepository, UserService userService) {
         this.receiverRepository = receiverRepository;
         this.customerRepository = customerRepository;
         this.obituaryRepository = obituaryRepository;
@@ -50,6 +53,7 @@ public class ObituaryService {
         this.mediaHandler = mediaHandler;
         this.receiverService = receiverService;
         this.messageRepository = messageRepository;
+        this.userService = userService;
         }
 
     @Transactional(readOnly = true)
@@ -165,7 +169,7 @@ public class ObituaryService {
     @Transactional
     public void deleteObituaryByCustomer(Long customerId, Long obituaryId) {
         Obituary obituary = findById(obituaryId);
-        ResponseThrow.checkOrForbidden(obituary.hasCustomerId(customerId));
+        userService.authorizeUserOrAdmin(customerId, "You are not allowed to delete this obituary");
         obituaryRepository.deleteById(obituaryId);
     }
 
@@ -213,6 +217,7 @@ public class ObituaryService {
                 }
             }
         }
+
         return customer;
     }
 
