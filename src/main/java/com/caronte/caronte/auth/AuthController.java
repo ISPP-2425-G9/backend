@@ -118,7 +118,7 @@ public class AuthController {
 		userService.authorizeUserOrAdmin(customerId);
 		Optional<User> existingUser = userService.findByEmail(request.getEmail());
 		if (existingUser.isPresent() && !Objects.equals(existingUser.get().getId(), customerId)) {
-			throw new AccessDeniedException("Este email ya está en uso");
+			throw new AccessDeniedException("This email is of other user");
 		}
 
 		Customer customer = customerService.update(customerId, request);

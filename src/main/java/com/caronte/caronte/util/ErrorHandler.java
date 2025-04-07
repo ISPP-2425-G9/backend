@@ -11,13 +11,14 @@ import org.springframework.validation.FieldError;
 import com.caronte.caronte.util.exceptions.ErrorHandlerException;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
+
+@NoArgsConstructor
+@AllArgsConstructor
 public class ErrorHandler {
 
     private Map<String, List<String>> errors;
-
-    public ErrorHandler(Map<String, List<String>> errors){
-        this.errors = errors;
-    }
 
     public static ErrorHandler catchError(BindingResult bindingResult) {
         Map<String, List<String>> errors = new HashMap<>();

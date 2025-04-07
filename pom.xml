@@ -112,6 +112,7 @@
 			<artifactId>dotenv-java</artifactId>
 			<version>2.2.4</version>
 		</dependency>
+
 		<!-- STRIPE		 -->
 		<!-- https://mvnrepository.com/artifact/com.stripe/stripe-java -->
 		<dependency>
@@ -131,6 +132,13 @@
 			<artifactId>springdoc-openapi-ui</artifactId>
 			<version>1.8.0</version> <!-- Usa la versión más reciente -->
 		</dependency>
+		
+		<!-- https://mvnrepository.com/artifact/org.jacoco/jacoco-maven-plugin -->
+		<dependency>
+			<groupId>org.jacoco</groupId>
+			<artifactId>jacoco-maven-plugin</artifactId>
+			<version>0.8.12</version>
+		</dependency>
 
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -142,10 +150,39 @@
 			<version>8.0.0</version>
 			<type>pom</type>
 		</dependency>
+
 	</dependencies>
 
 	<build>
 		<plugins>
+			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<version>0.8.12</version>  <!-- Asegúrate de usar esta versión o superior -->
+				<executions>
+					<execution>
+						<id>prepare-agent</id>
+						<goals>
+							<goal>prepare-agent</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>report</id>
+						<phase>verify</phase>
+						<goals>
+							<goal>report</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<excludes>
+						<exclude>**/DTOs/**</exclude>
+						<exclude>**/*Application.class</exclude>
+						<exclude>**/configuration/jwt/**</exclude>
+						<exclude>**/auth/payload/**</exclude>
+					</excludes>
+				</configuration>
+			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>

@@ -94,8 +94,9 @@ public class MessageService {
 
         uploadNewImages(request.getCustomImages(), new ArrayList<>(), savedMessage);
 
-        //Esto es necesario crearlo desde 0 por la relación entre receiver y message NO SE PUEDE ACTUALIZAR
-        //Con la funcion anterior si creas dos mensajes y se lo quieres enviar a la misma persona, uno de los dos no le llega 
+        // This needs to be created from scratch because the relationship between receiver and message CANNOT BE UPDATED
+        // With the previous function, if you create two messages and you want to send them to the same person, one of 
+        // the two will not reach them
         if (request.getRecipients() != null) {
             for (MessageRequestDto.RecipientDto r : request.getRecipients()){
                 receiverService.saveReceiverByRecipientDto(r, savedMessage);
@@ -199,9 +200,9 @@ public class MessageService {
             }
         }
         for (MessageRequestDto.RecipientDto r : request.getRecipients()) { 
-            //Un receptor existe si tiene el mismo telefono y email
-            //Si existe se actualiza 
-            //Si no existe se crea uno nuevo
+            // A recipient exists if it has the same phone number and email address
+            // If it exists, it is updated
+            // If it doesn't exist, a new one is created
             Receiver receiverExistent = receiverRepository.findByMessageIdAndTelephoneOrEmail(message.getId(), r.getTelephone(), r.getEmail()).orElse(null);
             if (receiverExistent == null) receiverService.saveReceiverByRecipientDto(r, message);
             else receiverService.updateMessageReceiver(receiverExistent.getId(),r);
