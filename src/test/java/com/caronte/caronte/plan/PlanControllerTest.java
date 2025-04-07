@@ -15,17 +15,35 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import com.caronte.caronte.configuration.jwt.JwtUtils;
+import com.caronte.caronte.configuration.services.StripeService;
+import com.caronte.caronte.configuration.services.UserDetailsImpl;
+import com.caronte.caronte.customer.Customer;
+import com.caronte.caronte.plan.DTOs.ChangePlanRequest;
 import com.caronte.caronte.user.User;
+import com.caronte.caronte.user.UserService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 class PlanControllerTest {
 
     private MockMvc mockMvc;
+
+    private ObjectMapper objectMapper = new ObjectMapper();
 
     @Mock
     private PlanService planService;
 
     @InjectMocks
     private PlanController planController;
+
+    @Mock
+    private StripeService stripeService; 
+
+    @Mock
+    private UserService userService;
+
+    @Mock
+    private JwtUtils jwtUtils;
 
     @BeforeEach
     void setUp() {
@@ -34,23 +52,31 @@ class PlanControllerTest {
     }
 
     @Test
-    @WithMockUser
+    @WithMockUser(username = "testUser", authorities = {"CUSTOMER"})
     void testChangePlan_Success() throws Exception {
-        // Simular comportamiento del servicio
+        Customer mockUser = new Customer();
+        mockUser.setPlan(Plan.newPlanFree());
+
+        when(userService.authorizeUserOrAdmin(anyLong())).thenReturn(mockUser);
         when(planService.changePlan(any(User.class), any(PlanType.class), any(String.class))).thenReturn(Plan.newPlanPremium("sub_4fbc23afe..."));
+        when(stripeService.subscription(any(String.class), any(User.class))).thenReturn("sub_4fbc23afe...");
+        String mockJwt = "mock-jwt-token";
+        when(jwtUtils.generateJwtToken(any(UserDetailsImpl.class))).thenReturn(mockJwt);
+        when(userService.findCurrentUser()).thenReturn(mockUser);
 
-        // Crear el objeto que simula el RequestBody (ChangePlanRequest)
-        String requestBody = "{ \"planType\": \"Premium\", \"paymentMethodId\": \"pm_1Je1wF2eZvKYlo2Cl39B5gF1\", \"isPremium\": true }";
+        ChangePlanRequest changePlanRequest = new ChangePlanRequest();
+        changePlanRequest.setPaymentMethodId("pm_1Je1wF2eZvKYlo2Cl39B5gF1");
+        changePlanRequest.setPlanType(PlanType.PREMIUM);
 
-        // Realizar la petición al endpoint del controlador
-        mockMvc.perform(put("/plans/{userId}", 1L) // Usar PUT y el path correspondiente
+        String requestBody = objectMapper.writeValueAsString(changePlanRequest);
+        mockMvc.perform(put("/api/plans/{userId}", 1L)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(requestBody))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.jwt").exists()) // Verificar que se genera el JWT
-                .andExpect(jsonPath("$.user").exists()); // Verificar que la respuesta tiene información del usuario
+                .andExpect(jsonPath("$.token").value(mockJwt));
 
-        // Verificar que el servicio fue llamado una vez
-        verify(planService, times(1)).changePlan(any(User.class), any(PlanType.class), any(String.class));
+        verify(userService, times(1)).authorizeUserOrAdmin(anyLong());
+        verify(stripeService, times(1)).subscription(any(String.class), any(User.class));
+        verify(jwtUtils, times(1)).generateJwtToken(any(UserDetailsImpl.class));
     }
 }
