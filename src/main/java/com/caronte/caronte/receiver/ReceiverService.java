@@ -79,10 +79,9 @@ public class ReceiverService {
 
     @Transactional
     public void sendObituary(List<Receiver> receivers, Obituary obituary) {
+        byte[] pdfBytes = emailService.generateObituaryPdf(obituary);
         for (Receiver receiver : receivers) {
             try {
-                byte[] pdfBytes = emailService.generateObituaryPdf(obituary);
-
                 emailService.sendEmailWithAttachment(receiver.getEmail(), "Esquela de " + obituary.getName(),
                         "Adjunto encontrarás la esquela de " + obituary.getName(),
                         pdfBytes, "esquela_" + obituary.getName() + ".pdf");
