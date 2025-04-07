@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 import org.mockito.MockitoAnnotations;
 import org.springframework.http.MediaType;
@@ -127,8 +128,27 @@ public class AuthControllerTest {
 
     @Test
     void testAuthenticateUserValidationError() throws Exception {
+        LoginRequest loginRequest = new LoginRequest();
+        loginRequest.setId("");
+        loginRequest.setPassword("password");
 
+        ObjectMapper objectMapper = new ObjectMapper();
+        String requestJson = objectMapper.writeValueAsString(loginRequest);
+
+        Exception exception = assertThrows(Exception.class, () -> {
+            mockMvc.perform(post("/api/auth/login")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(requestJson))
+                    .andReturn();
+        });
+
+        Throwable rootCause = exception;
+        while (rootCause.getCause() != null) {
+            rootCause = rootCause.getCause();
+        }
+        assertTrue(rootCause instanceof ErrorHandlerException, "The root cause must be ErrorHandlerException");
     }
+
 
     @Test
     void testRegisterCustomer() throws Exception {
@@ -312,7 +332,25 @@ public class AuthControllerTest {
 
     @Test
     void testGetCustomerNotFound() throws Exception {
+        Long customerId = 1L;
+        when(userService.authorizeUserOrAdmin(Mockito.anyLong(), Mockito.anyString())).thenReturn(null);
+        when(customerService.findById(customerId)).thenThrow(new RuntimeException("Customer not found"));
+        
+        Exception exception = assertThrows(Exception.class, () -> {
+            mockMvc.perform(get("/api/auth/customers/{customerId}", customerId))
+                .andReturn();
+        });
+        
+        Throwable rootCause = exception;
+        while (rootCause.getCause() != null) {
+            rootCause = rootCause.getCause();
+        }
+        
+        assertTrue(rootCause instanceof RuntimeException);
+        assertEquals("Customer not found", rootCause.getMessage());
     }
+
+
 
     @Test
     void testUpdateCustomer() throws Exception {
@@ -348,6 +386,34 @@ public class AuthControllerTest {
     }
 
     @Test
+    void testUpdateCustomerEmailMismatch() throws Exception {
+        Long customerId = 1L;
+        CustomerUpdateRequest request = new CustomerUpdateRequest();
+        request.setEmail("different@example.com");
+        request.setFullName("New Name");
+        request.setTelephone("123456789");
+
+        Customer otherCustomer = new Customer();
+        otherCustomer.setId(2L);
+        when(userService.findByEmail("different@example.com")).thenReturn(Optional.of(otherCustomer));
+        when(userService.authorizeUserOrAdmin(customerId)).thenReturn(null);
+
+        Exception exception = assertThrows(Exception.class, () -> {
+            mockMvc.perform(put("/api/auth/customers/{customerId}", customerId)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(asJsonString(request)))
+                .andReturn();
+        });
+
+        Throwable rootCause = exception;
+        while (rootCause.getCause() != null) {
+            rootCause = rootCause.getCause();
+        }
+        assertTrue(rootCause instanceof IllegalAccessError);
+        assertEquals("This email is of other user", rootCause.getMessage());
+    }
+
+    @Test
     void testUpdatePasswordCustomer() throws Exception {
         Long userId = 1L;
         UserChangePasswordRequest request = new UserChangePasswordRequest();
@@ -376,8 +442,22 @@ public class AuthControllerTest {
             .andExpect(jsonPath("$.name").value("Customer"));
     }
 
-    
-    
+    @Test
+    void testUpdatePasswordCustomerValidationError() throws Exception {
+        Long userId = 1L;
+        UserChangePasswordRequest request = new UserChangePasswordRequest();
+        request.setNewPassword("newPassword");
+        request.setConfirmPassword("differentPassword");
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        String requestJson = objectMapper.writeValueAsString(request);
+
+        mockMvc.perform(put("/api/auth/password/{userId}", userId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestJson))
+            .andExpect(status().isBadRequest());
+    }
+
     @Test
     void testGetCompany() throws Exception {
         Long companyId = 1L;
@@ -410,7 +490,24 @@ public class AuthControllerTest {
 
     @Test
     void testGetCompanyNotFound() throws Exception {
+        Long companyId = 1L;
+        when(userService.authorizeUser(Mockito.anyLong())).thenReturn(null);
+        when(companyService.findById(companyId)).thenThrow(new RuntimeException("Company not found"));
+        
+        Exception exception = assertThrows(Exception.class, () -> {
+            mockMvc.perform(get("/api/auth/companies/{companyId}", companyId))
+                .andReturn();
+        });
+        
+        Throwable rootCause = exception;
+        while (rootCause.getCause() != null) {
+            rootCause = rootCause.getCause();
+        }
+        
+        assertTrue(rootCause instanceof RuntimeException);
+        assertEquals("Company not found", rootCause.getMessage());
     }
+
 
     @Test
     void testUpdateCompany() throws Exception {
@@ -472,8 +569,23 @@ public class AuthControllerTest {
 
     @Test
     void testDeleteUserNotFound() throws Exception {
+        Long userId = 1L;
+        when(userService.authorizeUser(userId)).thenReturn(null);
+        doThrow(new RuntimeException("User not found")).when(userService).delete(userId);
+        
+        Exception exception = assertThrows(Exception.class, () -> {
+            mockMvc.perform(delete("/api/auth/{userId}", userId))
+                .andReturn();
+        });
+        
+        Throwable rootCause = exception;
+        while (rootCause.getCause() != null) {
+            rootCause = rootCause.getCause();
+        }
+        
+        assertTrue(rootCause instanceof RuntimeException);
+        assertEquals("User not found", rootCause.getMessage());
     }
-
 
     @Test
     void testGetCustomers() throws Exception {
@@ -551,6 +663,26 @@ public class AuthControllerTest {
                .andExpect(jsonPath("$.name").value("Customer A"));
     }
     
+    @Test
+    void testGetCustomerUnauthorized() throws Exception {
+        Long customerId = 1L;
+        doThrow(new RuntimeException("You can't access this data"))
+            .when(userService).authorizeUserOrAdmin(Mockito.eq(customerId), Mockito.eq("You can't access this data"));
+    
+        Exception exception = assertThrows(Exception.class, () -> {
+            mockMvc.perform(get("/api/auth/customers/{customerId}", customerId))
+                   .andReturn();
+        });
+    
+        Throwable rootCause = exception;
+        while (rootCause.getCause() != null) {
+            rootCause = rootCause.getCause();
+        }
+        assertTrue(rootCause instanceof RuntimeException);
+        assertEquals("You can't access this data", rootCause.getMessage());
+    }
+    
+
 
     @Test
     void testUpdateCustomerByAdmin() throws Exception {
@@ -757,6 +889,33 @@ public class AuthControllerTest {
     }
 
     @Test
-    void testDeleteAdminUserNotFound() throws Exception {}
+    void testDeleteAdminUserNotFound() throws Exception {
+        Long userId = 2L;
+        Admin admin = new Admin();
+        admin.setId(1L);
+        admin.setEmail("admin@example.com");
+        admin.setName("Admin User");
+        admin.setPassword("encodedPassword");
+        
+        Authentication auth = new UsernamePasswordAuthenticationToken(admin, null, List.of(new SimpleGrantedAuthority("ADMIN")));
+        SecurityContextHolder.getContext().setAuthentication(auth);
+        when(userService.findCurrentUser()).thenReturn(admin);
+        doThrow(new RuntimeException("User not found")).when(userService).delete(userId);
+        
+        Exception exception = assertThrows(Exception.class, () -> {
+            mockMvc.perform(delete("/api/auth/admin/users/{userId}", userId)
+                    .contentType(MediaType.APPLICATION_JSON))
+                    .andReturn();
+        });
+        
+        Throwable rootCause = exception;
+        while (rootCause.getCause() != null) {
+            rootCause = rootCause.getCause();
+        }
+        
+        assertTrue(rootCause instanceof RuntimeException);
+        assertEquals("User not found", rootCause.getMessage());
+    }
+
 
 }
