@@ -17,8 +17,6 @@ import com.caronte.caronte.admin.DTOs.CertificateResponseDTO;
 import com.caronte.caronte.admin.DTOs.MessageResponseDTO;
 import com.caronte.caronte.admin.DTOs.ObituaryResponseDTO;
 import com.caronte.caronte.admin.DTOs.ValidCertificateRequestDTO;
-import com.caronte.caronte.deathCertificate.DeathCertificate;
-import com.caronte.caronte.obituary.Obituary;
 
 import jakarta.validation.Valid;
 

@@ -11,12 +11,11 @@ import com.caronte.caronte.admin.Admin;
 import com.caronte.caronte.configuration.services.StripeService;
 import com.caronte.caronte.customer.Customer;
 import com.caronte.caronte.customer.CustomerRepository;
-import com.caronte.caronte.deathCertificate.DTOs.DeathCertificateRequestDTO;
 import com.caronte.caronte.deathCertificate.DeathCertificate;
 import com.caronte.caronte.deathCertificate.DeathCertificateService;
+import com.caronte.caronte.deathCertificate.DTOs.DeathCertificateRequestDTO;
 import com.caronte.caronte.imageTemplate.ImageTemplate;
 import com.caronte.caronte.imageTemplate.ImageTemplateRepository;
-import com.caronte.caronte.message.MessageRepository;
 import com.caronte.caronte.obituary.DTOs.ObituraryRequestDto;
 import com.caronte.caronte.receiver.Receiver;
 import com.caronte.caronte.receiver.ReceiverRepository;
@@ -36,13 +35,12 @@ public class ObituaryService {
     private final ReceiverRepository receiverRepository;
     private final DeathCertificateService deathCertificateService;
     private final MediaHandler mediaHandler;
-    private final MessageRepository messageRepository;
     private final UserService userService;
     private final StripeService stripeService;
 
     public ObituaryService(ObituaryRepository obituaryRepository, CustomerRepository customerRepository,
             ReceiverRepository receiverRepository, ImageTemplateRepository imageTemplateRepository,
-            DeathCertificateService deathCertificateService, MediaHandler mediaHandler, MessageRepository messageRepository,
+            DeathCertificateService deathCertificateService, MediaHandler mediaHandler,
             StripeService stripeService, UserService userService) {
         this.receiverRepository = receiverRepository;
         this.customerRepository = customerRepository;
@@ -50,7 +48,6 @@ public class ObituaryService {
         this.imageTemplateRepository = imageTemplateRepository;
         this.deathCertificateService = deathCertificateService;
         this.mediaHandler = mediaHandler;
-        this.messageRepository = messageRepository;
         this.stripeService = stripeService;
         this.userService = userService;
     }
