@@ -11,7 +11,7 @@ import lombok.Setter;
 @Setter
 public class ValidCertificateRequestDTO {
     
-    @JsonFormat(pattern = "dd/MM/yyyy")
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate deathDate;
     
     

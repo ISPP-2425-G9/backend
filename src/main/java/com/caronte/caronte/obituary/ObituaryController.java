@@ -33,8 +33,7 @@ public class ObituaryController {
     }
 
     @PostMapping("/create")
-    public ResponseEntity<String> createObituary(@RequestBody @Valid ObituraryRequestDto request,
-            Authentication authentication) {
+    public ResponseEntity<String> createObituary(@RequestBody @Valid ObituraryRequestDto request) {
         Long customerId = userService.findCurrentUserId();
         obituaryService.createObituaryWithReceivers(request, customerId);
         return ResponseEntity.ok("Obituary created successfully");
