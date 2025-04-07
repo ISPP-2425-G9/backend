@@ -1,8 +1,10 @@
 package com.caronte.caronte.message;
 
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
-import java.util.Optional;
 
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -11,7 +13,6 @@ import com.caronte.caronte.customer.CustomerRepository;
 import com.caronte.caronte.image.Image;
 import com.caronte.caronte.image.ImageRepository;
 import com.caronte.caronte.message.DTOs.MessageRequestDto;
-import com.caronte.caronte.message.DTOs.MessageRequestDto.RecipientDto;
 import com.caronte.caronte.receiver.Receiver;
 import com.caronte.caronte.receiver.ReceiverRepository;
 import com.caronte.caronte.receiver.ReceiverService;
@@ -27,102 +28,211 @@ public class MessageService {
     private final ReceiverRepository receiverRepository;
     private final ReceiverService receiverService;
     private final ImageRepository imageRepository;
-    private final MediaHandler mediaHandler;
+    MediaHandler mediaHandler;
+    PasswordEncoder passwordEncoder;
 
-    public MessageService(MessageRepository messageRepository, CustomerRepository customerRepository,
-            ReceiverService receiverService, ImageRepository imageRepository,
-            ReceiverRepository receiverRepository, MediaHandler mediaHandler) {
+    public MessageService(MessageRepository messageRepository,
+                          CustomerRepository customerRepository,
+                          ReceiverService receiverService,
+                          ImageRepository imageRepository,
+                          ReceiverRepository receiverRepository,
+                          MediaHandler mediaHandler,
+                          PasswordEncoder passwordEncoder) {
         this.imageRepository = imageRepository;
         this.messageRepository = messageRepository;
         this.customerRepository = customerRepository;
         this.receiverService = receiverService;
         this.receiverRepository = receiverRepository;
         this.mediaHandler = mediaHandler;
+        this.passwordEncoder = passwordEncoder;
+    }
+
+    public Message getMessageById(Long messageId) {
+            return messageRepository.findById(messageId)
+                .orElseThrow(() -> ResourceNotFound.of("Message", "id", messageId));
+    }
+
+    public MessageRequestDto getMessageRequestDtoByMessageId(Long customerId, Long messageId) {
+            Message message = getMessageById(messageId);
+            ResponseThrow.checkOrForbidden(message.hasCustomerWithId(customerId));
+            return convertToDto(message);
+    }
+
+    public MessageRequestDto getMessageRequestDtoByMessageId(Long messageId) {
+        Message message = getMessageById(messageId);
+        return convertToDto(message);
+    }
+    
+    public List<MessageRequestDto> getMessagesRequestDtoByCustomerId(Long customerId) {
+        List<Message> messages = messageRepository.findAllByCustomerId(customerId);
+        return messages.stream()
+                .map(this::convertToDto)
+                .toList();
     }
 
     @Transactional
     public Message createMessage(MessageRequestDto request, Long customerId) {
-        Customer customer = customerRepository.findById(customerId).orElseThrow(() -> ResourceNotFound.of("Customer"));
 
-        Message message = new Message(request, customer);
+        Customer customer = customerRepository.findById(customerId)
+                .orElseThrow(() -> ResourceNotFound.of("Customer", "id", customerId));
+
+        Message message = new Message();
+        message.setTitle(request.getTitle());
+        message.setBody(request.getBody());
+
+        String uniqueCode = generateUniqueRandomCode();
+        message.setCode(uniqueCode);
+
+        message.setIsLastWill(false);
+        message.setCustomer(customer);
+
         Message savedMessage = messageRepository.save(message);
 
-        List<Image> images = request.getCustomImages().stream()
-                .filter(customImage -> customImage != null && customImage.startsWith("data:image/"))
-                .map(customImage -> {
-                    String processedImageUrl = mediaHandler.uploadImageToCloudinary(customImage, "message");
-                    return new Image(processedImageUrl, message);
-                }).toList();
+        uploadNewImages(request.getCustomImages(), new ArrayList<>(), savedMessage);
 
-        imageRepository.saveAll(images);
-
-        List<Receiver> receivers = request.getRecipients().stream().map(r -> Receiver.parse(r, message)).toList();
-        receiverRepository.saveAll(receivers);
+        // This needs to be created from scratch because the relationship between receiver and message CANNOT BE UPDATED
+        // With the previous function, if you create two messages and you want to send them to the same person, one of 
+        // the two will not reach them
+        if (request.getRecipients() != null) {
+            for (MessageRequestDto.RecipientDto r : request.getRecipients()){
+                receiverService.saveReceiverByRecipientDto(r, savedMessage);
+            }
+        }
 
         return savedMessage;
     }
 
-    @Transactional(readOnly = true)
-    public List<Message> getMessagesByCustomerId(Long customerId) {
-        return messageRepository.findAllByCustomerId(customerId);
-    }
-
-    @Transactional(readOnly = true)
-    public Message getMessageById(Long message_id, Long customerId) {
-        return messageRepository.findById(message_id).orElseThrow(() -> ResourceNotFound.of("Message"));
-    }
-
     @Transactional
-    public Message updateMessage(Long messageId, MessageRequestDto request, Long customerId) {
-        Message message = messageRepository.findById(messageId).orElseThrow(() -> ResourceNotFound.of("Message"));
+    public Message updateMessage(Long message_id, MessageRequestDto request, Long customerId) {
+        Message message = this.getMessageById(message_id);
 
-        ResponseThrow.checkOrForbidden(message.hasCustomerWithId(customerId));
-
+        ResponseThrow.checkOrForbidden(message.hasCustomerWithId(customerId), "User not authorized to access this resource");
+    
         message.setTitle(request.getTitle());
         message.setBody(request.getBody());
+    
+        List<Image> existingImages = this.imageRepository.findAllByMessageId(message_id);
+        List<String> requestImageUrls = request.getCustomImages();
+    
+        existingImages = removeObsoleteImages(existingImages, requestImageUrls);
+    
+        uploadNewImages(requestImageUrls, existingImages, message);
 
-        List<Image> oldImages = this.imageRepository.findAllByMessageId(messageId);
-        oldImages.forEach(oldImage -> mediaHandler.deleteImageFromCloudinary(oldImage.getImageUrl()));
-        this.imageRepository.deleteAll(oldImages);
-
-        List<Image> newImages = request.getCustomImages().stream()
-            .filter(customImage -> customImage != null && customImage.startsWith("data:image/"))
-            .map(customImage -> {
-                String imageUrl = mediaHandler.uploadImageToCloudinary(customImage, "messages/");
-                return new Image(imageUrl, message);
-            }).toList();
-        imageRepository.saveAll(newImages);
-        
-        
-        for (RecipientDto recipient : request.getRecipients()) {
-            List<Receiver> receivers = receiverRepository.findByMessageId(messageId);
-            Optional<Receiver> existingReceiver = receivers.stream()
-                    .filter(receiver -> receiver.hasEqualEmailOrTelephone(recipient))
-                    .findFirst();
-        
-            if (existingReceiver.isPresent()) {
-                Receiver receiver = existingReceiver.get();
-                receiverService.updateMessageReceiver(receiver.getId(), recipient);
-            } else {
-                receiverService.saveMessageReceiver(recipient, message);
-            }
+        if (request.getRecipients() != null) {
+            updateRecipients(request, message);
         }
-        
-
+    
         return messageRepository.save(message);
     }
 
-    @Transactional
-    public void deleteMessage(Long messageId, Long customerId) {
-        Message message = messageRepository.findById(messageId).orElseThrow(() -> ResourceNotFound.of("Message"));
+    public void deleteMessage(Long message_id, Long customerId) {
+        Message message = this.getMessageById(message_id);
 
-        ResponseThrow.checkOrForbidden(message.hasCustomerWithId(customerId));
+        ResponseThrow.checkOrForbidden(message.hasCustomerWithId(customerId), "User not authorized to access this resource");
 
-        List<Image> images = this.imageRepository.findAllByMessageId(messageId);
-        images.forEach(image -> mediaHandler.deleteImageFromCloudinary(image.getImageUrl()));
-        this.imageRepository.deleteAll(images);
-
-        receiverRepository.findByMessageId(messageId).forEach(receiver -> receiverRepository.delete(receiver));
+        List<Image> images = this.imageRepository.findAllByMessageId(message_id);
+        for (Image image : images) {
+            mediaHandler.deleteImageFromCloudinary(image.getImageUrl());
+            this.imageRepository.delete(image);
+        }
+        receiverRepository.findByMessageId(message_id).forEach(receiver -> receiverRepository.delete(receiver));
         messageRepository.delete(message);
+    }
+    
+    private MessageRequestDto convertToDto(Message message) {
+        MessageRequestDto dto = new MessageRequestDto();
+        dto.setMessageId(message.getId());
+        dto.setTitle(message.getTitle());
+        dto.setBody(message.getBody());
+        dto.setIsLastWill(message.getIsLastWill());
+    
+        List<String> imageUrls = imageRepository.findAllByMessageId(message.getId()).stream()
+            .map(Image::getImageUrl)
+            .toList();
+        dto.setCustomImages(imageUrls);
+    
+        List<MessageRequestDto.RecipientDto> recipients = receiverRepository.findByMessageId(message.getId()).stream()
+            .map(this::convertToRecipientDto)
+            .toList();
+        dto.setRecipients(recipients);
+    
+        return dto;
+    }
+    
+    private MessageRequestDto.RecipientDto convertToRecipientDto(Receiver receiver) {
+        MessageRequestDto.RecipientDto recipientDto = new MessageRequestDto.RecipientDto();
+        recipientDto.setName(receiver.getName());
+        recipientDto.setTelephone(receiver.getTelephone());
+        recipientDto.setEmail(receiver.getEmail());
+        return recipientDto;
+    }
+
+    private void uploadNewImages(List<String> requestImageUrls, List<Image> existingImages, Message message) {
+        for (String customImage : requestImageUrls) {
+            if (existingImages.stream().anyMatch(i -> i.getImageUrl().equals(customImage))) {
+                continue;
+            }
+    
+            if (customImage != null && customImage.startsWith("data:image/")) {
+                String processedImageUrl = mediaHandler.uploadImageToCloudinary(
+                    customImage,
+                    message.getCustomer().getDni() + "/messages/" + message.getId() + "/"
+                );
+    
+                Image image = new Image();
+                image.setImageUrl(processedImageUrl);
+                image.setMessage(message);
+                imageRepository.save(image);
+            }
+        }
+    }
+
+    private void updateRecipients(MessageRequestDto request, Message message) {
+
+        for (Receiver receiver : receiverRepository.findByMessageId(message.getId())) {
+            //Si no existe en la request pero si en la base de datos se elimina
+            if (request.getRecipients().stream().noneMatch(r -> r.getTelephone().equals(receiver.getTelephone()) && r.getEmail().equals(receiver.getEmail()))) {
+                receiverRepository.delete(receiver);
+            }
+        }
+        for (MessageRequestDto.RecipientDto r : request.getRecipients()) { 
+            // A recipient exists if it has the same phone number and email address
+            // If it exists, it is updated
+            // If it doesn't exist, a new one is created
+            Receiver receiverExistent = receiverRepository.findByMessageIdAndTelephoneOrEmail(message.getId(), r.getTelephone(), r.getEmail()).orElse(null);
+            if (receiverExistent == null) receiverService.saveReceiverByRecipientDto(r, message);
+            else receiverService.updateMessageReceiver(receiverExistent.getId(),r);
+        }
+    }
+
+    private List<Image> removeObsoleteImages(List<Image> existingImages, List<String> requestImageUrls) {
+        Iterator<Image> iterator = existingImages.iterator();
+        while (iterator.hasNext()) {
+            Image image = iterator.next();
+            if (!requestImageUrls.contains(image.getImageUrl())) {
+                mediaHandler.deleteImageFromCloudinary(image.getImageUrl());
+                imageRepository.delete(image);
+                iterator.remove();
+            }
+        }
+        return existingImages;
+    }
+
+    private String generateUniqueRandomCode() {
+        String code;
+        int randomNumber = (int)(Math.random() * 100_000); // 00000 - 99999
+        code = String.format("%05d", randomNumber);
+        code = passwordEncoder.encode(code);
+        return code;
+    }
+
+    public boolean validateMessageCode(Long messageId, String code) {
+        Message message = messageRepository.findById(messageId).orElseThrow(() -> ResourceNotFound.of("Message not found"));
+        return passwordEncoder.matches(code, message.getCode());
+    }
+
+    public boolean isOwner(Long messageId, Long customerId) {
+        Message message = messageRepository.findById(messageId).orElseThrow(() -> ResourceNotFound.of("Message not found"));
+        return message.getCustomer().getId().equals(customerId);
     }
 }

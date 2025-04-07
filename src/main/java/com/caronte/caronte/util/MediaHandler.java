@@ -1,4 +1,3 @@
-
 package com.caronte.caronte.util;
 
 import java.awt.image.BufferedImage;
@@ -12,7 +11,9 @@ import java.util.Map;
 import javax.imageio.ImageIO;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
@@ -97,6 +98,9 @@ public class MediaHandler {
         BufferedImage image = null;
         try {
             byte[] imageBytes = decoder(base64String);
+            if (imageBytes.length > 5 * 1024 * 1024) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Image size exceeds 5 MB");
+            }
             ByteArrayInputStream bis = new ByteArrayInputStream(imageBytes);
             return ImageIO.read(bis);
         } catch (Exception e) {

@@ -61,5 +61,13 @@ public class ReceiverService {
         return receiverRepository.save(receiver);
     }
     
-
+    @Transactional
+    public Receiver saveMessageReceiver(String name, String telephone, String email, Message message) {
+        Receiver receiver = new Receiver();
+        receiver.setName(name);
+        receiver.setTelephone(telephone);
+        receiver.setEmail(email);
+        receiver.setMessage(message);
+        return receiverRepository.save(receiver);
+    }
 }

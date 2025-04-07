@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -17,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.caronte.caronte.obituary.DTOs.ObituraryRequestDto;
 import com.caronte.caronte.user.UserService;
+import com.stripe.exception.StripeException;
 
 import jakarta.validation.Valid;
 
@@ -33,8 +33,7 @@ public class ObituaryController {
     }
 
     @PostMapping("/create")
-    public ResponseEntity<String> createObituary(@RequestBody @Valid ObituraryRequestDto request,
-            Authentication authentication) {
+    public ResponseEntity<String> createObituary(@RequestBody @Valid ObituraryRequestDto request) throws StripeException {
         Long customerId = userService.findCurrentUserId();
         obituaryService.createObituaryWithReceivers(request, customerId);
         return ResponseEntity.ok("Obituary created successfully");
@@ -49,7 +48,7 @@ public class ObituaryController {
     }
 
     @DeleteMapping("/delete/{obituaryId}")
-    public ResponseEntity<String> deleteObituary(@PathVariable Long obituaryId, Authentication authentication) {
+    public ResponseEntity<String> deleteObituary(@PathVariable Long obituaryId) {
         Long customerId = userService.findCurrentUserId();
         obituaryService.deleteObituaryByCustomer(customerId, obituaryId);
         return ResponseEntity.ok("Obituary deleted successfully");
