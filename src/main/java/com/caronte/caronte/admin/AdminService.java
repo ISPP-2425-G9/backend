@@ -67,10 +67,10 @@ public class AdminService {
         userService.authorizeAdmin("User is not admin");
         List<DeathCertificate> pendingCertificates = deathCertificateRepository.getAllCertificatesByIsVerified(false);
         List<CertificateResponseDTO> response = new ArrayList();
-        String dni = "";
-        String name = "";
 
         for (DeathCertificate certificate : pendingCertificates) {
+            String dni = "";
+            String name = "";
 
             CertificateResponseDTO certificateResponse = new CertificateResponseDTO();
             certificateResponse.setId(certificate.getId());

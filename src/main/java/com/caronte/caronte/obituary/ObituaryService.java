@@ -205,10 +205,12 @@ public class ObituaryService {
         List<Message> messages = messageRepository.findAllByDeathCertificateId(deathCertificateId);
         Customer customer = null;
         if(!messages.isEmpty()) customer = messages.get(0).getCustomer();
-        for (Obituary obituary : obituaries) {
-            if (obituary.getIsMine()) {
-                customer = obituary.getCustomer();
-                break; 
+        else{
+            for (Obituary obituary : obituaries) {
+                if (obituary.getIsMine()) {
+                    customer = obituary.getCustomer();
+                    break; 
+                }
             }
         }
         return customer;
