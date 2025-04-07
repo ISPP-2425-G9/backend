@@ -11,6 +11,8 @@ import com.caronte.caronte.customer.Customer;
 import com.caronte.caronte.customer.CustomerRepository;
 import com.caronte.caronte.deathCertificate.DTOs.DeathCertificateRequestDTO;
 import com.caronte.caronte.deathCertificate.DTOs.DeathCertificateWithObituaryDniDTO;
+import com.caronte.caronte.message.Message;
+import com.caronte.caronte.message.MessageRepository;
 import com.caronte.caronte.obituary.Obituary;
 import com.caronte.caronte.obituary.ObituaryRepository;
 import com.caronte.caronte.util.MediaHandler;
@@ -25,25 +27,35 @@ public class DeathCertificateService {
     ObituaryRepository obituaryRepository;
     CustomerRepository customerRepository;
     MediaHandler mediaHandler;
+    MessageRepository messageRepository;
 
     public DeathCertificateService(DeathCertificateRepository deathCertificateRepository, 
         ObituaryRepository obituaryRepository, CustomerRepository customerRepository,
-        MediaHandler mediaHandler) {
+        MediaHandler mediaHandler, MessageRepository messageRepository) {
+        this.messageRepository = messageRepository;
         this.deathCertificateRepository = deathCertificateRepository;
         this.obituaryRepository = obituaryRepository;
         this.customerRepository = customerRepository;
         this.mediaHandler = mediaHandler;
     }
-
-
+    
     @Transactional
     public DeathCertificate createDeathCertificateAndRelations(DeathCertificateRequestDTO request, Long customerId) {
         if(customerId != null) 
             checkDeathCertificate(request, customerId);
         DeathCertificate certificate = createDeathCertificate(request);
         List<Obituary> obituaries = obituaryRepository.findByCustomerDni(request.getDni());
-        obituaries.forEach(obituary -> obituary.setDeathCertificate(certificate));
+        obituaries.forEach(obituary -> {
+            if (obituary.getIsMine()) {
+                obituary.setDeathCertificate(certificate);
+            }
+        });
         obituaryRepository.saveAll(obituaries);
+        Customer customer = customerRepository.findByDni(request.getDni())
+                .orElseThrow(() -> ResourceNotFound.of("Customer"));
+        List<Message> messages = messageRepository.findAllByCustomerId(customer.getId());
+        messages.forEach(message -> message.setDeathCertificate(certificate));
+        messageRepository.saveAll(messages);
         return certificate;
     }
 
@@ -77,7 +89,7 @@ public class DeathCertificateService {
             .filter(file -> file.startsWith("data:image/"))
             .orElseThrow(() -> new IllegalArgumentException("The death certificate is not a valid image"));
         certificate = mediaHandler.uploadImageToCloudinary(certificate, "certificates");
-        DeathCertificate deathCertificate = DeathCertificate.newDeathCertificate(certificate);
+        DeathCertificate deathCertificate = DeathCertificate.newDeathCertificate(certificate, request.getDni());
         deathCertificateRepository.save(deathCertificate);
         return deathCertificate; 
     }

@@ -119,7 +119,16 @@
 			<artifactId>stripe-java</artifactId>
 			<version>28.4.0</version>
 		</dependency>
-
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-mail</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.itextpdf</groupId>
+			<artifactId>itext7-core</artifactId>
+			<version>8.0.0</version>
+			<type>pom</type>
+		</dependency>
 	</dependencies>
 
 	<build>

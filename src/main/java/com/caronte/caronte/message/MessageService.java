@@ -16,6 +16,8 @@ import com.caronte.caronte.message.DTOs.MessageRequestDto;
 import com.caronte.caronte.receiver.Receiver;
 import com.caronte.caronte.receiver.ReceiverRepository;
 import com.caronte.caronte.receiver.ReceiverService;
+import com.caronte.caronte.user.UserService;
+import com.caronte.caronte.util.AESCipher;
 import com.caronte.caronte.util.MediaHandler;
 import com.caronte.caronte.util.exceptions.ResourceNotFound;
 import com.caronte.caronte.util.exceptions.ResponseThrow;
@@ -29,7 +31,8 @@ public class MessageService {
     private final ReceiverService receiverService;
     private final ImageRepository imageRepository;
     MediaHandler mediaHandler;
-    PasswordEncoder passwordEncoder;
+    private final AESCipher aesCipher;
+    private final UserService userService;
 
     public MessageService(MessageRepository messageRepository,
                           CustomerRepository customerRepository,
@@ -37,14 +40,16 @@ public class MessageService {
                           ImageRepository imageRepository,
                           ReceiverRepository receiverRepository,
                           MediaHandler mediaHandler,
-                          PasswordEncoder passwordEncoder) {
+                          AESCipher aesCipher, 
+                          UserService userService) {
         this.imageRepository = imageRepository;
         this.messageRepository = messageRepository;
         this.customerRepository = customerRepository;
         this.receiverService = receiverService;
         this.receiverRepository = receiverRepository;
         this.mediaHandler = mediaHandler;
-        this.passwordEncoder = passwordEncoder;
+        this.aesCipher = aesCipher;
+        this.userService = userService;
     }
 
     public Message getMessageById(Long messageId) {
@@ -80,7 +85,7 @@ public class MessageService {
         message.setTitle(request.getTitle());
         message.setBody(request.getBody());
 
-        String uniqueCode = generateUniqueRandomCode();
+        String uniqueCode = generateUniqueRandomCode(); // AQUIIII
         message.setCode(uniqueCode);
 
         message.setIsLastWill(false);
@@ -127,7 +132,7 @@ public class MessageService {
     public void deleteMessage(Long message_id, Long customerId) {
         Message message = this.getMessageById(message_id);
 
-        ResponseThrow.checkOrForbidden(message.hasCustomerWithId(customerId), "User not authorized to access this resource");
+        userService.authorizeUserOrAdmin(customerId, "User not authorized to access this resource");
 
         List<Image> images = this.imageRepository.findAllByMessageId(message_id);
         for (Image image : images) {
@@ -221,14 +226,17 @@ public class MessageService {
         String code;
         int randomNumber = (int)(Math.random() * 100_000); // 00000 - 99999
         code = String.format("%05d", randomNumber);
-        code = passwordEncoder.encode(code);
+        code = aesCipher.encrypt(code);
         return code;
     }
 
-    public boolean validateMessageCode(Long messageId, String code) {
-        Message message = messageRepository.findById(messageId).orElseThrow(() -> ResourceNotFound.of("Message not found"));
-        return passwordEncoder.matches(code, message.getCode());
-    }
+    public boolean validateMessageCode(Long messageId, String inputCode) {
+    Message message = messageRepository.findById(messageId)
+            .orElseThrow(() -> ResourceNotFound.of("Message not found"));
+    String decryptedCode = aesCipher.decrypt(message.getCode());
+    return inputCode.equals(decryptedCode);
+}
+
 
     public boolean isOwner(Long messageId, Long customerId) {
         Message message = messageRepository.findById(messageId).orElseThrow(() -> ResourceNotFound.of("Message not found"));
