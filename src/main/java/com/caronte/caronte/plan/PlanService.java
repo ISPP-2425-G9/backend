@@ -3,9 +3,7 @@ package com.caronte.caronte.plan;
 
 import org.springframework.stereotype.Service;
 
-import com.caronte.caronte.plan.DTOs.PlanResponse;
 import com.caronte.caronte.user.User;
-import com.caronte.caronte.user.UserRepository;
 import com.stripe.exception.StripeException;
 import com.stripe.model.Subscription;
 
@@ -15,13 +13,9 @@ public class PlanService {
 
     private PlanRepository planRepository;
 
-    private UserRepository userRepository;
-
-    public PlanService(PlanRepository planRepository, UserRepository userRepository) {
+    public PlanService(PlanRepository planRepository) {
         this.planRepository = planRepository;
-        this.userRepository = userRepository;
     }
-
 
     public Plan changePlan(User user, PlanType planType, String subscriptionId) throws StripeException {
         Plan plan = user.getPlan();
@@ -35,10 +29,4 @@ public class PlanService {
         return planRepository.save(plan);
     }
 
-    public PlanResponse getPlanInfo(Long userId) throws StripeException{
-        User user = userRepository.findById(userId).orElseThrow();
-        Plan plan = user.getPlan();
-        PlanResponse planResponse = new PlanResponse(plan);
-        return planResponse;
-    }
 }

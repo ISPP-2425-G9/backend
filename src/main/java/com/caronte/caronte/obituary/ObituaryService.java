@@ -8,6 +8,7 @@ import java.util.Optional;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.caronte.caronte.configuration.services.StripeService;
 import com.caronte.caronte.customer.Customer;
 import com.caronte.caronte.customer.CustomerRepository;
 import com.caronte.caronte.deathCertificate.DeathCertificate;
@@ -26,6 +27,7 @@ import com.caronte.caronte.user.UserService;
 import com.caronte.caronte.util.MediaHandler;
 import com.caronte.caronte.util.exceptions.ResourceNotFound;
 import com.caronte.caronte.util.exceptions.ResponseThrow;
+import com.stripe.exception.StripeException;
 
 @Service
 public class ObituaryService {
@@ -40,11 +42,13 @@ public class ObituaryService {
     private final MediaHandler mediaHandler;
     private final MessageRepository messageRepository;
     private final UserService userService;
+    private final StripeService stripeService;
 
     public ObituaryService(ObituaryRepository obituaryRepository, CustomerRepository customerRepository,
             ReceiverRepository receiverRepository, ImageTemplateRepository imageTemplateRepository,
             DeathCertificateService deathCertificateService, MediaHandler mediaHandler,
-            ReceiverService receiverService, MessageRepository messageRepository, UserService userService) {
+            ReceiverService receiverService, MessageRepository messageRepository, UserService userService,
+            StripeService stripeService) {
         this.receiverRepository = receiverRepository;
         this.customerRepository = customerRepository;
         this.obituaryRepository = obituaryRepository;
@@ -53,8 +57,9 @@ public class ObituaryService {
         this.mediaHandler = mediaHandler;
         this.receiverService = receiverService;
         this.messageRepository = messageRepository;
+        this.stripeService = stripeService;
         this.userService = userService;
-        }
+    }
 
     @Transactional(readOnly = true)
     public Obituary findById(Long id) {
@@ -88,7 +93,7 @@ public class ObituaryService {
     }
 
     @Transactional
-    public Obituary createObituaryWithReceivers(ObituraryRequestDto request, Long customerId) {
+    public Obituary createObituaryWithReceivers(ObituraryRequestDto request, Long customerId) throws StripeException {
         Customer customer = customerRepository.findById(customerId).orElseThrow(() -> ResourceNotFound.of("Customer"));
 
         ImageTemplate imageTemplate = imageTemplateRepository.findById(request.getImageTemplate_id())
@@ -109,6 +114,13 @@ public class ObituaryService {
         request.setDefaultWordColorIfNull();
 
         Obituary obituary = saveObituary(request, customImageUrl, customer, imageTemplate, deathCertificate);
+
+        // After the obituary is created, payment is made. If there is an error, a rollback will be made.
+        if(!obituary.getIsMine()){
+            ResponseThrow.checkOrBadRequest(Objects.nonNull(request.getPaymentMethodId()), 
+            "When you are creating an obituary for another person, you must enter a paymentMethodId in the body");
+            this.stripeService.pay(request.getPaymentMethodId(), customer.getEmail());
+        }
 
         List<ObituraryRequestDto.ContactDto> contacts = request.getContacts();
         List<Receiver> receivers = contacts.stream().map(contactDto -> Receiver.parse(contactDto, obituary)).toList();
