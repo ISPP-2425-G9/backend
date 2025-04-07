@@ -41,7 +41,7 @@ public class AdminService {
     private final ImageRepository imageRepository;
     private final ReceiverService receiverService;
     private final ReceiverRepository receiverRepository;
-    private final CustomerService customerService;
+    private final CustomerRepository customerRepository;
 
 
     public AdminService(DeathCertificateRepository deathCertificateRepository, 
@@ -50,7 +50,7 @@ public class AdminService {
         MessageRepository messageRepository,
         ImageRepository imageRepository,
         ReceiverService receiverService,
-        ReceiverRepository receiverRepository,
+        ReceiverRepository receiverRepository, 
         CustomerService customerService) {
 
         this.receiverRepository = receiverRepository;
@@ -61,7 +61,7 @@ public class AdminService {
         this.deathCertificateRepository = deathCertificateRepository;      
         this.userService = userService;
         this.obituaryService = obituaryService;
-        this.customerService = customerService;
+        this.customerRepository = customerRepository;
     }
 
 
@@ -78,7 +78,7 @@ public class AdminService {
             CertificateResponseDTO certificateResponse = new CertificateResponseDTO();
             certificateResponse.setId(certificate.getId());
             certificateResponse.setCertificateUrl(certificate.getUrl());
-            Customer customer = customerService.findByDni(certificate.getDni());
+            Customer customer = customerRepository.findByDni(certificate.getDni()).orElse(null);
             if(customer != null){
                 dni = customer.getDni();
                 name = customer.getName();
