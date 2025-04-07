@@ -7,6 +7,7 @@ import java.util.Optional;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.caronte.caronte.admin.Admin;
 import com.caronte.caronte.configuration.services.StripeService;
 import com.caronte.caronte.customer.Customer;
 import com.caronte.caronte.customer.CustomerRepository;
@@ -18,6 +19,8 @@ import com.caronte.caronte.imageTemplate.ImageTemplateRepository;
 import com.caronte.caronte.obituary.DTOs.ObituraryRequestDto;
 import com.caronte.caronte.receiver.Receiver;
 import com.caronte.caronte.receiver.ReceiverRepository;
+import com.caronte.caronte.user.User;
+import com.caronte.caronte.user.UserService;
 import com.caronte.caronte.util.MediaHandler;
 import com.caronte.caronte.util.exceptions.ResourceNotFound;
 import com.caronte.caronte.util.exceptions.ResponseThrow;
@@ -33,11 +36,12 @@ public class ObituaryService {
     private final DeathCertificateService deathCertificateService;
     private final MediaHandler mediaHandler;
     private final StripeService stripeService;
+    private final UserService userService;
 
     public ObituaryService(ObituaryRepository obituaryRepository, CustomerRepository customerRepository, 
             ReceiverRepository receiverRepository, ImageTemplateRepository imageTemplateRepository,
             DeathCertificateService deathCertificateService, MediaHandler mediaHandler, 
-            StripeService stripeService) {
+            StripeService stripeService, UserService userService) {
         this.receiverRepository = receiverRepository;
         this.customerRepository = customerRepository;
         this.obituaryRepository = obituaryRepository;
@@ -45,6 +49,7 @@ public class ObituaryService {
         this.deathCertificateService = deathCertificateService;
         this.mediaHandler = mediaHandler;
         this.stripeService = stripeService;
+        this.userService = userService;
     }
 
     
@@ -159,7 +164,8 @@ public class ObituaryService {
     @Transactional
     public void deleteObituaryByCustomer(Long customerId, Long obituaryId) {
         Obituary obituary = findById(obituaryId);
-        ResponseThrow.checkOrForbidden(obituary.hasCustomerId(customerId), "You are not allowed to delete this obituary");
+        User user = userService.findCurrentUser();
+        ResponseThrow.checkOrForbidden(obituary.hasCustomerId(customerId) || user instanceof Admin, "You are not allowed to delete this obituary");
         obituaryRepository.deleteById(obituaryId);
     }
 

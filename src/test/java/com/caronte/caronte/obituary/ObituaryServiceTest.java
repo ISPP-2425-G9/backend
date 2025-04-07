@@ -31,6 +31,7 @@ import com.caronte.caronte.obituary.DTOs.ObituraryRequestDto.ContactDto;
 import com.caronte.caronte.receiver.Receiver;
 import com.caronte.caronte.receiver.ReceiverRepository;
 import com.caronte.caronte.receiver.ReceiverService;
+import com.caronte.caronte.user.UserService;
 import com.caronte.caronte.util.MediaHandler;
 import com.caronte.caronte.util.exceptions.ResourceNotFound;
 import com.stripe.exception.StripeException;
@@ -58,6 +59,9 @@ public class ObituaryServiceTest {
 
     @MockitoBean
     private StripeService stripeService;
+
+    @MockitoBean
+    private UserService userService;
 
     @MockitoBean
     private ReceiverService receiverService; 
@@ -470,6 +474,7 @@ public class ObituaryServiceTest {
         Long customerId = customer.getId();
 
         when(obituaryRepository.findById(obituaryId)).thenReturn(Optional.of(obituary));
+        when(userService.findCurrentUser()).thenReturn(customer);
 
         obituaryService.deleteObituaryByCustomer(customerId, obituaryId);
 
@@ -480,9 +485,10 @@ public class ObituaryServiceTest {
     public void testDeleteObituaryByCustomer_CustomerNotMatch() {
         Long obituaryId = obituary.getId();
         Long customerId = 99L;
-
+        Customer customer = new Customer();
+        customer.setId(customerId);
         when(obituaryRepository.findById(obituaryId)).thenReturn(Optional.of(obituary));
-
+        when(userService.findCurrentUser()).thenReturn(customer);
         ResponseStatusException exception = assertThrows(ResponseStatusException.class,
                 () -> obituaryService.deleteObituaryByCustomer(customerId, obituaryId));
         assertEquals("You are not allowed to delete this obituary", exception.getReason());
