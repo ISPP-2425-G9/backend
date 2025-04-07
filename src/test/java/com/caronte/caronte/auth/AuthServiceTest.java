@@ -1,12 +1,9 @@
 package com.caronte.caronte.auth;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 import java.util.Optional;
-import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -15,15 +12,19 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.BeanPropertyBindingResult;
+import org.springframework.validation.BindingResult;
 
 import com.caronte.caronte.auth.payload.response.RegisterRequestCompany;
 import com.caronte.caronte.auth.payload.response.RegisterRequestCustomer;
 import com.caronte.caronte.company.Company;
 import com.caronte.caronte.company.CompanyRepository;
+import com.caronte.caronte.company.CompanyType;
 import com.caronte.caronte.customer.Customer;
 import com.caronte.caronte.customer.CustomerRepository;
 import com.caronte.caronte.user.User;
 import com.caronte.caronte.user.UserRepository;
+import com.caronte.caronte.util.ErrorHandler;
 
 class AuthServiceTest {
 
@@ -60,53 +61,61 @@ class AuthServiceTest {
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
+
+        // Configurar mocks de CustomerRequest
+        when(mockCustomerRequest.getName()).thenReturn("John Doe");
+        when(mockCustomerRequest.getEmail()).thenReturn("john.doe@example.com");
+        when(mockCustomerRequest.getPassword1()).thenReturn("password123");
+        when(mockCustomerRequest.getPassword2()).thenReturn("password123");
+        when(mockCustomerRequest.getTelephone()).thenReturn("666777888");
+        when(mockCustomerRequest.getDni()).thenReturn("12345678Z");
+
+        // Configurar mocks de CompanyRequest
+        when(mockCompanyRequest.getName()).thenReturn("Company 1");
+        when(mockCompanyRequest.getEmail()).thenReturn("company@gmail.com");
+        when(mockCompanyRequest.getPassword1()).thenReturn("1234");
+        when(mockCompanyRequest.getPassword2()).thenReturn("1234");
+        when(mockCompanyRequest.getTelephone()).thenReturn("123123123");
+        when(mockCompanyRequest.getAddress()).thenReturn("Av. Reina Mercedes");
+        when(mockCompanyRequest.getCity()).thenReturn("Sevilla");
+        when(mockCompanyRequest.getZipCode()).thenReturn("12345");
+        when(mockCompanyRequest.getNif()).thenReturn("A12345678");
+        when(mockCompanyRequest.getImageUrl()).thenReturn("http://company.png");
+        when(mockCompanyRequest.getDescription()).thenReturn("Descripcion company");
+        when(mockCompanyRequest.getCompanyType()).thenReturn(CompanyType.FUNERARIA);
     }
 
-    static Stream<RegisterRequestCustomer> provideValidCustomerRequests() {
-        return Stream.of(
-            new RegisterRequestCustomer("test1@example.com", "password", "password", "12345678A"),
-            new RegisterRequestCustomer("test2@example.com", "securePass123", "securePass123", "87654321B")
-        );
+    @Test
+    void validateAndBuildCustomer_ValidData_ReturnsCustomer() {
+        BindingResult bindingResult = new BeanPropertyBindingResult(mockCustomerRequest, "mockCustomerRequest");
+        ErrorHandler errors = ErrorHandler.catchError(bindingResult);
+
+        when(userRepository.existsByEmail(mockCustomerRequest.getEmail())).thenReturn(false);
+        when(customerRepository.existsByDni(mockCustomerRequest.getDni())).thenReturn(false);
+        when(passwordEncoder.encode(mockCustomerRequest.getPassword1())).thenReturn("encodedPassword");
+        when(mockCustomerRequest.parse(passwordEncoder)).thenReturn(mockCustomer);
+
+        Customer customer = authService.validateAndBuildCustomer(mockCustomerRequest, errors);
+
+        assertNotNull(customer);
+        assertTrue(errors.getErrors().isEmpty());
     }
 
-    static Stream<RegisterRequestCompany> provideValidCompanyRequests() {
-        return Stream.of(
-            new RegisterRequestCompany("company1@example.com", "password", "password", "B12345678"),
-            new RegisterRequestCompany("company2@example.com", "securePass456", "securePass456", "C87654321")
-        );
+    @Test
+    void validateAndBuildCompany_ValidData_ReturnsCompany() {
+        BindingResult bindingResult = new BeanPropertyBindingResult(mockCompanyRequest, "mockCompanyRequest");
+        ErrorHandler errors = ErrorHandler.catchError(bindingResult);
+
+        when(userRepository.existsByEmail(mockCompanyRequest.getEmail())).thenReturn(false);
+        when(companyRepository.existsByNif(mockCompanyRequest.getNif())).thenReturn(false);
+        when(passwordEncoder.encode(mockCompanyRequest.getPassword1())).thenReturn("encodedPassword");
+        when(mockCompanyRequest.parse(passwordEncoder)).thenReturn(mockCompany);
+
+        Company company = authService.validateAndBuildCompany(mockCompanyRequest, errors);
+
+        assertNotNull(company);
+        assertTrue(errors.getErrors().isEmpty());
     }
-
-    // @ParameterizedTest
-    // @MethodSource("provideValidCustomerRequests")
-    // void validateAndBuildCustomer_ValidData_ReturnsCustomer(RegisterRequestCustomer request) {
-    //     ErrorHandler errors = new ErrorHandler();
-
-    //     when(userRepository.existsByEmail(request.getEmail())).thenReturn(false);
-    //     when(customerRepository.existsByDni(request.getDni())).thenReturn(false);
-    //     when(passwordEncoder.encode(request.getPassword1())).thenReturn("encodedPassword");
-    //     when(request.parse(passwordEncoder)).thenReturn(mockCustomer);
-
-    //     Customer customer = authService.validateAndBuildCustomer(request, errors);
-
-    //     assertNotNull(customer);
-    //     assertTrue(errors.getErrors().isEmpty());
-    // }
-
-    // @ParameterizedTest
-    // @MethodSource("provideValidCompanyRequests")
-    // void validateAndBuildCompany_ValidData_ReturnsCompany(RegisterRequestCompany request) {
-    //     ErrorHandler errors = new ErrorHandler();
-
-    //     when(userRepository.existsByEmail(request.getEmail())).thenReturn(false);
-    //     when(companyRepository.existsByNif(request.getNif())).thenReturn(false);
-    //     when(passwordEncoder.encode(request.getPassword1())).thenReturn("encodedPassword");
-    //     when(request.parse(passwordEncoder)).thenReturn(mockCompany);
-
-    //     Company company = authService.validateAndBuildCompany(request, errors);
-
-    //     assertNotNull(company);
-    //     assertTrue(errors.getErrors().isEmpty());
-    // }
 
     @Test
     @Transactional

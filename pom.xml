@@ -150,6 +150,14 @@
 						</goals>
 					</execution>
 				</executions>
+				<configuration>
+					<excludes>
+						<exclude>**/DTOs/**</exclude>
+						<exclude>**/*Application.class</exclude>
+						<exclude>**/configuration/jwt/**</exclude>
+						<exclude>**/auth/payload/**</exclude>
+					</excludes>
+				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>

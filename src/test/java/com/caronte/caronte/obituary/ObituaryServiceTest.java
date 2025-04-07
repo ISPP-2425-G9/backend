@@ -1,17 +1,8 @@
 package com.caronte.caronte.obituary;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -48,7 +39,7 @@ public class ObituaryServiceTest {
     @MockitoBean
     private CustomerRepository customerRepository;
 
-    @Autowired
+    @MockitoBean
     private ImageTemplateService imageTemplateService;
 
     @Autowired
@@ -145,7 +136,7 @@ public class ObituaryServiceTest {
         when(obituaryRepository.save(any(Obituary.class))).thenReturn(obituary);
         Obituary obituary_test = obituaryService.createObituaryWithReceivers(requestDto, customer.getId());
 
-        when(receiverService.saveObituaryReceiver(eq(null), eq(obituary_test))).thenReturn(null);
+        when(receiverService.saveObituaryReceiver(eq(contact1), eq(obituary_test))).thenReturn(null);
 
         verify(customerRepository).findById(1L);
         verify(imageTemplateService).findById(1L);
@@ -319,13 +310,16 @@ public class ObituaryServiceTest {
 
     @Test
     public void testCreateObituaryWithReceivers_ImageTemplateNotFound() {
+        // Preparar el mock
         when(customerRepository.findById(1L)).thenReturn(Optional.of(customer));
-        when(imageTemplateService.findById(1L)).thenThrow(new RuntimeException("Image template not found"));
+        when(imageTemplateService.findById(1L)).thenThrow(ResourceNotFound.of("Image template"));
 
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+        // Ejecutar el test y capturar la excepción
+        RuntimeException exception = assertThrows(ResourceNotFound.class, () -> {
             obituaryService.createObituaryWithReceivers(requestDto, 1L);
         });
 
+        // Verificar que el mensaje de la excepción sea el esperado
         assertEquals("Image template not found", exception.getMessage());
     }
 

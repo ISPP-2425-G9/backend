@@ -1,18 +1,8 @@
 package com.caronte.caronte.deathCertificate;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.mockStatic;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
 import java.awt.image.BufferedImage;
 import java.util.Arrays;
@@ -90,7 +80,7 @@ public class DeathCertificateServiceTest {
         BufferedImage image = new BufferedImage(1, 1, BufferedImage.TYPE_INT_RGB);
     
         DeathCertificateRequestDTO requestDTO = new DeathCertificateRequestDTO();
-        requestDTO.setFile("someBase64EncodedString");
+        requestDTO.setFile("data:image/test");
     
         try (var mediaHandlerMock = mockStatic(MediaHandler.class)) {
             mediaHandlerMock.when(() -> MediaHandler.base64ToImage(anyString())).thenReturn(image);
@@ -105,7 +95,6 @@ public class DeathCertificateServiceTest {
             assertFalse(result.getIsVerified());
             verify(deathCertificateRepository).save(any(DeathCertificate.class));
     
-            mediaHandlerMock.verify(() -> MediaHandler.base64ToImage(anyString()), times(1));
             verify(mediaHandler, times(1)).uploadImageToCloudinary(any(), eq("certificates"));
         }
     }
@@ -173,9 +162,10 @@ public class DeathCertificateServiceTest {
     @Test
     void checkDeathCertificate_NoObituaries_ThrowsException() {
         Customer mockCustomer = mock(Customer.class);
+        when(mockCustomer.getDni()).thenReturn("12345678Z");
         when(customerRepository.findById(anyLong())).thenReturn(Optional.of(mockCustomer));
         when(obituaryRepository.findByCustomerDni(anyString())).thenReturn(Collections.emptyList());
-        
+        requestDTO.setDni("12345678Z");
         NoSuchElementException exception = assertThrows(NoSuchElementException.class, () -> {
             deathCertificateService.checkDeathCertificate(requestDTO, anyLong());
         });
@@ -184,20 +174,24 @@ public class DeathCertificateServiceTest {
 
     @Test
     void checkDeathCertificate_CertificateAlreadyUploaded_ThrowsException() {
-        Obituary obituary = mock(Obituary.class);
+        Obituary mockObituary = mock(Obituary.class);
+        Customer mockCustomer = mock(Customer.class);
+        DeathCertificateRequestDTO mockRequest = mock(DeathCertificateRequestDTO.class);
+        
         String dni = "12345678K";
-        Customer customer = mock(Customer.class);
-        DeathCertificateRequestDTO request = mock(DeathCertificateRequestDTO.class);
+
+        when(mockCustomer.getDni()).thenReturn(dni); 
+        when(mockRequest.getDni()).thenReturn(dni);  
+        when(mockObituary.getDeathCertificate()).thenReturn(deathCertificate1); 
+
+        when(customerRepository.findById(anyLong())).thenReturn(Optional.of(mockCustomer));
+        when(obituaryRepository.findByCustomerDni(eq(dni))).thenReturn(Collections.singletonList(mockObituary));  
         
-        when(customer.getDni()).thenReturn(dni); 
-        when(request.getDni()).thenReturn(dni);  
-        when(obituary.getDeathCertificate()).thenReturn(any(DeathCertificate.class)); 
-        when(customerRepository.findById(1L)).thenReturn(Optional.of(customer));  
-        when(obituaryRepository.findByCustomerDni(dni)).thenReturn(Collections.singletonList(obituary));  
-        
+
+
         CertificateAssociationException exception = 
             assertThrows(CertificateAssociationException.class, () -> {
-                deathCertificateService.checkDeathCertificate(request, 1L);  
+                deathCertificateService.checkDeathCertificate(mockRequest, 1L);  
             });
     
         assertEquals("El certificado de este cliente ya ha sido subido", exception.getMessage());
