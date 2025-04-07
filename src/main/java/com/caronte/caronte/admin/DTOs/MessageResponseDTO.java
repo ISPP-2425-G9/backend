@@ -2,8 +2,6 @@ package com.caronte.caronte.admin.DTOs;
 
 import java.util.List;
 
-import com.caronte.caronte.image.Image;
-
 import lombok.Getter;
 import lombok.Setter;
 

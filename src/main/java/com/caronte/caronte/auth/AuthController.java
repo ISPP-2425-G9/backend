@@ -165,7 +165,7 @@ public class AuthController {
 	}
 
 	@DeleteMapping("/{userId}")
-	public ResponseEntity<?> deleteUser(@PathVariable Long userId) {
+	public ResponseEntity<?> deleteUser(@PathVariable Long userId) throws StripeException {
 		userService.authorizeUser(userId);
 		userService.delete(userId);
 		return ResponseEntity.noContent().build();
