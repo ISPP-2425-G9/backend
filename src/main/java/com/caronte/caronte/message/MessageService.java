@@ -16,6 +16,7 @@ import com.caronte.caronte.message.DTOs.MessageRequestDto;
 import com.caronte.caronte.receiver.Receiver;
 import com.caronte.caronte.receiver.ReceiverRepository;
 import com.caronte.caronte.receiver.ReceiverService;
+import com.caronte.caronte.user.UserService;
 import com.caronte.caronte.util.AESCipher;
 import com.caronte.caronte.util.MediaHandler;
 import com.caronte.caronte.util.exceptions.ResourceNotFound;
@@ -31,6 +32,7 @@ public class MessageService {
     private final ImageRepository imageRepository;
     MediaHandler mediaHandler;
     private final AESCipher aesCipher;
+    private final UserService userService;
 
     public MessageService(MessageRepository messageRepository,
                           CustomerRepository customerRepository,
@@ -38,7 +40,8 @@ public class MessageService {
                           ImageRepository imageRepository,
                           ReceiverRepository receiverRepository,
                           MediaHandler mediaHandler,
-                          AESCipher aesCipher) {
+                          AESCipher aesCipher, 
+                          UserService userService) {
         this.imageRepository = imageRepository;
         this.messageRepository = messageRepository;
         this.customerRepository = customerRepository;
@@ -46,6 +49,7 @@ public class MessageService {
         this.receiverRepository = receiverRepository;
         this.mediaHandler = mediaHandler;
         this.aesCipher = aesCipher;
+        this.userService = userService;
     }
 
     public Message getMessageById(Long messageId) {
@@ -128,7 +132,7 @@ public class MessageService {
     public void deleteMessage(Long message_id, Long customerId) {
         Message message = this.getMessageById(message_id);
 
-        ResponseThrow.checkOrForbidden(message.hasCustomerWithId(customerId), "User not authorized to access this resource");
+        userService.authorizeUserOrAdmin(customerId, "User not authorized to access this resource");
 
         List<Image> images = this.imageRepository.findAllByMessageId(message_id);
         for (Image image : images) {
