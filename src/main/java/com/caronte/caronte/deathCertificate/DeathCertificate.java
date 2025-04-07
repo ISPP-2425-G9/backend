@@ -18,10 +18,14 @@ public class DeathCertificate extends BaseEntity{
     @Column(nullable = false)
     private Boolean isVerified;
 
-    public static DeathCertificate newDeathCertificate(String url) {
+    @Column(length = 10)
+    private String dni; 
+
+    public static DeathCertificate newDeathCertificate(String url, String dni) {
         DeathCertificate deathCertificate = new DeathCertificate();
         deathCertificate.setUrl(url);
         deathCertificate.setIsVerified(false);
+        deathCertificate.setDni(dni);
         return deathCertificate;
     }
 }
