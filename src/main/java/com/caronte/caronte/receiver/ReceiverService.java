@@ -35,7 +35,7 @@ public class ReceiverService {
     }
 
     @Transactional
-    public Receiver saveMessageReceiver(RecipientDto recipientDto, Message message) {
+    public Receiver saveReceiverByRecipientDto(RecipientDto recipientDto, Message message) {
         Receiver receiver = Receiver.parse(recipientDto, message);
         return receiverRepository.save(receiver);
     }
