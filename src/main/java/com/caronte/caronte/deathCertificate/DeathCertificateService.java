@@ -72,7 +72,7 @@ public class DeathCertificateService {
 
     }
     
-    private List<Obituary> getObituariesByDni(String dni) {
+    public List<Obituary> getObituariesByDni(String dni) {
         return Optional.of(obituaryRepository.findByCustomerDni(dni))
             .filter(obituaries -> !obituaries.isEmpty())
             .orElseThrow(() -> new NoSuchElementException("No hay esquelas creadas asociadas a ese DNI"));
@@ -102,6 +102,8 @@ public class DeathCertificateService {
     @Transactional
     public DeathCertificateWithObituaryDniDTO getDeathCertificateByObituaryId(Long obituaryId) {
         Obituary obituary = obituaryRepository.findById(obituaryId).orElseThrow(() -> ResourceNotFound.of("Obituary"));
+        if (obituary.getDeathCertificate() == null) 
+            throw new ResourceNotFound("Death certificate");
         return new DeathCertificateWithObituaryDniDTO(obituary);
     }
 

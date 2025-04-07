@@ -11,10 +11,12 @@ import com.caronte.caronte.plan.Plan;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Getter
 @Setter
+@NoArgsConstructor
 public class RegisterRequestCustomer {
 
     @NotBlank(message = "El nombre completo es requerido")
@@ -37,6 +39,13 @@ public class RegisterRequestCustomer {
     @Pattern(regexp = REGEX_DNI, message = "Invalid DNI format")
     private String dni;
 
+    public RegisterRequestCustomer(String email, String password1, String password2, String dni) {
+        this.email = email;
+        this.password1 = password1;
+        this.password2 = password2;
+        this.dni = dni;
+    }
+    
     public Customer parse(PasswordEncoder passwordEncoder) {
         Customer customer = new Customer();
         customer.setDni(this.getDni());

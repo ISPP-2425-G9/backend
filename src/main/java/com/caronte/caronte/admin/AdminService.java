@@ -22,11 +22,9 @@ import com.caronte.caronte.message.MessageRepository;
 import com.caronte.caronte.obituary.Obituary;
 import com.caronte.caronte.obituary.ObituaryRepository;
 import com.caronte.caronte.obituary.ObituaryService;
-import com.caronte.caronte.obituary.DTOs.ObituraryRequestDto;
 import com.caronte.caronte.receiver.Receiver;
 import com.caronte.caronte.receiver.ReceiverRepository;
 import com.caronte.caronte.receiver.ReceiverService;
-import com.caronte.caronte.receiver.DTOs.ReceiverResponseDTO;
 import com.caronte.caronte.user.UserService;
 
 
@@ -36,7 +34,6 @@ public class AdminService {
     private final DeathCertificateRepository deathCertificateRepository;
     private final ObituaryRepository obituaryRepository;
     private final UserService userService;
-    private final ObituaryService obituaryService;
     private final MessageRepository messageRepository;
     private final ImageRepository imageRepository;
     private final ReceiverService receiverService;
@@ -60,7 +57,6 @@ public class AdminService {
         this.obituaryRepository = obituaryRepository;
         this.deathCertificateRepository = deathCertificateRepository;      
         this.userService = userService;
-        this.obituaryService = obituaryService;
         this.customerRepository = customerRepository;
     }
 
@@ -69,7 +65,7 @@ public class AdminService {
     public List<CertificateResponseDTO> getAllPendingCertificates() {
         userService.authorizeAdmin("User is not admin");
         List<DeathCertificate> pendingCertificates = deathCertificateRepository.getAllCertificatesByIsVerified(false);
-        List<CertificateResponseDTO> response = new ArrayList();
+        List<CertificateResponseDTO> response = new ArrayList<>();
 
         for (DeathCertificate certificate : pendingCertificates) {
             String dni = "";

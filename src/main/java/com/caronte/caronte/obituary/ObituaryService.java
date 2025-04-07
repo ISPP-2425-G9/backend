@@ -1,6 +1,5 @@
 package com.caronte.caronte.obituary;
 
-import java.security.MessageDigest;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -8,6 +7,7 @@ import java.util.Optional;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.caronte.caronte.admin.Admin;
 import com.caronte.caronte.configuration.services.StripeService;
 import com.caronte.caronte.customer.Customer;
 import com.caronte.caronte.customer.CustomerRepository;
@@ -16,12 +16,9 @@ import com.caronte.caronte.deathCertificate.DeathCertificateService;
 import com.caronte.caronte.deathCertificate.DTOs.DeathCertificateRequestDTO;
 import com.caronte.caronte.imageTemplate.ImageTemplate;
 import com.caronte.caronte.imageTemplate.ImageTemplateRepository;
-import com.caronte.caronte.message.Message;
-import com.caronte.caronte.message.MessageRepository;
 import com.caronte.caronte.obituary.DTOs.ObituraryRequestDto;
 import com.caronte.caronte.receiver.Receiver;
 import com.caronte.caronte.receiver.ReceiverRepository;
-import com.caronte.caronte.receiver.ReceiverService;
 import com.caronte.caronte.user.User;
 import com.caronte.caronte.user.UserService;
 import com.caronte.caronte.util.MediaHandler;
@@ -32,31 +29,25 @@ import com.stripe.exception.StripeException;
 @Service
 public class ObituaryService {
 
-    private final ReceiverService receiverService;
-
     private final ObituaryRepository obituaryRepository;
     private final CustomerRepository customerRepository;
     private final ImageTemplateRepository imageTemplateRepository;
     private final ReceiverRepository receiverRepository;
     private final DeathCertificateService deathCertificateService;
     private final MediaHandler mediaHandler;
-    private final MessageRepository messageRepository;
     private final UserService userService;
     private final StripeService stripeService;
 
     public ObituaryService(ObituaryRepository obituaryRepository, CustomerRepository customerRepository,
             ReceiverRepository receiverRepository, ImageTemplateRepository imageTemplateRepository,
             DeathCertificateService deathCertificateService, MediaHandler mediaHandler,
-            ReceiverService receiverService, MessageRepository messageRepository, UserService userService,
-            StripeService stripeService) {
+            StripeService stripeService, UserService userService) {
         this.receiverRepository = receiverRepository;
         this.customerRepository = customerRepository;
         this.obituaryRepository = obituaryRepository;
         this.imageTemplateRepository = imageTemplateRepository;
         this.deathCertificateService = deathCertificateService;
         this.mediaHandler = mediaHandler;
-        this.receiverService = receiverService;
-        this.messageRepository = messageRepository;
         this.stripeService = stripeService;
         this.userService = userService;
     }
@@ -181,7 +172,8 @@ public class ObituaryService {
     @Transactional
     public void deleteObituaryByCustomer(Long customerId, Long obituaryId) {
         Obituary obituary = findById(obituaryId);
-        userService.authorizeUserOrAdmin(customerId, "You are not allowed to delete this obituary");
+        User user = userService.findCurrentUser();
+        ResponseThrow.checkOrForbidden(obituary.hasCustomerId(customerId) || user instanceof Admin, "You are not allowed to delete this obituary");
         obituaryRepository.deleteById(obituaryId);
     }
 

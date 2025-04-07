@@ -11,27 +11,28 @@ import org.springframework.validation.FieldError;
 import com.caronte.caronte.util.exceptions.ErrorHandlerException;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
+
+@NoArgsConstructor
+@AllArgsConstructor
 public class ErrorHandler {
 
     private Map<String, List<String>> errors;
-
-    public ErrorHandler(Map<String, List<String>> errors){
-        this.errors = errors;
-    }
 
     public static ErrorHandler catchError(BindingResult bindingResult) {
         Map<String, List<String>> errors = new HashMap<>();
 
         if (bindingResult.hasErrors()) {
             for (FieldError error : bindingResult.getFieldErrors()) {
-                errors.computeIfAbsent(error.getField(), key -> new ArrayList<>()).add(error.getDefaultMessage());
+                errors.computeIfAbsent(error.getField(), _ -> new ArrayList<>()).add(error.getDefaultMessage());
             }
         }
         return new ErrorHandler(errors);
     }
 
     public void addError(String field, String message) {
-        errors.computeIfAbsent(field, key -> new ArrayList<>()).add(message);
+        errors.computeIfAbsent(field, _ -> new ArrayList<>()).add(message);
     }
 
     @JsonIgnore

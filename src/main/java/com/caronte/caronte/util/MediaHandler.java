@@ -94,7 +94,7 @@ public class MediaHandler {
         }
     }
 
-    private static BufferedImage base64ToImage(String base64String) {
+    public static BufferedImage base64ToImage(String base64String) {
         BufferedImage image = null;
         try {
             byte[] imageBytes = decoder(base64String);
@@ -110,7 +110,7 @@ public class MediaHandler {
     }
 
     @SuppressWarnings("unused")
-    private File base64ToVideo(String base64String) {
+    public File base64ToVideo(String base64String) {
         File videoFile = null;
         try {
             byte[] videoBytes = decoder(base64String);
