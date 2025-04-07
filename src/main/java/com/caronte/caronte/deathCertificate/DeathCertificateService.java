@@ -45,10 +45,14 @@ public class DeathCertificateService {
             checkDeathCertificate(request, customerId);
         DeathCertificate certificate = createDeathCertificate(request);
         List<Obituary> obituaries = obituaryRepository.findByCustomerDni(request.getDni());
-        obituaries.forEach(obituary -> obituary.setDeathCertificate(certificate));
+        obituaries.forEach(obituary -> {
+            if (obituary.getIsMine()) {
+                obituary.setDeathCertificate(certificate);
+            }
+        });
         obituaryRepository.saveAll(obituaries);
         Customer customer = customerRepository.findByDni(request.getDni())
-            .orElseThrow(() -> ResourceNotFound.of("Customer"));
+                .orElseThrow(() -> ResourceNotFound.of("Customer"));
         List<Message> messages = messageRepository.findAllByCustomerId(customer.getId());
         messages.forEach(message -> message.setDeathCertificate(certificate));
         messageRepository.saveAll(messages);
