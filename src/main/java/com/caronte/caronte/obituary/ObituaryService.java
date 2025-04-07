@@ -1,6 +1,5 @@
 package com.caronte.caronte.obituary;
 
-import java.security.MessageDigest;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -12,12 +11,11 @@ import com.caronte.caronte.admin.Admin;
 import com.caronte.caronte.configuration.services.StripeService;
 import com.caronte.caronte.customer.Customer;
 import com.caronte.caronte.customer.CustomerRepository;
+import com.caronte.caronte.deathCertificate.DTOs.DeathCertificateRequestDTO;
 import com.caronte.caronte.deathCertificate.DeathCertificate;
 import com.caronte.caronte.deathCertificate.DeathCertificateService;
-import com.caronte.caronte.deathCertificate.DTOs.DeathCertificateRequestDTO;
 import com.caronte.caronte.imageTemplate.ImageTemplate;
 import com.caronte.caronte.imageTemplate.ImageTemplateRepository;
-import com.caronte.caronte.message.Message;
 import com.caronte.caronte.message.MessageRepository;
 import com.caronte.caronte.obituary.DTOs.ObituraryRequestDto;
 import com.caronte.caronte.receiver.Receiver;
@@ -41,11 +39,10 @@ public class ObituaryService {
     private final MessageRepository messageRepository;
     private final UserService userService;
     private final StripeService stripeService;
-    private final UserService userService;
 
     public ObituaryService(ObituaryRepository obituaryRepository, CustomerRepository customerRepository,
             ReceiverRepository receiverRepository, ImageTemplateRepository imageTemplateRepository,
-            DeathCertificateService deathCertificateService, MediaHandler mediaHandler, 
+            DeathCertificateService deathCertificateService, MediaHandler mediaHandler, MessageRepository messageRepository,
             StripeService stripeService, UserService userService) {
         this.receiverRepository = receiverRepository;
         this.customerRepository = customerRepository;
