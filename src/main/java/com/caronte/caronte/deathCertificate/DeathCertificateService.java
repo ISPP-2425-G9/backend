@@ -85,7 +85,7 @@ public class DeathCertificateService {
             .filter(file -> file.startsWith("data:image/"))
             .orElseThrow(() -> new IllegalArgumentException("The death certificate is not a valid image"));
         certificate = mediaHandler.uploadImageToCloudinary(certificate, "certificates");
-        DeathCertificate deathCertificate = DeathCertificate.newDeathCertificate(certificate);
+        DeathCertificate deathCertificate = DeathCertificate.newDeathCertificate(certificate, request.getDni());
         deathCertificateRepository.save(deathCertificate);
         return deathCertificate; 
     }
