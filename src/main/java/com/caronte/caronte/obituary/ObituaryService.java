@@ -203,22 +203,5 @@ public class ObituaryService {
 
     }
 
-    @Transactional(readOnly = true)
-    public Customer getCustomerByCertificateId(Long deathCertificateId) {
-        List<Obituary> obituaries = obituaryRepository.findByDeathCertificateId(deathCertificateId);
-        List<Message> messages = messageRepository.findAllByDeathCertificateId(deathCertificateId);
-        Customer customer = null;
-        if(!messages.isEmpty()) customer = messages.get(0).getCustomer();
-        else{
-            for (Obituary obituary : obituaries) {
-                if (obituary.getIsMine()) {
-                    customer = obituary.getCustomer();
-                    break; 
-                }
-            }
-        }
-
-        return customer;
-    }
 
 }
