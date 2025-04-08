@@ -110,6 +110,7 @@ public class MessageControllerTest {
                 .andExpect(jsonPath("$", hasSize(2)));
     }
         
+    // TODO
     @Test
     void testGetMessagesByCustomerId_Error() throws Exception {
     }
@@ -127,7 +128,8 @@ public class MessageControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.title", is("Test Title")));
     }
-        
+
+    // TODO
     @Test
     void testGetMessageById_Forbidden() throws Exception {
        
