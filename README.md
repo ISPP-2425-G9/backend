@@ -1,8 +1,6 @@
 # CARONTE - Backend
 
-[![Codacy Badge](https://app.codacy.com/project/badge/Grade/2194b57b5519495bbc0ba348cf27a296)](https://app.codacy.com/gh/ISPP-2425-G9/backend/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
-
-[![Codacy Badge](https://app.codacy.com/project/badge/Coverage/2194b57b5519495bbc0ba348cf27a296)](https://app.codacy.com/gh/ISPP-2425-G9/backend/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_coverage)
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/2194b57b5519495bbc0ba348cf27a296)](https://app.codacy.com/gh/ISPP-2425-G9/backend/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade) [![Codacy Badge](https://app.codacy.com/project/badge/Coverage/2194b57b5519495bbc0ba348cf27a296)](https://app.codacy.com/gh/ISPP-2425-G9/backend/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_coverage) ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg) ![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-yellow.svg?logo=conventional-commits)
 
 ## Description
 Caronte is a backend application developed with Spring Boot that uses a MySQL database to manage and store data related to cars.
@@ -113,3 +111,22 @@ cd caronte
     ```
 
     This will start the server at `http://localhost:8080`.
+
+
+## Running tests
+
+You can run tests with the following commands:
+
+- If you have maven installed
+
+    ```bash
+    mvn clean verify
+    ```
+
+- Without using your local maven
+
+     ```bash
+    ./mvnw clean verify
+    ```
+
+Once you have executed one of these commands, you will have a coverage report in ***./target/site/jacoco/index.html***. Check that file in yout browser to see the results.
