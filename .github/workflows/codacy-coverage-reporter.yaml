@@ -1,4 +1,4 @@
-name: Run Tests with MySQL
+name: Codacy coverage report
 
 on:
   pull_request:
@@ -56,4 +56,5 @@ jobs:
         uses: codacy/codacy-coverage-reporter-action@v1.3.0
         with:
           project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
-          coverage-reports: target\site\jacoco\jacoco.xml
+          coverage-reports: target/site/jacoco/jacoco.xml
+
