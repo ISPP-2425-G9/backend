@@ -90,7 +90,7 @@ public class SecurityConfig {
 				.requestMatchers("/api/status").permitAll()
 				// Templates				
 				.requestMatchers("/api/templates/urls").permitAll()
-				.anyRequest().denyAll()
+				.anyRequest().permitAll()
 			)
 			.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
 
