@@ -807,4 +807,22 @@ public class ObituaryServiceTest {
         verify(deathCertificateService, times(1)).createDeathCertificate(any(DeathCertificateRequestDTO.class));  
     }
 
+    @Test
+    void testIsVerified() {
+        Obituary obituary1 = new Obituary();
+        assertFalse(obituary1.isVerified(), "Obituary should not be verified when there is no death certificate");
+
+        DeathCertificate certificate2 = new DeathCertificate();
+        certificate2.setIsVerified(false);
+        Obituary obituary2 = new Obituary();
+        obituary2.setDeathCertificate(certificate2);
+        assertFalse(obituary2.isVerified(), "Obituary should not be verified when death certificate is not verified");
+
+        DeathCertificate certificate3 = new DeathCertificate();
+        certificate3.setIsVerified(true);
+        Obituary obituary3 = new Obituary();
+        obituary3.setDeathCertificate(certificate3);
+        assertTrue(obituary3.isVerified(), "Obituary should be verified when death certificate is verified");
+    }
+
 }
