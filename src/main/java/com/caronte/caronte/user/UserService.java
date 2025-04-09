@@ -12,6 +12,7 @@ import com.caronte.caronte.auth.payload.response.UserChangePasswordRequest;
 import com.caronte.caronte.configuration.services.UserDetailsImpl;
 import com.caronte.caronte.util.exceptions.ResourceNotFound;
 import com.caronte.caronte.util.exceptions.ResponseThrow;
+import com.stripe.exception.StripeException;
 
 @Service
 public class UserService {
@@ -57,7 +58,7 @@ public class UserService {
     public User authorizeUserOrAdmin(Long userId, String message){
         User user = findCurrentUser();
         UserDetailsImpl auth =  (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        ResponseThrow.checkOrBadRequest(user.getId() == userId || auth.isAdmin(), message);
+        ResponseThrow.checkOrBadRequest(user.getId().equals(userId) || auth.isAdmin(), message);
         return user;
     }
 
@@ -70,18 +71,20 @@ public class UserService {
     @Transactional(readOnly = true)
     public User authorizeUser(Long userId, String message){
         User user = findCurrentUser();
-        ResponseThrow.checkOrBadRequest(user.getId() == userId, message);
+        ResponseThrow.checkOrBadRequest(user.getId().equals(userId), message);
         return user;
     }
 
     @Transactional(readOnly = true)
     public User authorizeUser(Long id){
-        return authorizeUserOrAdmin(id, "No puedes realizar acciones en la cuenta de otro usuario");
+        return authorizeUser(id, "No puedes realizar acciones en la cuenta de otro usuario");
     }
 
     @Transactional
-    public void delete(Long id) {
-        userRepository.deleteById(id);
+    public void delete(Long id) throws StripeException {
+        User user = userRepository.findById(id).orElseThrow(() -> ResourceNotFound.of("User"));
+        user.getPlan().cancel();
+        userRepository.delete(user);
     }
 
     @Transactional

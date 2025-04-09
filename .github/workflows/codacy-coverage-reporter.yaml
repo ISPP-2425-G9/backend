@@ -1,9 +1,6 @@
 name: Codacy coverage report
 
 on:
-  pull_request:
-    branches: [develop]
-    types: [opened, reopened, edited, review_requested, synchronize]
   push:
     branches:
       - "develop"
@@ -57,4 +54,3 @@ jobs:
         with:
           project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
           coverage-reports: target/site/jacoco/jacoco.xml
-
