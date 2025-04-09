@@ -11,6 +11,8 @@ import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -36,6 +38,8 @@ import com.caronte.caronte.user.UserService;
 import com.caronte.caronte.util.MediaHandler;
 import com.caronte.caronte.util.exceptions.ResourceNotFound;
 import com.stripe.exception.StripeException;
+import com.stripe.model.Subscription;
+import com.stripe.param.SubscriptionCreateParams;
 
 @SpringBootTest
 public class ObituaryServiceTest {
@@ -152,6 +156,7 @@ public class ObituaryServiceTest {
         Customer customer = new Customer();
         customer.setId(1L);
         customer.setName("John Doe");
+        customer.setPlan(Plan.newPlanPremium("sub_123"));
 
         ImageTemplate imageTemplate = new ImageTemplate();
         imageTemplate.setId(1L);
@@ -182,28 +187,33 @@ public class ObituaryServiceTest {
         obituary.setImageTemplate(imageTemplate);
         List<Receiver> receivers = contacts.stream().map(contactDto -> Receiver.parse(contactDto, obituary)).toList();
 
-        // Mocks
-        when(customerRepository.findById(1L)).thenReturn(Optional.of(customer));
-        when(imageTemplateRepository.findById(1L)).thenReturn(Optional.of(imageTemplate));
-        when(obituaryRepository.saveAndFlush(any(Obituary.class))).thenReturn(obituary);
-        when(receiverRepository.saveAll(anyList())).thenReturn(receivers);
-        // Act
-        Obituary obituary_test = obituaryService.createObituaryWithReceivers(requestDto, customer.getId());
+        try (MockedStatic<Subscription> subscriptionStatic = Mockito.mockStatic(Subscription.class)) {
+            // Mocks
+            subscriptionStatic.when(() -> Subscription.create(any(SubscriptionCreateParams.class)))
+                              .thenReturn(null);
+            when(customerRepository.findById(1L)).thenReturn(Optional.of(customer));
+            when(imageTemplateRepository.findById(1L)).thenReturn(Optional.of(imageTemplate));
+            when(obituaryRepository.saveAndFlush(any(Obituary.class))).thenReturn(obituary);
+            when(receiverRepository.saveAll(anyList())).thenReturn(receivers);
+            // Act
+            Obituary obituary_test = obituaryService.createObituaryWithReceivers(requestDto, customer.getId());
 
-        // Assert
-        verify(customerRepository).findById(1L);
-        verify(imageTemplateRepository).findById(1L);
-        verify(obituaryRepository, times(1)).saveAndFlush(any(Obituary.class));
+            // Assert
+            verify(customerRepository).findById(1L);
+            verify(imageTemplateRepository).findById(1L);
+            verify(obituaryRepository, times(1)).saveAndFlush(any(Obituary.class));
 
-        assertNotNull(obituary_test);
-        assertEquals("Alfonso Manuel Giraldillo", obituary_test.getName());
-        assertEquals("Esto es un mensaje de despedida", obituary_test.getFarewellMessage());
-        assertEquals("Esto es una frase de despedida", obituary_test.getFarewellPhrase());
-        assertEquals("uploaded-image-url", obituary_test.getCustomImageUrl());
-        assertNull(obituary_test.getBirthDate());
-        assertNull(obituary_test.getDeathDate());
+            assertNotNull(obituary_test);
+            assertEquals("Alfonso Manuel Giraldillo", obituary_test.getName());
+            assertEquals("Esto es un mensaje de despedida", obituary_test.getFarewellMessage());
+            assertEquals("Esto es una frase de despedida", obituary_test.getFarewellPhrase());
+            assertEquals("uploaded-image-url", obituary_test.getCustomImageUrl());
+            assertNull(obituary_test.getBirthDate());
+            assertNull(obituary_test.getDeathDate());
 
-        assertEquals(1, contacts.size());
+            assertEquals(1, contacts.size());
+        } 
+        
     }
 
     @Test
@@ -259,6 +269,8 @@ public class ObituaryServiceTest {
 
         requestDto.setWordColor(null);
         requestDto.setContacts(contacts);
+        requestDto.setIsMine(true);
+        customer.setPlan(Plan.newPlanPremium("sub_123"));
 
         when(obituaryRepository.saveAndFlush(any(Obituary.class))).thenReturn(obituary);
 
@@ -274,7 +286,7 @@ public class ObituaryServiceTest {
 
     @Test
     public void testCreateObituaryWithNoContacts() throws StripeException {
-        customer.setPlan(Plan.newPlanFree());
+        customer.setPlan(Plan.newPlanPremium("sub_123"));
         when(customerRepository.findById(1L)).thenReturn(Optional.of(customer));
         when(imageTemplateRepository.findById(1L)).thenReturn(Optional.of(imageTemplate));
         requestDto.setContacts(new ArrayList<>());

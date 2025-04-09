@@ -172,7 +172,7 @@ public class ObituaryService {
     @Transactional
     public void deleteObituaryByCustomer(Long customerId, Long obituaryId) {
         Obituary obituary = findById(obituaryId);
-        userService.authorizeUserOrAdmin(customerId, "You are not allowed to delete this obituary");
+        ResponseThrow.checkOrForbidden(Objects.equals(obituary.getCustomer().getId(), customerId), "You are not allowed to delete this obituary");
         obituaryRepository.delete(obituary);
     }
 

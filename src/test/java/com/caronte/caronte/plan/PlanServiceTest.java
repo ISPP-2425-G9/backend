@@ -9,6 +9,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.caronte.caronte.user.User;
@@ -45,15 +47,15 @@ public class PlanServiceTest {
 
         Subscription mockSubscription = mock(Subscription.class);
         when(mockSubscription.cancel()).thenReturn(mockSubscription);
-        mockStatic(Subscription.class);
-        when(Subscription.retrieve("sub_123")).thenReturn(mockSubscription);
+        try (MockedStatic<Subscription> subscriptionStatic = Mockito.mockStatic(Subscription.class)) {
+            subscriptionStatic.when(() -> Subscription.retrieve(eq("sub_123"))).thenReturn(mockSubscription);
+            when(planRepository.save(any(Plan.class))).thenReturn(plan);
 
-        when(planRepository.save(any(Plan.class))).thenReturn(plan);
-
-        Plan updatedPlan = planService.changePlan(user, PlanType.FREE, null);
-
-        assertEquals(PlanType.FREE, updatedPlan.getPlanType());
-        verify(mockSubscription).cancel();
+            Plan updatedPlan = planService.changePlan(user, PlanType.FREE, null);
+    
+            assertEquals(PlanType.FREE, updatedPlan.getPlanType());
+            verify(mockSubscription).cancel();
+        } 
     }
 
     @Test
