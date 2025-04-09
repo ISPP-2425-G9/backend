@@ -24,7 +24,7 @@ public class Customer extends User {
 
     @JsonIgnore
     public boolean hasDni(String dni) {
-        return Objects.equals(this.dni, dni);
+        return  Objects.equals(this.dni, dni);
     }
 
     public void update(CustomerUpdateRequest request) {
