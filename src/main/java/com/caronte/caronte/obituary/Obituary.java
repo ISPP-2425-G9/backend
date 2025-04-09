@@ -1,6 +1,7 @@
 package com.caronte.caronte.obituary;
 
 import java.time.LocalDate;
+import java.util.Objects;
 
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
@@ -60,7 +61,7 @@ public class Obituary extends BaseEntity {
 
     @JsonIgnore
     public boolean hasCustomerId(Long customerId){
-        return this.getCustomer().getId() == customerId;
+        return Objects.equals(this.getCustomer().getId(), customerId);
     }
     
     @JsonIgnore
