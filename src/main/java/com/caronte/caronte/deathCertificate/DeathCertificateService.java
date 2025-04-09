@@ -63,7 +63,7 @@ public class DeathCertificateService {
     public void checkDeathCertificate(DeathCertificateRequestDTO request, Long customerId) {
         Customer customerLogged = customerRepository.findById(customerId).orElseThrow(() -> ResourceNotFound.of("Customer"));
         validateDniNotOwn(customerLogged, request);
-        List<Obituary> obituaries = getObituariesByDni(customerLogged.getDni());
+        List<Obituary> obituaries = getObituariesByDni(request.getDni());
         validateObituaries(obituaries);
     }
 

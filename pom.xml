@@ -112,6 +112,7 @@
 			<artifactId>dotenv-java</artifactId>
 			<version>2.2.4</version>
 		</dependency>
+
 		<!-- STRIPE		 -->
 		<!-- https://mvnrepository.com/artifact/com.stripe/stripe-java -->
 		<dependency>
@@ -120,6 +121,18 @@
 			<version>28.4.0</version>
 		</dependency>
 
+		<!-- SWAGGER -->
+		<dependency>
+			<groupId>org.springdoc</groupId>
+			<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+			<version>2.8.6</version> <!-- Usa la última versión disponible -->
+		</dependency>
+		<dependency>
+			<groupId>org.springdoc</groupId>
+			<artifactId>springdoc-openapi-ui</artifactId>
+			<version>1.8.0</version> <!-- Usa la versión más reciente -->
+		</dependency>
+		
 		<!-- https://mvnrepository.com/artifact/org.jacoco/jacoco-maven-plugin -->
 		<dependency>
 			<groupId>org.jacoco</groupId>
@@ -164,6 +177,7 @@
 				<configuration>
 					<excludes>
 						<exclude>**/DTOs/**</exclude>
+						<exclude>**/**Repository.java</exclude>
 						<exclude>**/*Application.class</exclude>
 						<exclude>**/configuration/jwt/**</exclude>
 						<exclude>**/auth/payload/**</exclude>

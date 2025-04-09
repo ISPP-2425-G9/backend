@@ -1,6 +1,9 @@
 package com.caronte.caronte.plan;
 
 import com.caronte.caronte.util.BaseEntity;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.stripe.exception.StripeException;
+import com.stripe.model.Subscription;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -38,6 +41,13 @@ public class Plan extends BaseEntity {
 
     public boolean isPremium() {
         return this.planType == PlanType.PREMIUM;
+    }
+
+    @JsonIgnore
+    public void cancel() throws StripeException {
+        if(isPremium()){
+            Subscription.retrieve(this.getSubscriptionId());
+        }
     }
 
 }
