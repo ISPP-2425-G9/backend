@@ -171,9 +171,6 @@ public class MessageControllerTest {
 
     @Test
     void testIsMessageOwner_Success() throws Exception {
-        // Simulación:
-        // Se asume que findCurrentUserId() retorna 1
-        // y que messageService.isOwner(messageId, customerId) retorna true.
         when(userService.findCurrentUserId()).thenReturn(1L);
         when(messageService.isOwner(20L, 1L)).thenReturn(true);
 
@@ -185,8 +182,6 @@ public class MessageControllerTest {
 
     @Test
     void testValidateMessageCode_Success() throws Exception {
-        // Simulación:
-        // Se asume que el código es válido y se devuelve un MessageRequestDto.
         when(messageService.validateMessageCode(20L, "12345")).thenReturn(true);
         MessageRequestDto dummyDto = new MessageRequestDto();
         dummyDto.setMessageId(20L);
@@ -194,7 +189,6 @@ public class MessageControllerTest {
         dummyDto.setBody("Test Body");
         when(messageService.getMessageRequestDtoByMessageId(20L)).thenReturn(dummyDto);
 
-        // Se espera una respuesta 200 OK con los datos del MessageRequestDto.
         mockMvc.perform(get("/api/messages/{messageId}/validate-code/{code}", 20L, "12345")
                 .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
@@ -205,11 +199,7 @@ public class MessageControllerTest {
 
     @Test
     void testValidateMessageCode_Invalid() throws Exception {
-        // Simulación:
-        // Se asume que el código es inválido y que ResponseThrow.checkOrBadRequest lanza
-        // una excepción que se traduce en una respuesta 400 Bad Request.
         when(messageService.validateMessageCode(20L, "wrongCode")).thenReturn(false);
-        // No es necesario simular getMessageRequestDtoByMessageId, ya que en este caso la validación falla
 
         mockMvc.perform(get("/api/messages/{messageId}/validate-code/{code}", 20L, "wrongCode")
                 .contentType(MediaType.APPLICATION_JSON))

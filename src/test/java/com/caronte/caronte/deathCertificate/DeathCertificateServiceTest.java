@@ -79,7 +79,6 @@ public class DeathCertificateServiceTest {
         customer.setName("Jones Smiths");
     }
 
-    // --- Tests para createDeathCertificate ---
     @Test
     void createDeathCertificate_ValidImage_Success() {
         String uploadedUrl = "https://cloudinary.com/certificates/cert.png";
@@ -115,7 +114,6 @@ public class DeathCertificateServiceTest {
         assertEquals("The death certificate is not a valid image", exception.getMessage());
     }
 
-    // --- Tests para checkDeathCertificate ---
     @Test
     void checkDeathCertificate_NullRequest_ThrowsException() {
         when(customerRepository.findById(eq(1L))).thenReturn(Optional.of(customer));
