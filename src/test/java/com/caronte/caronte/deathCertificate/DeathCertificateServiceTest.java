@@ -168,7 +168,6 @@ public class DeathCertificateServiceTest {
     @Test
     void checkDeathCertificate_NoObituaries_ThrowsException() {
         Customer loggedCustomer = mock(Customer.class);
-        when(loggedCustomer.getDni()).thenReturn("12345678Z");
         when(customerRepository.findById(anyLong())).thenReturn(Optional.of(loggedCustomer));
         when(obituaryRepository.findByCustomerDni(anyString())).thenReturn(Collections.emptyList());
         requestDTO.setDni("12345678Z");
@@ -184,7 +183,6 @@ public class DeathCertificateServiceTest {
         Customer loggedCustomer = mock(Customer.class);
         DeathCertificateRequestDTO mockRequest = mock(DeathCertificateRequestDTO.class);
         String dni = "12345678K";
-        when(loggedCustomer.getDni()).thenReturn(dni); 
         when(mockRequest.getDni()).thenReturn(dni);  
         when(mockObituary.getDeathCertificate()).thenReturn(deathCertificate1); 
         when(customerRepository.findById(anyLong())).thenReturn(Optional.of(loggedCustomer));
@@ -212,8 +210,6 @@ public class DeathCertificateServiceTest {
         Obituary obituaryForLogged = new Obituary();
         obituaryForLogged.setIsMine(true);
         obituaryForLogged.setDeathCertificate(null);
-        when(obituaryRepository.findByCustomerDni(eq(loggedCustomer.getDni())))
-            .thenReturn(Arrays.asList(obituaryForLogged));
         
         try (MockedStatic<MediaHandler> mediaHandlerStatic = mockStatic(MediaHandler.class)) {
             BufferedImage image = new BufferedImage(1, 1, BufferedImage.TYPE_INT_RGB);

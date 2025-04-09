@@ -28,6 +28,7 @@ import com.caronte.caronte.imageTemplate.ImageTemplateRepository;
 import com.caronte.caronte.imageTemplate.ImageTemplateService;
 import com.caronte.caronte.obituary.DTOs.ObituraryRequestDto;
 import com.caronte.caronte.obituary.DTOs.ObituraryRequestDto.ContactDto;
+import com.caronte.caronte.plan.Plan;
 import com.caronte.caronte.receiver.Receiver;
 import com.caronte.caronte.receiver.ReceiverRepository;
 import com.caronte.caronte.receiver.ReceiverService;
@@ -273,7 +274,7 @@ public class ObituaryServiceTest {
 
     @Test
     public void testCreateObituaryWithNoContacts() throws StripeException {
-
+        customer.setPlan(Plan.newPlanFree());
         when(customerRepository.findById(1L)).thenReturn(Optional.of(customer));
         when(imageTemplateRepository.findById(1L)).thenReturn(Optional.of(imageTemplate));
         requestDto.setContacts(new ArrayList<>());
@@ -310,7 +311,7 @@ public class ObituaryServiceTest {
         Receiver receiver1 = Receiver.parse(contact1, obituary);
         Receiver receiver2 = Receiver.parse(contact2, obituary);
         List<Receiver> receivers = List.of(receiver1, receiver2);
-
+        customer.setPlan(Plan.newPlanPremium("sub_21a2bd45f..."));
         when(obituaryRepository.saveAndFlush(any(Obituary.class))).thenReturn(obituary);
         when(customerRepository.findById(eq(1L))).thenReturn(Optional.of(customer));
         when(imageTemplateRepository.findById(eq(1L))).thenReturn(Optional.of(imageTemplate)); // corregido aquí
@@ -478,7 +479,7 @@ public class ObituaryServiceTest {
 
         obituaryService.deleteObituaryByCustomer(customerId, obituaryId);
 
-        verify(obituaryRepository, times(1)).deleteById(obituaryId);
+        verify(obituaryRepository, times(1)).delete(obituary);
     }
 
     @Test
