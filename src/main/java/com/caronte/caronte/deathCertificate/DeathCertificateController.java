@@ -37,8 +37,7 @@ public class DeathCertificateController {
 
     @PostMapping("/upload/loggedInUser")
     public ResponseEntity<String> uploadDeathCertificateLogged(
-            @RequestBody @Valid DeathCertificateRequestDTO deathCertificateRequestDTO) {
-        Long customerId = userService.findCurrentUserId();
+            @RequestBody @Valid DeathCertificateRequestDTO deathCertificateRequestDTO, Long customerId) {
         deathCertificateService.createDeathCertificateAndRelations(deathCertificateRequestDTO, customerId);
         return ResponseEntity.ok("Death Certificate uploaded successfully");
     }

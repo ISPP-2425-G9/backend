@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -114,7 +115,7 @@ public class AuthController {
 	@PutMapping("/customers/{customerId}")
 	public ResponseEntity<JwtResponse> updateCustomer(
 			@PathVariable Long customerId,
-			@RequestBody @Valid CustomerUpdateRequest request) throws AccessDeniedException, StripeException {
+			@RequestBody @Valid CustomerUpdateRequest request, @AuthenticationPrincipal UserDetailsImpl userDetailsImpl) throws AccessDeniedException, StripeException {
 		userService.authorizeUserOrAdmin(customerId);
 		Optional<User> existingUser = userService.findByEmail(request.getEmail());
 		if (existingUser.isPresent() && !Objects.equals(existingUser.get().getId(), customerId)) {
@@ -124,7 +125,7 @@ public class AuthController {
 		Customer customer = customerService.update(customerId, request);
 		UserDetailsImpl userDetails = UserDetailsImpl.build(customer);
 		String jwt = jwtUtils.generateJwtToken(userDetails);
-		User user = userService.findCurrentUser();
+		User user = userService.findById(userDetailsImpl.getId());
 		JwtResponse jwtResponse = new JwtResponse(jwt, user);
 		return ResponseEntity.ok().body(jwtResponse);
 	}
@@ -150,7 +151,7 @@ public class AuthController {
 	@PutMapping("/companies/{companyId}")
 	public ResponseEntity<JwtResponse> updateCompany(
 			@PathVariable Long companyId,
-    			@RequestBody @Valid CompanyUpdateRequest request) throws AccessDeniedException, StripeException {
+    			@RequestBody @Valid CompanyUpdateRequest request, @AuthenticationPrincipal UserDetailsImpl userDetailsImpl) throws AccessDeniedException, StripeException {
     		userService.authorizeUser(companyId);
 		userService.findByEmail(request.getEmail())
 			.filter(user -> Objects.equals(user.getId(), companyId))
@@ -159,7 +160,7 @@ public class AuthController {
   		Company company = companyService.update(companyId, request);
 		UserDetailsImpl userDetails = UserDetailsImpl.build(company);
 		String jwt = jwtUtils.generateJwtToken(userDetails);
-		User user = userService.findCurrentUser();
+		User user = userService.findById(userDetailsImpl.getId());
 		JwtResponse jwtResponse = new JwtResponse(jwt, user);
 		return ResponseEntity.ok().body(jwtResponse);
 	}

@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -13,6 +14,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.caronte.caronte.configuration.jwt.JwtUtils;
+import com.caronte.caronte.configuration.services.UserDetailsImpl;
 import com.caronte.caronte.emergencyContact.DTOs.EmergencyContactDTO;
 import com.caronte.caronte.user.UserService;
 
@@ -24,6 +27,7 @@ public class EmergencyContactController {
 
     private final EmergencyContactService emergencyContactService;
     private final UserService userService;
+    JwtUtils jwtUtils;
 
     public EmergencyContactController (EmergencyContactService emergencyContactService, UserService userService) {
         this.emergencyContactService = emergencyContactService;
@@ -31,31 +35,32 @@ public class EmergencyContactController {
     }
 
     @GetMapping
-    public ResponseEntity<List<EmergencyContactDTO>> getEmergencyContacts() {
-        String email = userService.findCurrentUserEmail();
+    public ResponseEntity<List<EmergencyContactDTO>> getEmergencyContacts(@AuthenticationPrincipal UserDetailsImpl userDetailsImpl) {
+        String email = userService.findById(userDetailsImpl.getId()).getEmail();
         List<EmergencyContactDTO> emergencyContacts = emergencyContactService.findAll(email);
         return ResponseEntity.ok().body(emergencyContacts);
     }
 
     @PostMapping
-    public ResponseEntity<EmergencyContactDTO> saveEmergencyContact(@RequestBody @Valid EmergencyContactDTO emergencyContactDTO) {
+    public ResponseEntity<EmergencyContactDTO> saveEmergencyContact(@RequestBody @Valid EmergencyContactDTO emergencyContactDTO,
+    @AuthenticationPrincipal UserDetailsImpl userDetailsImpl) {
         System.out.println("emergencyContactDTO: " + emergencyContactDTO);
-        String email = userService.findCurrentUserEmail();
+        String email = userService.findById(userDetailsImpl.getId()).getEmail();
         EmergencyContactDTO emergencyContact = emergencyContactService.save(emergencyContactDTO, email);
         return ResponseEntity.status(HttpStatus.CREATED).body(emergencyContact);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<EmergencyContactDTO> updateEmergencyContact(@RequestBody @Valid EmergencyContactDTO emergencyContactDTO,
-                                                    @PathVariable Long id) {
-        String email = userService.findCurrentUserEmail();
+                                                    @PathVariable Long id, @AuthenticationPrincipal UserDetailsImpl userDetailsImpl) {
+        String email = userService.findById(userDetailsImpl.getId()).getEmail();
         EmergencyContactDTO emergencyContact = emergencyContactService.update(emergencyContactDTO, id, email);
         return ResponseEntity.ok().body(emergencyContact);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteEmergencyContact(@PathVariable Long id) {
-        String email = userService.findCurrentUserEmail();
+    public ResponseEntity<?> deleteEmergencyContact(@PathVariable Long id, @AuthenticationPrincipal UserDetailsImpl userDetailsImpl) {
+        String email = userService.findById(userDetailsImpl.getId()).getEmail();
         emergencyContactService.delete(id, email);
         return ResponseEntity.noContent().build();
     }

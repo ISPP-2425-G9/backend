@@ -52,7 +52,7 @@ public class PlanController {
         planService.changePlan(user, newPlanType, subscriptionId);
         
         String jwt = jwtUtils.generateJwtToken(userDetailsImpl);
-        user = userService.findCurrentUser();
+        user = userService.findById(userDetailsImpl.getId());
         JwtResponse jwtResponse = new JwtResponse(jwt, user);
         return ResponseEntity.ok(jwtResponse);
     }
