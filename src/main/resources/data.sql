@@ -4,7 +4,7 @@ INSERT INTO plan (id, subscription_id, plan_type) VALUES
 (3, NULL, 'FREE'),
 (4, 'sub_1R4QQbGa0d4217RGFKZprtnL', 'PREMIUM'),
 (5, NULL, 'FREE'),
-(6, NULL, 'FREE'),
+(6, 'sub_1RABMOGa0d4217RG50kt7ZgA', 'PREMIUM'),
 (7, NULL, 'PREMIUM'),
 (8, NULL, 'PREMIUM'),
 (9, NULL, 'PREMIUM'),

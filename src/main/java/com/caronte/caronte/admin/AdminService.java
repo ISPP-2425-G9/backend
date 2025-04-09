@@ -21,7 +21,6 @@ import com.caronte.caronte.message.Message;
 import com.caronte.caronte.message.MessageRepository;
 import com.caronte.caronte.obituary.Obituary;
 import com.caronte.caronte.obituary.ObituaryRepository;
-import com.caronte.caronte.obituary.ObituaryService;
 import com.caronte.caronte.receiver.Receiver;
 import com.caronte.caronte.receiver.ReceiverRepository;
 import com.caronte.caronte.receiver.ReceiverService;
@@ -43,7 +42,7 @@ public class AdminService {
 
     public AdminService(DeathCertificateRepository deathCertificateRepository, 
         ObituaryRepository obituaryRepository, UserService userService, 
-        CustomerRepository customerRepository, ObituaryService obituaryService,
+        CustomerRepository customerRepository,
         MessageRepository messageRepository,
         ImageRepository imageRepository,
         ReceiverService receiverService,

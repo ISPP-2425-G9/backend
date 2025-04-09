@@ -1,22 +1,18 @@
 package com.caronte.caronte.user;
 
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
+
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import static org.mockito.ArgumentMatchers.any;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -26,7 +22,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import com.caronte.caronte.auth.payload.response.UserChangePasswordRequest;
 import com.caronte.caronte.configuration.authorization.Authorization;
 import com.caronte.caronte.configuration.services.UserDetailsImpl;
+import com.caronte.caronte.plan.Plan;
 import com.caronte.caronte.util.exceptions.ResourceNotFound;
+import com.stripe.exception.StripeException;
 
 @ExtendWith(MockitoExtension.class)
 class UserServiceTest {
@@ -169,9 +167,16 @@ class UserServiceTest {
     
 
     @Test
-    void delete_shouldCallRepositoryDeleteById() {
+    void delete_shouldCallRepositoryDeleteById() throws StripeException {
+        User mockUser = mock(User.class);
+        Plan mockPlan = mock(Plan.class);
+        when(mockUser.getPlan()).thenReturn(mockPlan);
+        doNothing().when(mockPlan).cancel();
+
+        doNothing().when(userRepository).delete(eq(mockUser));
+        when(userRepository.findById(eq(1L))).thenReturn(Optional.of(mockUser));
         userService.delete(1L);
-        verify(userRepository, times(1)).deleteById(1L);
+        verify(userRepository, times(1)).delete(mockUser);
     }
 
     @Test
