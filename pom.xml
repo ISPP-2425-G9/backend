@@ -164,6 +164,7 @@
 				<configuration>
 					<excludes>
 						<exclude>**/DTOs/**</exclude>
+						<exclude>**/**Repository.java</exclude>
 						<exclude>**/*Application.class</exclude>
 						<exclude>**/configuration/jwt/**</exclude>
 						<exclude>**/auth/payload/**</exclude>
