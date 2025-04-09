@@ -165,7 +165,7 @@ public class AuthController {
 	}
 
 	@DeleteMapping("/{userId}")
-	public ResponseEntity<?> deleteUser(@PathVariable Long userId) {
+	public ResponseEntity<?> deleteUser(@PathVariable Long userId) throws StripeException {
 		userService.authorizeUser(userId);
 		userService.delete(userId);
 		return ResponseEntity.noContent().build();
@@ -208,9 +208,9 @@ public class AuthController {
 	}
 
 	@DeleteMapping("/admin/users/{userId}")
-	public ResponseEntity<?> deleteAdmin(@PathVariable Long userId) {
-		userService.delete(userId);
-		return ResponseEntity.noContent().build();
-	}
+ 	public ResponseEntity<?> deleteAdmin(@PathVariable Long userId) throws StripeException {
+ 		userService.delete(userId);
+        return ResponseEntity.noContent().build();
+ 	}
 
 }

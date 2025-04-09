@@ -12,6 +12,7 @@ import com.caronte.caronte.auth.payload.response.UserChangePasswordRequest;
 import com.caronte.caronte.configuration.services.UserDetailsImpl;
 import com.caronte.caronte.util.exceptions.ResourceNotFound;
 import com.caronte.caronte.util.exceptions.ResponseThrow;
+import com.stripe.exception.StripeException;
 
 @Service
 public class UserService {
@@ -80,8 +81,10 @@ public class UserService {
     }
 
     @Transactional
-    public void delete(Long id) {
-        userRepository.deleteById(id);
+    public void delete(Long id) throws StripeException {
+        User user = userRepository.findById(id).orElseThrow(() -> ResourceNotFound.of("User"));
+        user.getPlan().cancel();
+        userRepository.delete(user);
     }
 
     @Transactional
