@@ -27,6 +27,7 @@ import com.caronte.caronte.auth.payload.response.JwtResponse;
 import com.caronte.caronte.auth.payload.response.LoginRequest;
 import com.caronte.caronte.auth.payload.response.RegisterRequestCompany;
 import com.caronte.caronte.auth.payload.response.RegisterRequestCustomer;
+import com.caronte.caronte.auth.payload.response.RememberPasswordRequest;
 import com.caronte.caronte.auth.payload.response.UserChangePasswordRequest;
 import com.caronte.caronte.company.Company;
 import com.caronte.caronte.company.CompanyService;
@@ -113,7 +114,7 @@ public class AuthController {
 	public ResponseEntity<Customer> getCustomer(@PathVariable Long customerId) {
 		userService.authorizeUserOrAdmin(customerId, "You can't access this data");
 		Customer customer = customerService.findById(customerId);
-		return ResponseEntity.ok().body(customer);
+		return ResponseEntity.ok(customer);
 	}
 
 	@PutMapping("/customers/{customerId}")
@@ -131,7 +132,13 @@ public class AuthController {
 		String jwt = jwtUtils.generateJwtToken(userDetails);
 		User user = userService.findCurrentUser();
 		JwtResponse jwtResponse = new JwtResponse(jwt, user);
-		return ResponseEntity.ok().body(jwtResponse);
+		return ResponseEntity.ok(jwtResponse);
+	}
+
+	@PostMapping("/password/verify")
+	public ResponseEntity<Boolean> verifyRememberCode(@RequestBody RememberPasswordRequest rememberPasswordRequest) throws Exception {
+		boolean isVerify = verificationCodeStore.verifyCode(rememberPasswordRequest);
+		return ResponseEntity.ok(isVerify);
 	}
 
 	@PostMapping("/password/remember")

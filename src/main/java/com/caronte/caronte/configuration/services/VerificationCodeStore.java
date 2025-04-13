@@ -2,12 +2,14 @@ package com.caronte.caronte.configuration.services;
 
 import java.time.LocalDateTime;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import com.caronte.caronte.auth.payload.response.RememberPasswordRequest;
 import com.caronte.caronte.user.UserRepository;
 import com.caronte.caronte.util.exceptions.ResponseThrow;
 
@@ -45,11 +47,17 @@ public class VerificationCodeStore {
     }
 
     public String getCode(String email) {
+        ResponseThrow.checkOrBadRequest(userRepository.existsByEmail(email), "There isn't user with email: " + email);
         CodeData data = CODE_MAP.get(email);
         if (data != null && data.expirationTime().isAfter(LocalDateTime.now())) {
             return data.code();
         }
         return null;
+    }
+
+    public boolean verifyCode(RememberPasswordRequest rememberPasswordRequest) {
+        String code = getCode(rememberPasswordRequest.email());
+        return Objects.equals(code, rememberPasswordRequest.code());
     }
 
     @Scheduled(fixedRate = 60000)
