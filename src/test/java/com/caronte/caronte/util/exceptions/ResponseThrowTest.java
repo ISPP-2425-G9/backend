@@ -1,9 +1,8 @@
 package com.caronte.caronte.util.exceptions;
 
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.web.server.ResponseStatusException;
 
 public class ResponseThrowTest {

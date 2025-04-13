@@ -10,7 +10,6 @@ import com.caronte.caronte.auth.payload.response.RegisterRequestCompany;
 import com.caronte.caronte.auth.payload.response.RegisterRequestCustomer;
 import com.caronte.caronte.company.Company;
 import com.caronte.caronte.company.CompanyRepository;
-import com.caronte.caronte.configuration.services.VerificationCodeStore;
 import com.caronte.caronte.customer.Customer;
 import com.caronte.caronte.customer.CustomerRepository;
 import com.caronte.caronte.user.User;
@@ -24,16 +23,13 @@ public class AuthService {
     private final CustomerRepository customerRepository;
     private final CompanyRepository companyRepository;
     private final PasswordEncoder passwordEncoder;
-    private final VerificationCodeStore verificationCodeStore;
     
     public AuthService(UserRepository userRepository, CustomerRepository customerRepository, 
-            CompanyRepository companyRepository, PasswordEncoder passwordEncoder,
-            VerificationCodeStore verificationCodeStore) {
+            CompanyRepository companyRepository, PasswordEncoder passwordEncoder) {
 		this.userRepository = userRepository;
         this.customerRepository = customerRepository;
         this.companyRepository = companyRepository;
         this.passwordEncoder = passwordEncoder;
-        this.verificationCodeStore = verificationCodeStore;
 	}
 
     @Transactional(readOnly = true)

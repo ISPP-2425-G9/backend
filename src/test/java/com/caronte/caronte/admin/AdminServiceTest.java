@@ -1,21 +1,8 @@
 package com.caronte.caronte.admin;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
 import java.time.LocalDate;
 import java.util.Arrays;
@@ -27,7 +14,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import com.caronte.caronte.admin.DTOs.CertificateResponseDTO;
 import com.caronte.caronte.admin.DTOs.MessageResponseDTO;
@@ -53,28 +40,28 @@ public class AdminServiceTest {
     @Autowired
     private AdminService adminService;
 
-    @MockBean
+    @MockitoBean
     private UserService userService;
 
-    @MockBean
+    @MockitoBean
     private DeathCertificateRepository deathCertificateRepository;
 
-    @MockBean
+    @MockitoBean
     private CustomerRepository customerRepository;
 
-    @MockBean
+    @MockitoBean
     private MessageRepository messageRepository;
 
-    @MockBean
+    @MockitoBean
     private ImageRepository imageRepository;
 
-    @MockBean
+    @MockitoBean
     private ObituaryRepository obituaryRepository;
 
-    @MockBean
+    @MockitoBean
     private ReceiverService receiverService;
 
-    @MockBean
+    @MockitoBean
     private ReceiverRepository receiverRepository;
 
 
