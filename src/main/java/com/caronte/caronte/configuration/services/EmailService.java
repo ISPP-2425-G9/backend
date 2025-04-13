@@ -91,31 +91,33 @@ public class EmailService {
         String birth = obituary.getBirthDate() != null ? obituary.getBirthDate().format(formatter) : "¿?";
         String death = obituary.getDeathDate() != null ? obituary.getDeathDate().format(formatter) : "¿?";
         Paragraph dates = new Paragraph(birth + " - " + death)
-                .setFontSize(14)
+                .setFontSize(17)
                 .setFontColor(textColor)
                 .setTextAlignment(TextAlignment.CENTER)
                 .setMarginBottom(20);
         document.add(dates);
-        String farewellPhrase = obituary.getFarewellPhrase();
-        if (farewellPhrase != null && !farewellPhrase.isBlank()) {
-            Paragraph phrase = new Paragraph("\"" + farewellPhrase + "\"")
-                    .setFontSize(16)
-                    .setItalic()
-                    .setFontColor(textColor)
-                    .setTextAlignment(TextAlignment.CENTER)
-                    .setMarginBottom(10);
-            document.add(phrase);
-        }
+
         String farewellMessage = obituary.getFarewellMessage();
         if (farewellMessage != null && !farewellMessage.isBlank()) {
             Paragraph message = new Paragraph(farewellMessage)
-                    .setFontSize(12)
+                    .setFontSize(14)
                     .setFontColor(textColor)
                     .setTextAlignment(TextAlignment.CENTER)
                     .setMarginTop(20);
             document.add(message);
         }
 
+        String farewellPhrase = obituary.getFarewellPhrase();
+        if (farewellPhrase != null && !farewellPhrase.isBlank()) {
+            Paragraph phrase = new Paragraph("\"" + farewellPhrase + "\"")
+                    .setFontSize(18)
+                    .setItalic()
+                    .setFontColor(textColor)
+                    .setTextAlignment(TextAlignment.CENTER)
+                    .setMarginBottom(10);
+            document.add(phrase);
+        }
+        
         document.close();
         return baos.toByteArray();
     }
