@@ -135,7 +135,7 @@ public class AuthController {
 		return ResponseEntity.ok(jwtResponse);
 	}
 
-	@PostMapping("/password/verify")
+	@PostMapping("/password/remember/verify")
 	public ResponseEntity<Boolean> verifyRememberCode(@RequestBody RememberPasswordRequest rememberPasswordRequest) throws Exception {
 		boolean isVerify = verificationCodeStore.verifyCode(rememberPasswordRequest);
 		return ResponseEntity.ok(isVerify);
