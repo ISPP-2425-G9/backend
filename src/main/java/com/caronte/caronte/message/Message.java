@@ -1,6 +1,7 @@
 package com.caronte.caronte.message;
 
 import java.security.SecureRandom;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -66,7 +67,7 @@ public class Message extends BaseEntity {
 
     @JsonIgnore
     public boolean hasCustomerWithId(Long id) {
-        return this.customer.getId() == id;
+        return Objects.equals(this.customer.getId(), id);
     }
 
 }

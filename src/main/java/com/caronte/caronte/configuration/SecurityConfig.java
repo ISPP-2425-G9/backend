@@ -61,9 +61,10 @@ public class SecurityConfig {
 				// Auth
 				.requestMatchers(HttpMethod.DELETE, "/api/auth/*").authenticated()
 				.requestMatchers("/api/auth/admin/**").hasAuthority(ADMIN)
-				.requestMatchers("/api/auth/companies/**").hasAnyAuthority(COMPANY)
+				.requestMatchers("/api/auth/companies/signup").anonymous()
+				.requestMatchers("/api/auth/customers/signup").anonymous()
 				.requestMatchers("/api/auth/customers/**").hasAnyAuthority(CUSTOMER)
-				.requestMatchers("/api/auth/companies/signup", "/api/auth/customers/signup").anonymous()
+				.requestMatchers("/api/auth/companies/**").hasAnyAuthority(COMPANY)
 				.requestMatchers("/api/auth/login").anonymous()
 				.requestMatchers(HttpMethod.PUT, "/api/auth/password/*").authenticated()
 				// Companies
