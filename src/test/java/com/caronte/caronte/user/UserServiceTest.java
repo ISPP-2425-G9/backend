@@ -139,7 +139,6 @@ class UserServiceTest {
         when(authentication.isAuthenticated()).thenReturn(true);
         when(authentication.getPrincipal()).thenReturn(anotherUser);
         SecurityContextHolder.getContext().setAuthentication(authentication);
-        // ID diferente al actual (2L vs 99L)
         assertThrows(Exception.class, () -> userService.authorizeUserOrAdmin(99L, "not allowed"));
     }
     

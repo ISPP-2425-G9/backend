@@ -482,18 +482,5 @@ public class AdminServiceTest {
     
         verify(deathCertificateRepository).delete(deathCertificate);
     }
-    
-
-
-
-
-
-
-
-
-
-
-
-
 
 }

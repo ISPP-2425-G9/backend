@@ -44,7 +44,6 @@ public class UserDetailsServiceImplTest {
 
     @Test
     void testLoadUserByUsername_withEmail_found() {
-        // Usamos una instancia de Admin en lugar de un User genérico
         String email = "test@example.com";
         Admin dummyAdmin = mock(Admin.class);
         when(dummyAdmin.getId()).thenReturn(1L);
@@ -52,10 +51,8 @@ public class UserDetailsServiceImplTest {
         when(dummyAdmin.getPassword()).thenReturn("password");
         when(userRepository.findByEmail(email)).thenReturn(Optional.of(dummyAdmin));
 
-        // Act
         UserDetails details = userDetailsService.loadUserByUsername(email);
 
-        // Assert
         assertNotNull(details);
         assertEquals(email, details.getUsername());
     }
@@ -65,7 +62,6 @@ public class UserDetailsServiceImplTest {
         String email = "test@example.com";
         when(userRepository.findByEmail(email)).thenReturn(Optional.empty());
 
-        // Act & Assert
         UsernameNotFoundException exception = assertThrows(UsernameNotFoundException.class,
                 () -> userDetailsService.loadUserByUsername(email));
         assertEquals("User Not Found with email: " + email, exception.getMessage());
@@ -79,17 +75,15 @@ void testLoadUserByUsername_withDni_found() {
     when(dummyCustomer.getEmail()).thenReturn("dummy@customer.com");
     when(dummyCustomer.getPassword()).thenReturn("custpass");
     
-    // Usamos un stub único para getPlan():
     Plan mockPlan = mock(Plan.class);
     when(mockPlan.getPlanType()).thenReturn(PlanType.FREE);
     when(dummyCustomer.getPlan()).thenReturn(mockPlan);
 
     when(customerRepository.findByDni(dni)).thenReturn(Optional.of(dummyCustomer));
 
-    // Act
+
     UserDetails details = userDetailsService.loadUserByUsername(dni);
 
-    // Assert
     assertNotNull(details);
     assertEquals("dummy@customer.com", details.getUsername());
 }
@@ -99,7 +93,6 @@ void testLoadUserByUsername_withDni_found() {
         String dni = "12345678X";
         when(customerRepository.findByDni(dni)).thenReturn(Optional.empty());
 
-        // Act & Assert
         UsernameNotFoundException exception = assertThrows(UsernameNotFoundException.class,
                 () -> userDetailsService.loadUserByUsername(dni));
         assertEquals("User Not Found with DNI: " + dni, exception.getMessage());
@@ -113,17 +106,16 @@ void testLoadUserByUsername_withDni_found() {
         when(dummyCompany.getEmail()).thenReturn("dummy@company.com");
         when(dummyCompany.getPassword()).thenReturn("comppass");
     
-        // Usamos un stub único para getPlan():
         Plan mockPlan = mock(Plan.class);
         when(mockPlan.getPlanType()).thenReturn(PlanType.FREE);
         when(dummyCompany.getPlan()).thenReturn(mockPlan);
     
         when(companyRepository.findByNif(nif)).thenReturn(Optional.of(dummyCompany));
     
-        // Act
+    
         UserDetails details = userDetailsService.loadUserByUsername(nif);
     
-        // Assert
+    
         assertNotNull(details);
         assertEquals("dummy@company.com", details.getUsername());
     }
@@ -133,7 +125,7 @@ void testLoadUserByUsername_withDni_found() {
         String nif = "A1234567B";
         when(companyRepository.findByNif(nif)).thenReturn(Optional.empty());
 
-        // Act & Assert
+        
         UsernameNotFoundException exception = assertThrows(UsernameNotFoundException.class,
                 () -> userDetailsService.loadUserByUsername(nif));
         assertEquals("User Not Found with NIF: " + nif, exception.getMessage());
@@ -141,9 +133,8 @@ void testLoadUserByUsername_withDni_found() {
 
     @Test
     void testLoadUserByUsername_withInvalidPattern() {
-        // Arr: Se pasa un valor que no cumple con ninguno de los patrones (email, DNI o NIF).
         String invalidUsername = "invalid_username";
-        // Por la implementación se retorna null
+
         UserDetails details = userDetailsService.loadUserByUsername(invalidUsername);
         assertNull(details);
     }

@@ -386,16 +386,13 @@ public class ObituaryServiceTest {
 
     @Test
     public void testCreateObituaryWithReceivers_ImageTemplateNotFound() {
-        // Preparar el mock
         when(customerRepository.findById(eq(1L))).thenReturn(Optional.of(customer));
         when(imageTemplateRepository.findById(anyLong())).thenReturn(Optional.empty());
 
-        // Ejecutar el test y capturar la excepción
         ResourceNotFound exception = assertThrows(ResourceNotFound.class, () -> {
             obituaryService.createObituaryWithReceivers(requestDto, 1L);
         });
 
-        // Verificar que el mensaje de la excepción sea el esperado
         assertEquals("Image template not found", exception.getReason());
     }
 
@@ -598,6 +595,234 @@ public class ObituaryServiceTest {
 
         assertNotNull(result);
         assertTrue(result.isEmpty());
+    }
+
+
+
+    @Test
+    public void testInvalidDeathCertificate_WithDeathCertificateNull() {
+        ObituraryRequestDto requestDto = new ObituraryRequestDto();
+        requestDto.setDeathCertificate(null);
+        Customer customer = new Customer();
+        customer.setDni("37898928G");
+
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class,
+                () -> obituaryService.certificateManagement(requestDto, customer, customer.getId()));
+
+        assertEquals("The Death Certificate is invalid", exception.getReason());
+    }
+    @Test
+    public void testInvalidDeathCertificate_WithDNINull() {
+        ObituraryRequestDto requestDto = new ObituraryRequestDto();
+        DeathCertificateRequestDTO deathCertificateDTO = new DeathCertificateRequestDTO();
+        requestDto.setDeathCertificate(deathCertificateDTO);
+        deathCertificateDTO.setDni(null);
+        deathCertificateDTO.setFile("file-content");
+        Customer customer = new Customer();
+        customer.setDni("37898928G");
+
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class,
+                () -> obituaryService.certificateManagement(requestDto, customer, customer.getId()));
+
+        assertEquals("The Death Certificate is invalid", exception.getReason());
+    }
+
+    @Test
+    public void testInvalidDeathCertificate_WithFileNull() {
+        ObituraryRequestDto requestDto = new ObituraryRequestDto();
+        DeathCertificateRequestDTO deathCertificateDTO = new DeathCertificateRequestDTO();
+        requestDto.setDeathCertificate(deathCertificateDTO);
+        deathCertificateDTO.setDni("37898928D");
+        deathCertificateDTO.setFile(null);
+        Customer customer = new Customer();
+        customer.setDni("37898928G");
+
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class,
+                () -> obituaryService.certificateManagement(requestDto, customer, customer.getId()));
+
+        assertEquals("The Death Certificate is invalid", exception.getReason());
+    }
+    
+    @Test
+    public void testDniMatchingWithCustomer() {
+        DeathCertificateRequestDTO deathCertificateDTO = new DeathCertificateRequestDTO();
+        deathCertificateDTO.setDni("12345678A");
+        deathCertificateDTO.setFile("file-content");
+
+        ObituraryRequestDto requestDto = new ObituraryRequestDto();
+        requestDto.setDeathCertificate(deathCertificateDTO);
+
+        Customer customer = new Customer();
+        customer.setDni("12345678A"); 
+
+        when(customerRepository.existsByDni(anyString())).thenReturn(true);
+
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class,
+                () -> obituaryService.certificateManagement(requestDto, customer, customer.getId()));
+
+        assertEquals("No puedes subir un certificado con tu DNI", exception.getReason());
+    }
+
+
+    @Test
+    public void testCreateDeathCertificateWhenObituaryWithoutCertificate() {
+    
+        DeathCertificateRequestDTO deathCertificateDTO = new DeathCertificateRequestDTO();
+        deathCertificateDTO.setDni("12345678B"); 
+        deathCertificateDTO.setFile("file-content");
+    
+        ObituraryRequestDto requestDto = new ObituraryRequestDto();
+        requestDto.setDeathCertificate(deathCertificateDTO);
+    
+        Customer customer = new Customer();
+        customer.setDni("12345678A");
+        
+        Obituary obituary = new Obituary();
+        obituary.setDeathCertificate(null);
+        when(obituaryRepository.findByCustomerDni(anyString())).thenReturn(List.of(obituary));
+    
+        when(customerRepository.existsByDni(anyString())).thenReturn(true);
+    
+        DeathCertificate createdCertificate = new DeathCertificate();
+        when(deathCertificateService.createDeathCertificateAndRelations(deathCertificateDTO, customer.getId())).thenReturn(createdCertificate);
+    
+        DeathCertificate result = obituaryService.certificateManagement(requestDto, customer, customer.getId());
+        
+        assertNotNull(result);
+        verify(deathCertificateService, times(1)).createDeathCertificateAndRelations(deathCertificateDTO, customer.getId());
+    }
+    
+
+    @Test
+    public void testCreateDeathCertificateWhenObituaryWithCertificate() {
+    
+        DeathCertificateRequestDTO deathCertificateDTO = new DeathCertificateRequestDTO();
+        deathCertificateDTO.setDni("12345678B");
+        deathCertificateDTO.setFile("file-content");
+    
+        ObituraryRequestDto requestDto = new ObituraryRequestDto();
+        requestDto.setDeathCertificate(deathCertificateDTO);
+    
+        Customer customer = new Customer();
+        customer.setDni("12345678A");
+    
+       
+        DeathCertificate existingCertificate = new DeathCertificate();  
+        Obituary obituary = new Obituary();
+        obituary.setDeathCertificate(existingCertificate);
+        when(obituaryRepository.findByCustomerDni(anyString())).thenReturn(List.of(obituary));
+    
+        when(customerRepository.existsByDni(anyString())).thenReturn(true);
+
+        when(deathCertificateService.createDeathCertificate(any(DeathCertificateRequestDTO.class)))
+                .thenReturn(existingCertificate); 
+        when(deathCertificateService.createDeathCertificateAndRelations(any(DeathCertificateRequestDTO.class), anyLong()))
+                .thenReturn(existingCertificate); 
+    
+        DeathCertificate result = obituaryService.certificateManagement(requestDto, customer, customer.getId());
+    
+    
+        assertNotNull(result);
+        assertEquals(existingCertificate, result);  
+        verify(deathCertificateService, never()).createDeathCertificateAndRelations(any(DeathCertificateRequestDTO.class), anyLong());  
+        verify(deathCertificateService, times(1)).createDeathCertificate(any(DeathCertificateRequestDTO.class));  
+    }
+
+    @Test
+    public void testDeleteObituary() {
+        Long obituaryId = 1L;
+        doNothing().when(obituaryRepository).deleteById(obituaryId);
+        obituaryService.deleteObituary(obituaryId);
+        verify(obituaryRepository, times(1)).deleteById(obituaryId);
+    }
+
+
+    @Test
+    public void testCreateDeathCertificateWhenObituaryNoExistingCustomer() {
+    
+        DeathCertificateRequestDTO deathCertificateDTO = new DeathCertificateRequestDTO();
+        deathCertificateDTO.setDni("12345678B");
+        deathCertificateDTO.setFile("file-content");
+    
+        ObituraryRequestDto requestDto = new ObituraryRequestDto();
+        requestDto.setDeathCertificate(deathCertificateDTO);
+    
+        Customer customer = new Customer();
+        customer.setDni("12345678A");
+    
+       
+        DeathCertificate existingCertificate = new DeathCertificate();  
+        Obituary obituary = new Obituary();
+        obituary.setDeathCertificate(existingCertificate);
+        when(obituaryRepository.findByCustomerDni(anyString())).thenReturn(List.of(obituary));
+    
+        when(customerRepository.existsByDni(anyString())).thenReturn(false);
+
+        when(deathCertificateService.createDeathCertificate(any(DeathCertificateRequestDTO.class)))
+                .thenReturn(existingCertificate); 
+        when(deathCertificateService.createDeathCertificateAndRelations(any(DeathCertificateRequestDTO.class), anyLong()))
+                .thenReturn(existingCertificate); 
+    
+        DeathCertificate result = obituaryService.certificateManagement(requestDto, customer, customer.getId());
+    
+    
+        assertNotNull(result);
+        assertEquals(existingCertificate, result);  
+        verify(deathCertificateService, never()).createDeathCertificateAndRelations(any(DeathCertificateRequestDTO.class), anyLong());  
+        verify(deathCertificateService, times(1)).createDeathCertificate(any(DeathCertificateRequestDTO.class));  
+    }
+
+    @Test
+    public void testCreateDeathCertificateWhenObituaryEmptyObituariesList() {
+    
+        DeathCertificateRequestDTO deathCertificateDTO = new DeathCertificateRequestDTO();
+        deathCertificateDTO.setDni("12345678B");
+        deathCertificateDTO.setFile("file-content");
+    
+        ObituraryRequestDto requestDto = new ObituraryRequestDto();
+        requestDto.setDeathCertificate(deathCertificateDTO);
+    
+        Customer customer = new Customer();
+        customer.setDni("12345678A");
+    
+       
+        DeathCertificate existingCertificate = new DeathCertificate();  
+        Obituary obituary = new Obituary();
+        obituary.setDeathCertificate(existingCertificate);
+        when(obituaryRepository.findByCustomerDni(anyString())).thenReturn(List.of());
+    
+        when(customerRepository.existsByDni(anyString())).thenReturn(true);
+
+        when(deathCertificateService.createDeathCertificate(any(DeathCertificateRequestDTO.class)))
+                .thenReturn(existingCertificate); 
+        when(deathCertificateService.createDeathCertificateAndRelations(any(DeathCertificateRequestDTO.class), anyLong()))
+                .thenReturn(existingCertificate); 
+    
+        DeathCertificate result = obituaryService.certificateManagement(requestDto, customer, customer.getId());
+    
+    
+        assertNotNull(result);
+        assertEquals(existingCertificate, result);  
+        verify(deathCertificateService, never()).createDeathCertificateAndRelations(any(DeathCertificateRequestDTO.class), anyLong());  
+        verify(deathCertificateService, times(1)).createDeathCertificate(any(DeathCertificateRequestDTO.class));  
+    }
+
+    @Test
+    void testIsVerified() {
+        Obituary obituary1 = new Obituary();
+        assertFalse(obituary1.isVerified(), "Obituary should not be verified when there is no death certificate");
+
+        DeathCertificate certificate2 = new DeathCertificate();
+        certificate2.setIsVerified(false);
+        Obituary obituary2 = new Obituary();
+        obituary2.setDeathCertificate(certificate2);
+        assertFalse(obituary2.isVerified(), "Obituary should not be verified when death certificate is not verified");
+
+        DeathCertificate certificate3 = new DeathCertificate();
+        certificate3.setIsVerified(true);
+        Obituary obituary3 = new Obituary();
+        obituary3.setDeathCertificate(certificate3);
+        assertTrue(obituary3.isVerified(), "Obituary should be verified when death certificate is verified");
     }
 
 }

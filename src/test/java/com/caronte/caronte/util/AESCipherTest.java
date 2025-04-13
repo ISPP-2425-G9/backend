@@ -14,7 +14,6 @@ class AESCipherTest {
     @BeforeEach
     void setUp() throws Exception {
         aesCipher = new AESCipher();
-        // Inyectamos un secretKey de 16 caracteres, necesario para AES-128.
         Field secretKeyField = AESCipher.class.getDeclaredField("secretKey");
         secretKeyField.setAccessible(true);
         secretKeyField.set(aesCipher, "1234567890123456");

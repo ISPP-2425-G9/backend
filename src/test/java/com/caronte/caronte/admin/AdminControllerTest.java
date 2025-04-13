@@ -38,7 +38,6 @@ public class AdminControllerTest {
     @InjectMocks
     private AdminController adminController;
 
-    // Removed duplicate asJsonString method to avoid compilation error.
 
     @BeforeEach
     void setUp() {
@@ -46,7 +45,6 @@ public class AdminControllerTest {
         mockMvc = MockMvcBuilders.standaloneSetup(adminController).build();
     }
 
-    // Test para obtener los certificados pendientes
     @Test
     void testGetAllPendingDeathCertificate() throws Exception {
         CertificateResponseDTO certificate = new CertificateResponseDTO();
@@ -61,7 +59,7 @@ public class AdminControllerTest {
             .andExpect(jsonPath("$[0].name").value("John Doe"));
     }
 
-    // Test para obtener los obituarios asociados a un certificado de defunción
+
     @Test
     void testGetAllObituariesByDeathCertificate() throws Exception {
         ObituaryResponseDTO obituary = new ObituaryResponseDTO();
@@ -78,7 +76,7 @@ public class AdminControllerTest {
             .andExpect(jsonPath("$[0].farewellMessage").value("Farewell message"));
     }
 
-    // Test para obtener los mensajes asociados a un certificado de defunción
+
     @Test
     void testGetAllMessagesByDeathCertificate() throws Exception {
         MessageResponseDTO message = new MessageResponseDTO();
@@ -97,22 +95,17 @@ public class AdminControllerTest {
 
     @Test
     void testApproveDeathCertificate() throws Exception {
-        // Preparamos el DTO con la fecha de defunción
         ValidCertificateRequestDTO request = new ValidCertificateRequestDTO();
         request.setDeathDate(LocalDate.of(2023, 1, 1));
 
-        // Se mockea el comportamiento del servicio para aprobar el certificado
         doNothing().when(adminService).verificateDeathCertificate(1L, request.getDeathDate());
 
-        // Se realiza la petición PUT y se valida la respuesta
         mockMvc.perform(put("/api/admin/certificates/approve/1")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(asJsonString(request)))
             .andExpect(status().isOk())
             .andExpect(content().string("Certificate approved successfully"));
     }
-
-    // Método helper configurado para que pueda serializar LocalDate correctamente.
     private static final ObjectMapper mapper = new ObjectMapper()
             .registerModule(new JavaTimeModule())
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
@@ -125,7 +118,6 @@ public class AdminControllerTest {
         }
     }
 
-    // Test para desaprobar un certificado de defunción
     @Test
     void testDisapproveDeathCertificate() throws Exception {
         doNothing().when(adminService).disapproveCertificate(1L);

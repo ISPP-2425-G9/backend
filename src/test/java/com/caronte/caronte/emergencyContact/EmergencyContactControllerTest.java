@@ -57,17 +57,13 @@ public class EmergencyContactControllerTest {
 
     @Test
     void testGetEmergencyContacts_Success() throws Exception {
-        // Se simula que el usuario actual tiene email "test@example.com"
         String email = "test@example.com";
         when(userService.findCurrentUserEmail()).thenReturn(email);
 
-        // Se preparan dos objetos EmergencyContactDTO de ejemplo
         EmergencyContactDTO dto1 = new EmergencyContactDTO(1L, "John Doe", "123456789", email);
 
         EmergencyContactDTO dto2 = new EmergencyContactDTO(2L, "Jane Doe", "987654321", email);
 
-
-        // Se simula que el servicio retorna la lista con los dos contactos
         when(emergencyContactService.findAll(email)).thenReturn(List.of(dto1, dto2));
 
         mockMvc.perform(get("/api/contacts"))
@@ -86,10 +82,8 @@ public class EmergencyContactControllerTest {
         String email = "test@example.com";
         when(userService.findCurrentUserEmail()).thenReturn(email);
 
-        // Se prepara el DTO con los datos del contacto a guardar
         EmergencyContactDTO request = new EmergencyContactDTO(1L , "John Doe", "123456789", email);
 
-        // Se simula la respuesta del servicio al guardar el contacto
         EmergencyContactDTO savedDto = new EmergencyContactDTO(1L , "John Doe", "123456789", email);
 
         when(emergencyContactService.save(any(EmergencyContactDTO.class), eq(email))).thenReturn(savedDto);
@@ -108,10 +102,10 @@ public class EmergencyContactControllerTest {
         String email = "test@example.com";
         when(userService.findCurrentUserEmail()).thenReturn(email);
 
-        // Se prepara el DTO con los nuevos datos para actualizar
+
         EmergencyContactDTO request = new EmergencyContactDTO(1L , "John Updated", "111222333", email);
 
-        // Se simula la respuesta del servicio al actualizar el contacto
+    
         EmergencyContactDTO updatedDto = new EmergencyContactDTO(1L , "John Updated", "111222333", email);
 
         when(emergencyContactService.update(any(EmergencyContactDTO.class), eq(1L), eq(email)))
@@ -131,7 +125,7 @@ public class EmergencyContactControllerTest {
         String email = "test@example.com";
         when(userService.findCurrentUserEmail()).thenReturn(email);
 
-        // Simulamos que el servicio elimina correctamente sin retornar nada
+    
         doNothing().when(emergencyContactService).delete(eq(1L), eq(email));
 
         mockMvc.perform(delete("/api/contacts/{id}", 1L))
@@ -140,11 +134,8 @@ public class EmergencyContactControllerTest {
         verify(emergencyContactService).delete(1L, email);
     }
     
-    // En caso de que EmergencyContactDTO cuente con validaciones (por ejemplo, nombre no puede ser vacío),
-    // se puede agregar un test para validar el error:
     @Test
     void testSaveEmergencyContact_ValidationError() throws Exception {
-        // Se asume que el nombre es obligatorio, por lo que se envía una cadena vacía
         EmergencyContactDTO request = new EmergencyContactDTO(1L, "", "123456789", null);
 
         mockMvc.perform(post("/api/contacts")
