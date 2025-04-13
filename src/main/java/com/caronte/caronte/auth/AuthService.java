@@ -10,6 +10,7 @@ import com.caronte.caronte.auth.payload.response.RegisterRequestCompany;
 import com.caronte.caronte.auth.payload.response.RegisterRequestCustomer;
 import com.caronte.caronte.company.Company;
 import com.caronte.caronte.company.CompanyRepository;
+import com.caronte.caronte.configuration.services.VerificationCodeStore;
 import com.caronte.caronte.customer.Customer;
 import com.caronte.caronte.customer.CustomerRepository;
 import com.caronte.caronte.user.User;
@@ -23,15 +24,26 @@ public class AuthService {
     private final CustomerRepository customerRepository;
     private final CompanyRepository companyRepository;
     private final PasswordEncoder passwordEncoder;
+    private final VerificationCodeStore verificationCodeStore;
     
     public AuthService(UserRepository userRepository, CustomerRepository customerRepository, 
-            CompanyRepository companyRepository, PasswordEncoder passwordEncoder) {
+            CompanyRepository companyRepository, PasswordEncoder passwordEncoder,
+            VerificationCodeStore verificationCodeStore) {
 		this.userRepository = userRepository;
         this.customerRepository = customerRepository;
         this.companyRepository = companyRepository;
         this.passwordEncoder = passwordEncoder;
+        this.verificationCodeStore = verificationCodeStore;
 	}
 
+    @Transactional(readOnly = true)
+    public String getNameById(Long userId) {
+        return userRepository.findById(userId)
+                             .map(User::getName)
+                             .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+    }
+
+    @Transactional(readOnly = true)
     public Customer validateAndBuildCustomer(RegisterRequestCustomer registerRequest, ErrorHandler errors) {
         if (Objects.nonNull(registerRequest.getPassword1()) && !Objects.equals(registerRequest.getPassword1(), registerRequest.getPassword2()))
             errors.addError("password", "Las contraseñas no coinciden");
@@ -45,6 +57,7 @@ public class AuthService {
         return registerRequest.parse(passwordEncoder);
     }
 
+    @Transactional(readOnly = true)
     public Company validateAndBuildCompany(RegisterRequestCompany registerRequest, ErrorHandler errors) {        
         if (Objects.nonNull(registerRequest.getPassword1()) && !Objects.equals(registerRequest.getPassword1(), registerRequest.getPassword2()))
             errors.addError("password", "Las contraseñas no coinciden");
@@ -57,15 +70,10 @@ public class AuthService {
 
         return registerRequest.parse(passwordEncoder);
     }
-
+    
     @Transactional
     public void save(User user){
         userRepository.save(user);
     }
 
-    public String getNameById(Long userId) {
-        return userRepository.findById(userId)
-                             .map(User::getName)
-                             .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
-    }
 }
