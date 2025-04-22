@@ -2,6 +2,9 @@ package com.caronte.caronte.util;
 import java.security.MessageDigest;
 import java.util.Base64;
 
+import org.springframework.stereotype.Component;
+
+@Component
 public class Hash {
 
     public String hash(String input) {
