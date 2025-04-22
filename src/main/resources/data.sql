@@ -139,22 +139,20 @@ INSERT INTO obituary (id, name, birth_date, death_date, custom_image_url, farewe
 (2, 'Nombre Ejemplo 2', '1975-05-15', '2022-12-20', 'https://static.nationalgeographicla.com/files/styles/image_3200/public/comedy-wildlife-awards-squirel-stop.jpg', 'Mensaje de despedida 2', 'Frase de despedida 2', 0, 6, 1, 1, NULL);
 
 INSERT INTO message (id ,body, code, is_last_will, title, customer_id, death_certificate_id ) VALUES 
-(1, 'Este es el último mensaje de prueba.', 'f/y2K0Ea56RQbdLqmUiLCw==', 1, 'Última Voluntad 1', 5,1),
+(1, 'Este es el último mensaje de prueba.', 'f/y2K0Ea56RQbdLqmUiLCw==', 0, 'Mensaje General', 5,1),
 (2, 'Otro mensaje de prueba.', 'f/y2K0Ea56RQbdLqmUiLCw==', 0, 'Mensaje General', 5,1),
 (3, 'Otro mensaje de prueba.', 'f/y2K0Ea56RQbdLqmUiLCw==', 0, 'Mensaje General', 6,2);
 
 INSERT INTO image (id, image_url, message_id) VALUES 
 (1, 'https://static.nationalgeographicla.com/files/styles/image_3200/public/comedy-wildlife-awards-squirel-stop.jpg', 1),
 (2, 'https://static.nationalgeographicla.com/files/styles/image_3200/public/comedy-wildlife-awards-squirel-stop.jpg', 1),
-(3, 'https://static.nationalgeographicla.com/files/styles/image_3200/public/comedy-wildlife-awards-squirel-stop.jpg', 3);
+(3, 'https://static.nationalgeographicla.com/files/styles/image_3200/public/comedy-wildlife-awards-squirel-stop.jpg', 2);
 
-INSERT INTO video (id, video_url, message_id) VALUES 
-(1, 'https://www.youtube.com/watch?v=9bZkp7q19f0', 1),
-(2, 'https://www.youtube.com/watch?v=9bZkp7q19f0', 2);
 
 INSERT INTO receiver (id, message_id, obituary_id, telephone, name, email) VALUES 
-(1, 1, NULL, '678945634', 'Reciver Uno', 'javierrodriguezreina@gmail.com'),
-(2, 2, NULL, '643767999', 'Reciver Dos', 'javierrodriguezreina@gmail.com'),
-(3, 3, NULL, '643767999', 'Reciver Dos', 'javierrodriguezreina@gmail.com'),
-(4, NULL, 1, '643767999', 'Reciver Dos', 'javierrodriguezreina@gmail.com'),
-(5, NULL, 2, '643767999', 'Reciver Dos', 'javierrodriguezreina@gmail.com');
+(1, 1, NULL, '678945634', 'Reciver Uno', 'correo1@gmail.com'),
+(2, 1, NULL, '643767999', 'Reciver Dos', 'correo2@gmail.com'),
+(3, 2, NULL, '643767949', 'Reciver Dos', 'correo3@gmail.com'),
+(4, NULL, 1, '643767929', 'Reciver Dos', 'correo4@gmail.com'),
+(5, NULL, 1, '643767919', 'Reciver Dos', 'correo5@gmail.com'),
+(6, NULL, 2, '643767229', 'Reciver Dos', 'correo6@gmail.com');
