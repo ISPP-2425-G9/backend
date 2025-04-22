@@ -1,0 +1,54 @@
+name: Codacy coverage report
+
+on:
+  pull_request:
+    branches: [develop]
+    types: [opened, reopened, edited, review_requested, synchronize]
+  push:
+    branches:
+      - "develop"
+  workflow_call:
+
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.0
+        ports:
+          - 3306:3306
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: caronte
+        options: >-
+          --health-cmd="mysqladmin ping --silent"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: '23'
+          distribution: 'temurin'
+
+      - name: Load environment variables from .env.example
+        run: |
+          cp .env.example .env
+          export $(grep -v '^#' .env | xargs)
+        shell: bash
+
+      - name: Wait for MySQL to be ready
+        run: |
+          until mysqladmin ping -h 127.0.0.1 -uroot -proot --silent; do
+            echo "Waiting for MySQL..."
+            sleep 2
+          done
+
+      - name: Run tests with Maven
+        run: ./mvnw clean verify
