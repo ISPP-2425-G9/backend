@@ -126,7 +126,7 @@ INSERT INTO emergency_contact (id, email, name, telephone, customer_id) VALUES
 (1, 'contacto1@caronte.site', 'Contacto Uno', '678945638', 5),
 (2, 'contacto2@caronte.site', 'Contacto Dos', '643767999', 5),
 (3, 'contacto3@caronte.site', 'Contacto Tres', '674945638', 5),
-(4, 'contacto4@caronte.site', 'Contacto Cuatro', '645767999', 5);
+(4, 'contacto4@caronte.site', 'Contacto Cuatro', '645767999', 6);
 
 INSERT INTO image_template (id , image_url) VALUES (1 ,'https://res.cloudinary.com/ds02duuid/image/upload/v1741707864/images/obituaries/templates/fbrpmmujaksc5dbbrbbi.jpg'),
  (2 ,'https://res.cloudinary.com/ds02duuid/image/upload/v1741707864/images/obituaries/templates/jqqcvnp28w3adaymwkcr.jpg'),
