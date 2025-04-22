@@ -11,18 +11,27 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.caronte.caronte.auth.payload.response.UserChangePasswordRequest;
 import com.caronte.caronte.company.Company;
+import com.caronte.caronte.company.CompanyRepository;
 import com.caronte.caronte.company.CompanyService;
 import com.caronte.caronte.configuration.services.UserDetailsImpl;
 import com.caronte.caronte.customer.Customer;
 import com.caronte.caronte.customer.CustomerRepository;
 import com.caronte.caronte.customer.CustomerService;
 import com.caronte.caronte.deathCertificate.DeathCertificate;
+import com.caronte.caronte.deathCertificate.DeathCertificateRepository;
 import com.caronte.caronte.deathCertificate.DeathCertificateService;
+import com.caronte.caronte.emergencyContact.EmergencyContact;
+import com.caronte.caronte.emergencyContact.EmergencyContactRepository;
+import com.caronte.caronte.image.Image;
+import com.caronte.caronte.image.ImageRepository;
 import com.caronte.caronte.message.Message;
+import com.caronte.caronte.message.MessageRepository;
 import com.caronte.caronte.message.MessageService;
 import com.caronte.caronte.obituary.Obituary;
 import com.caronte.caronte.obituary.ObituaryRepository;
 import com.caronte.caronte.obituary.ObituaryService;
+import com.caronte.caronte.receiver.Receiver;
+import com.caronte.caronte.receiver.ReceiverRepository;
 import com.caronte.caronte.util.Hash;
 import com.caronte.caronte.util.exceptions.ResourceNotFound;
 import com.caronte.caronte.util.exceptions.ResponseThrow;
@@ -34,28 +43,30 @@ public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final Hash hash;
-    private final CustomerService customerService;
-    private final CompanyService companyService;
-    private final ObituaryService obituaryService;
-    private final MessageService messageService;
-    private final DeathCertificateService deathCertificateService;
     private final CustomerRepository customerRepository;
     private final ObituaryRepository obituaryRepository;
+    private final MessageRepository messageRepository;
+    private final ImageRepository imageRepository;
+    private final ReceiverRepository receiverRepository;
+    private final EmergencyContactRepository emergencyContactRepository;
+    private final DeathCertificateRepository deathCertificateRepository;
+    private final CompanyRepository companyRepository; 
 
     public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, Hash hash,
-            CustomerService customerService, CompanyService companyService,
-            ObituaryService obituaryService, MessageService messageService, DeathCertificateService deathCertificateService,
-            CustomerRepository customerRepository, ObituaryRepository obituaryRepository) {
+            CustomerRepository customerRepository, ObituaryRepository obituaryRepository, MessageRepository messageRepository,
+            ImageRepository imageRepository, ReceiverRepository receiverRepository, EmergencyContactRepository emergencyContactRepository,
+            DeathCertificateRepository deathCertificateRepository, CompanyRepository companyRepository) { 
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.hash = hash;
-        this.customerService = customerService;
-        this.companyService = companyService;
-        this.obituaryService = obituaryService;
-        this.messageService = messageService;
-        this.deathCertificateService = deathCertificateService;
         this.customerRepository = customerRepository;
         this.obituaryRepository = obituaryRepository;
+        this.messageRepository = messageRepository;
+        this.imageRepository = imageRepository;
+        this.receiverRepository = receiverRepository;
+        this.emergencyContactRepository = emergencyContactRepository;
+        this.deathCertificateRepository = deathCertificateRepository;
+        this.companyRepository = companyRepository;
     }
 
     @Transactional(readOnly = true)
@@ -117,6 +128,7 @@ public class UserService {
     public void delete(Long id) throws StripeException {
         User user = userRepository.findById(id).orElseThrow(() -> ResourceNotFound.of("User"));
         user.getPlan().cancel();
+        anonymizeData(id);
         userRepository.delete(user);
     }
 
@@ -134,8 +146,8 @@ public class UserService {
     }
 
     @Transactional void anonymizeData(Long id){
-        Customer customer = customerService.findById(id);
-        Company company = companyService.findById(id);
+        Customer customer = customerRepository.findById(id).get();
+        Company company = companyRepository.findById(id).get();
 
         if(customer != null){
             customer.setName("Anónimo");
@@ -143,13 +155,60 @@ public class UserService {
             customer.setTelephone("000000000");
             customer.setPassword("anonimo"+hash.hash(customer.getPassword()));
             customerRepository.save(customer);
-            List<Obituary> obituaries = obituaryService.getAllObituariesByCustomer(id);
+            customerRepository.flush();
+            List<Obituary> obituaries = obituaryRepository.findByCustomerId(id);
             for (Obituary o : obituaries){
                 o.setName("Anónimo");
                 o.setFarewellMessage("Anónimo");
                 o.setFarewellPhrase("Anonimo");
                 o.setCustomImageUrl("Anonimo");
                 obituaryRepository.save(o);
+                obituaryRepository.flush();
+                List<Receiver> receivers = receiverRepository.findByObituary(o);
+                for (Receiver r : receivers){
+                    r.setName("Anónimo");
+                    r.setTelephone("000000000");
+                    r.setEmail("anonimo"+hash.hash(r.getEmail())+".com");
+                    receiverRepository.save(r);
+                    receiverRepository.flush();
+                }
+            }
+            List<Message> messages = messageRepository.findAllByCustomerId(id);
+            for (Message m : messages){
+                m.setTitle("Anónimo");
+                m.setBody("Anónimo");
+                messageRepository.save(m);
+                messageRepository.flush();
+                List<Receiver> receivers = receiverRepository.findByMessageId(m.getId());
+                for (Receiver r : receivers){
+                    r.setName("Anónimo");
+                    r.setTelephone("000000000");
+                    r.setEmail("anonimo"+hash.hash(r.getEmail())+".com");
+                    receiverRepository.save(r);
+                    receiverRepository.flush();
+                }
+            }
+            List<Image> images = imageRepository.findAllByMessageId(id);
+            for (Image i : images){
+                i.setImageUrl("Anonimo");
+                imageRepository.save(i);
+                imageRepository.flush();
+            }
+            DeathCertificate deathCertificate = deathCertificateRepository.getCertificateByDni(customer.getDni());
+            if(deathCertificate != null){
+                deathCertificate.setUrl("Anonimo");
+                deathCertificate.setDni("00000000A");
+                deathCertificateRepository.save(deathCertificate);
+                deathCertificateRepository.flush();
+
+            }
+            List<EmergencyContact> emergencyContacts = emergencyContactRepository.findAllByCustomerEmail(customer.getEmail());
+            for (EmergencyContact e : emergencyContacts){
+                e.setName("Anónimo");
+                e.setTelephone("000000000");
+                e.setEmail("anonimo"+hash.hash(e.getEmail())+".com");
+                emergencyContactRepository.save(e);
+                emergencyContactRepository.flush();
             }
 
 
@@ -165,12 +224,13 @@ public class UserService {
             company.setZipCode("00000");
             company.setDescription("Anónimo");
             company.setImageUrl("Anonimo");
+            companyRepository.save(company);
+            companyRepository.flush();
+            
         }
         else{
             throw new ResourceNotFound("User", "ID", id);
         }
-
-
     }
 
 }
