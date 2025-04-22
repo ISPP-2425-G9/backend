@@ -129,7 +129,6 @@ public class UserService {
         User user = userRepository.findById(id).orElseThrow(() -> ResourceNotFound.of("User"));
         user.getPlan().cancel();
         anonymizeData(id);
-        userRepository.delete(user);
     }
 
     @Transactional
@@ -146,10 +145,11 @@ public class UserService {
     }
 
     @Transactional void anonymizeData(Long id){
-        Customer customer = customerRepository.findById(id).get();
-        Company company = companyRepository.findById(id).get();
+        Optional<Customer> customerOpt = customerRepository.findById(id);
+        Optional<Company>  companyOpt = companyRepository.findById(id);
 
-        if(customer != null){
+        if(customerOpt.isPresent()){
+            Customer customer = customerOpt.get();
             customer.setName("Anónimo");
             customer.setEmail("anonimo"+hash.hash(customer.getEmail())+".com");
             customer.setTelephone("000000000");
@@ -165,10 +165,12 @@ public class UserService {
                 obituaryRepository.save(o);
                 obituaryRepository.flush();
                 List<Receiver> receivers = receiverRepository.findByObituary(o);
+                Integer count = 0;
                 for (Receiver r : receivers){
                     r.setName("Anónimo");
-                    r.setTelephone("000000000");
+                    r.setTelephone("00000000"+count);
                     r.setEmail("anonimo"+hash.hash(r.getEmail())+".com");
+                    count++;
                     receiverRepository.save(r);
                     receiverRepository.flush();
                 }
@@ -180,10 +182,12 @@ public class UserService {
                 messageRepository.save(m);
                 messageRepository.flush();
                 List<Receiver> receivers = receiverRepository.findByMessageId(m.getId());
+                Integer count = 0;
                 for (Receiver r : receivers){
                     r.setName("Anónimo");
-                    r.setTelephone("000000000");
+                    r.setTelephone("00000000"+count);
                     r.setEmail("anonimo"+hash.hash(r.getEmail())+".com");
+                    count++;
                     receiverRepository.save(r);
                     receiverRepository.flush();
                 }
@@ -203,17 +207,20 @@ public class UserService {
 
             }
             List<EmergencyContact> emergencyContacts = emergencyContactRepository.findAllByCustomerEmail(customer.getEmail());
+            Integer count = 0;
             for (EmergencyContact e : emergencyContacts){
                 e.setName("Anónimo");
-                e.setTelephone("000000000");
+                e.setTelephone("00000000"+count);
                 e.setEmail("anonimo"+hash.hash(e.getEmail())+".com");
+                count++;
                 emergencyContactRepository.save(e);
                 emergencyContactRepository.flush();
             }
 
 
         }
-        else if(company != null){
+        else if(companyOpt.isPresent()){
+            Company company = companyOpt.get();
             company.setName("Anónimo");
             company.setEmail("anonimo"+hash.hash(company.getEmail())+".com");
             company.setTelephone("000000000");
