@@ -1,4 +1,4 @@
-name: Codacy coverage report
+name: Run tests
 
 on:
   pull_request:
