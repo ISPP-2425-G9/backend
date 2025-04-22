@@ -13,5 +13,7 @@ public interface DeathCertificateRepository extends LongRepository<DeathCertific
     List<DeathCertificate> getAllCertificatesByIsVerified(boolean isVerified);
 
     CertificateResponseDTO getCertificateById(Long id);
+
+    DeathCertificate getCertificateByDni(String dni);
     
 }
