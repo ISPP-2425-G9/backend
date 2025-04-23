@@ -19,7 +19,7 @@ public class Customer extends User {
     @Column(nullable = false)
     private Boolean isActive;
 
-    @Column(unique = true, nullable = false, length = 20)
+    @Column(unique = true, nullable = false)
     private String dni;
 
     @JsonIgnore
