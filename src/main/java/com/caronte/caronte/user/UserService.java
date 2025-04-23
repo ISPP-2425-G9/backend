@@ -150,12 +150,6 @@ public class UserService {
 
         if(customerOpt.isPresent()){
             Customer customer = customerOpt.get();
-            customer.setName("Anónimo");
-            customer.setEmail("anonimo"+hash.hash(customer.getEmail())+".com");
-            customer.setTelephone("000000000");
-            customer.setPassword("anonimo"+hash.hash(customer.getPassword()));
-            customerRepository.save(customer);
-            customerRepository.flush();
             List<Obituary> obituaries = obituaryRepository.findByCustomerId(id);
             for (Obituary o : obituaries){
                 o.setName("Anónimo");
@@ -198,13 +192,12 @@ public class UserService {
                 imageRepository.save(i);
                 imageRepository.flush();
             }
-            DeathCertificate deathCertificate = deathCertificateRepository.getCertificateByDni(customer.getDni());
-            if(deathCertificate != null){
-                deathCertificate.setUrl("Anonimo");
-                deathCertificate.setDni("00000000A");
-                deathCertificateRepository.save(deathCertificate);
+            List<DeathCertificate> deathCertificate = deathCertificateRepository.findAllByDni(customer.getDni());
+            for(DeathCertificate d : deathCertificate){
+                d.setUrl("Anonimo");
+                d.setDni("00000000A");
+                deathCertificateRepository.save(d);
                 deathCertificateRepository.flush();
-
             }
             List<EmergencyContact> emergencyContacts = emergencyContactRepository.findAllByCustomerEmail(customer.getEmail());
             Integer count = 0;
@@ -216,7 +209,13 @@ public class UserService {
                 emergencyContactRepository.save(e);
                 emergencyContactRepository.flush();
             }
-
+            customer.setName("Anónimo");
+            customer.setEmail("anonimo"+hash.hash(customer.getEmail())+".com");
+            customer.setTelephone("000000000");
+            customer.setPassword("anonimo"+hash.hash(customer.getPassword()));
+            customer.setDni(hash.hash(customer.getDni()));
+            customerRepository.save(customer);
+            customerRepository.flush();
 
         }
         else if(companyOpt.isPresent()){
