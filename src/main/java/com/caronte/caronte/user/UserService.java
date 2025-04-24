@@ -254,9 +254,7 @@ public class UserService {
         }
     }
     private void removeImages(List<String> existingImages) {
-        for (String image : existingImages) {
-            mediaHandler.deleteImageFromCloudinary(image);
-        }
+        existingImages.forEach(mediaHandler::deleteImageFromCloudinary);
     }
 
 }
