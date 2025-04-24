@@ -1,5 +1,7 @@
 package com.caronte.caronte.user;
 
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 
@@ -33,9 +35,11 @@ import com.caronte.caronte.obituary.ObituaryService;
 import com.caronte.caronte.receiver.Receiver;
 import com.caronte.caronte.receiver.ReceiverRepository;
 import com.caronte.caronte.util.Hash;
+import com.caronte.caronte.util.MediaHandler;
 import com.caronte.caronte.util.exceptions.ResourceNotFound;
 import com.caronte.caronte.util.exceptions.ResponseThrow;
 import com.stripe.exception.StripeException;
+import com.stripe.model.tax.Registration.CountryOptions.Me;
 
 @Service
 public class UserService {
@@ -51,11 +55,12 @@ public class UserService {
     private final EmergencyContactRepository emergencyContactRepository;
     private final DeathCertificateRepository deathCertificateRepository;
     private final CompanyRepository companyRepository; 
+    private final MediaHandler mediaHandler;
 
     public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, Hash hash,
             CustomerRepository customerRepository, ObituaryRepository obituaryRepository, MessageRepository messageRepository,
             ImageRepository imageRepository, ReceiverRepository receiverRepository, EmergencyContactRepository emergencyContactRepository,
-            DeathCertificateRepository deathCertificateRepository, CompanyRepository companyRepository) { 
+            DeathCertificateRepository deathCertificateRepository, CompanyRepository companyRepository,MediaHandler mediaHandler) { 
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.hash = hash;
@@ -67,6 +72,7 @@ public class UserService {
         this.emergencyContactRepository = emergencyContactRepository;
         this.deathCertificateRepository = deathCertificateRepository;
         this.companyRepository = companyRepository;
+        this.mediaHandler = mediaHandler;
     }
 
     @Transactional(readOnly = true)
@@ -147,11 +153,13 @@ public class UserService {
     @Transactional void anonymizeData(Long id){
         Optional<Customer> customerOpt = customerRepository.findById(id);
         Optional<Company>  companyOpt = companyRepository.findById(id);
+        List<String> deteleUrls = new ArrayList<>();
 
         if(customerOpt.isPresent()){
             Customer customer = customerOpt.get();
             List<Obituary> obituaries = obituaryRepository.findByCustomerId(id);
             for (Obituary o : obituaries){
+                deteleUrls.add(o.getCustomImageUrl());
                 o.setName("Anónimo");
                 o.setFarewellMessage("Anónimo");
                 o.setFarewellPhrase("Anonimo");
@@ -185,15 +193,18 @@ public class UserService {
                     receiverRepository.save(r);
                     receiverRepository.flush();
                 }
+                List<Image> images = imageRepository.findAllByMessageId(m.getId());
+                for (Image i : images){
+                    deteleUrls.add(i.getImageUrl());
+                    i.setImageUrl("Anonimo");
+                    imageRepository.save(i);
+                    imageRepository.flush();
+                }
             }
-            List<Image> images = imageRepository.findAllByMessageId(id);
-            for (Image i : images){
-                i.setImageUrl("Anonimo");
-                imageRepository.save(i);
-                imageRepository.flush();
-            }
+
             List<DeathCertificate> deathCertificate = deathCertificateRepository.findAllByDni(customer.getDni());
             for(DeathCertificate d : deathCertificate){
+                deteleUrls.add(d.getUrl());
                 d.setUrl("Anonimo");
                 d.setDni("00000000A");
                 deathCertificateRepository.save(d);
@@ -216,26 +227,35 @@ public class UserService {
             customer.setDni(hash.hash(customer.getDni()));
             customerRepository.save(customer);
             customerRepository.flush();
+            System.out.println(deteleUrls);
+            removeImages(deteleUrls);
 
         }
         else if(companyOpt.isPresent()){
             Company company = companyOpt.get();
+            deteleUrls.add(company.getImageUrl());
             company.setName("Anónimo");
             company.setEmail("anonimo"+hash.hash(company.getEmail())+".com");
             company.setTelephone("000000000");
             company.setPassword("anonimo"+hash.hash(company.getPassword()));
             company.setAddress("Anónimo");
             company.setCity("Anónimo");
-            company.setNif("00000000A");
+            company.setNif(hash.hash(company.getNif()));
             company.setZipCode("00000");
             company.setDescription("Anónimo");
             company.setImageUrl("Anonimo");
             companyRepository.save(company);
             companyRepository.flush();
+            removeImages(deteleUrls);
             
         }
         else{
             throw new ResourceNotFound("User", "ID", id);
+        }
+    }
+    private void removeImages(List<String> existingImages) {
+        for (String image : existingImages) {
+            mediaHandler.deleteImageFromCloudinary(image);
         }
     }
 
