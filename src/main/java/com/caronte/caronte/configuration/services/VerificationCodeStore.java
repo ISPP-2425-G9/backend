@@ -6,8 +6,10 @@ import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.caronte.caronte.auth.payload.response.RememberPasswordRequest;
 import com.caronte.caronte.user.UserRepository;
@@ -24,15 +26,15 @@ public class VerificationCodeStore {
     private final String domain;
 
     public VerificationCodeStore(UserRepository userRepository, EmailService emailService, 
-            @Value("app.domain") String domain) {
+            @Value("${app.domain}") String domain) {
         this.userRepository = userRepository;
         this.emailService = emailService;
         this.domain = domain;
     }
 
     public void saveCode(String email) throws Exception {
-        ResponseThrow.checkOrBadRequest(userRepository.existsByEmail(email), "There isn't user with email: " + email);
-        String code = generateUniqueRandomCode();
+        ResponseThrow.checkOrBadRequest(userRepository.existsByEmail(email), "No existe usuario con email " + email);
+        String code = generateRandomCode();
         saveCode(email, code);
         String subject = "Recuperación de correo";
         String body = String.format("""
@@ -47,17 +49,23 @@ public class VerificationCodeStore {
     }
 
     public String getCode(String email) {
-        ResponseThrow.checkOrBadRequest(userRepository.existsByEmail(email), "There isn't user with email: " + email);
+        ResponseThrow.checkOrBadRequest(userRepository.existsByEmail(email), "No existe usuario con email " + email);
         CodeData data = CODE_MAP.get(email);
-        if (data != null && data.expirationTime().isAfter(LocalDateTime.now())) {
-            return data.code();
-        }
-        return null;
+        if(data == null)
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No se ha enviado correo de recuperación");
+        
+        ResponseThrow.checkOrBadRequest(data.expirationTime().isAfter(LocalDateTime.now()), "Tiempo de recuperación expirado");
+        return data.code();
     }
 
-    public boolean verifyCode(RememberPasswordRequest rememberPasswordRequest) {
+    public void verifyCode(RememberPasswordRequest rememberPasswordRequest) {
         String code = getCode(rememberPasswordRequest.email());
-        return Objects.equals(code, rememberPasswordRequest.code());
+        ResponseThrow.checkOrBadRequest(Objects.equals(code, rememberPasswordRequest.code()), 
+                                 "Código de recuperación incorrecto");
+    }
+
+    public void removeCode(String email) {
+        this.CODE_MAP.remove(email);
     }
 
     @Scheduled(fixedRate = 60000)
@@ -66,8 +74,8 @@ public class VerificationCodeStore {
         CODE_MAP.entrySet().removeIf(entry -> entry.getValue().expirationTime().isBefore(now));
     }
 
-    private String generateUniqueRandomCode() {
-        int randomNumber = (int)(Math.random() * 100_000); // 00000 - 99999
+    private String generateRandomCode() {
+        int randomNumber = (int)(Math.random() * 100_000);
         return String.format("%05d", randomNumber);
     }
 

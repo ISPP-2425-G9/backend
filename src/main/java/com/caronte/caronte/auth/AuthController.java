@@ -136,9 +136,11 @@ public class AuthController {
 	}
 
 	@PostMapping("/password/remember/verify")
-	public ResponseEntity<Boolean> verifyRememberCode(@RequestBody RememberPasswordRequest rememberPasswordRequest) throws Exception {
-		boolean isVerify = verificationCodeStore.verifyCode(rememberPasswordRequest);
-		return ResponseEntity.ok(isVerify);
+	public ResponseEntity<String> verifyRememberCode(@RequestBody @Valid RememberPasswordRequest rememberPasswordRequest) throws Exception {
+		verificationCodeStore.verifyCode(rememberPasswordRequest);
+		userService.changePassword(rememberPasswordRequest.email(), rememberPasswordRequest.password());
+		verificationCodeStore.removeCode(rememberPasswordRequest.email());
+		return ResponseEntity.ok("Contraseña cambiada");
 	}
 
 	@PostMapping("/password/remember")

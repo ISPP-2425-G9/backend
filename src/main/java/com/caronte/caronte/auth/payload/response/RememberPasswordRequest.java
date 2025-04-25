@@ -1,11 +1,9 @@
 package com.caronte.caronte.auth.payload.response;
 
-import com.caronte.caronte.util.RegexContants;
-
-import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 
 public record RememberPasswordRequest(
-    @Email(regexp = RegexContants.REGEX_EMAIL) String email, 
-    @NotBlank String code) {
+    @NotBlank(message = "El email no puede estar en blanco") String email, 
+    @NotBlank(message = "La contraseña no puede estar en blanco") String password,
+    @NotBlank(message = "Debes de introducir el código de verificación") String code) {
 }
