@@ -38,7 +38,7 @@ public class VerificationCodeStore {
         saveCode(email, code);
         String subject = "Recuperación de correo";
         String body = String.format("""
-            Ha recibido correo de verificación para recuperar contraseña en la url: %s
+            Ha recibido correo de verificación para recuperar contraseña de tu cuenta en %s
             El código de verificación es el siguiente: %s
             """, domain, code);
         emailService.sendEmail(email, subject, body);
