@@ -3,7 +3,7 @@
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/2194b57b5519495bbc0ba348cf27a296)](https://app.codacy.com/gh/ISPP-2425-G9/backend/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade) [![Codacy Badge](https://app.codacy.com/project/badge/Coverage/2194b57b5519495bbc0ba348cf27a296)](https://app.codacy.com/gh/ISPP-2425-G9/backend/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_coverage) ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg) ![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-yellow.svg?logo=conventional-commits)
 
 ## Description
-Caronte is a backend application developed with Spring Boot that uses a MySQL database to manage and store data related to cars.
+Caronte is a backend application developed with Spring Boot that uses a MySQL database to manage and store data related to last wishes and obituaries.
 
 ## Requirements
 
