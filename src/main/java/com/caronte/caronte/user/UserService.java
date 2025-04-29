@@ -154,12 +154,11 @@ public class UserService {
 
 @Transactional
 void anonymizeData(Long id) {
-    Optional<Customer> customerOpt = customerRepository.findById(id);
-    Optional<Company>  companyOpt = companyRepository.findById(id);
+     User user = userRepository.findById(id)
+    .orElseThrow(() -> new ResourceNotFound("User", "ID", id));
     List<String> deteleUrls = new ArrayList<>();
 
-    if (customerOpt.isPresent()) {
-        Customer customer = customerOpt.get();
+    if (user instanceof Customer customer) {
 
         List<Obituary> obituaries = obituaryRepository.findByCustomerId(id);
         List<Receiver> allReceivers = new ArrayList<>();
@@ -231,8 +230,7 @@ void anonymizeData(Long id) {
 
         removeImages(deteleUrls);
 
-    } else if (companyOpt.isPresent()) {
-        Company company = companyOpt.get();
+    } else if (user instanceof Company company) {
         deteleUrls.add(company.getImageUrl());
         company.setName(ANONYMOUS);
         company.setEmail(ANONYMOUS + hash.hash(company.getEmail()) + ".com");
