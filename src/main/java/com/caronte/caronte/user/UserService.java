@@ -34,7 +34,6 @@ import com.caronte.caronte.obituary.ObituaryRepository;
 import com.caronte.caronte.obituary.ObituaryService;
 import com.caronte.caronte.receiver.Receiver;
 import com.caronte.caronte.receiver.ReceiverRepository;
-import com.caronte.caronte.util.Hash;
 import com.caronte.caronte.util.MediaHandler;
 import com.caronte.caronte.util.exceptions.ResourceNotFound;
 import com.caronte.caronte.util.exceptions.ResponseThrow;
@@ -46,7 +45,6 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    private final Hash hash;
     private final CustomerRepository customerRepository;
     private final ObituaryRepository obituaryRepository;
     private final MessageRepository messageRepository;
@@ -57,13 +55,12 @@ public class UserService {
     private final CompanyRepository companyRepository; 
     private final MediaHandler mediaHandler;
 
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, Hash hash,
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder,
             CustomerRepository customerRepository, ObituaryRepository obituaryRepository, MessageRepository messageRepository,
             ImageRepository imageRepository, ReceiverRepository receiverRepository, EmergencyContactRepository emergencyContactRepository,
             DeathCertificateRepository deathCertificateRepository, CompanyRepository companyRepository,MediaHandler mediaHandler) { 
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
-        this.hash = hash;
         this.customerRepository = customerRepository;
         this.obituaryRepository = obituaryRepository;
         this.messageRepository = messageRepository;
@@ -157,9 +154,7 @@ void anonymizeData(Long id) {
      User user = userRepository.findById(id)
     .orElseThrow(() -> new ResourceNotFound("User", "ID", id));
     List<String> deteleUrls = new ArrayList<>();
-
     if (user instanceof Customer customer) {
-
         List<Obituary> obituaries = obituaryRepository.findByCustomerId(id);
         List<Receiver> allReceivers = new ArrayList<>();
         List<Image> allImages = new ArrayList<>();
@@ -174,8 +169,8 @@ void anonymizeData(Long id) {
             int count = 0;
             for (Receiver r : receivers) {
                 r.setName(ANONYMOUS);
-                r.setTelephone("00000000" + count);
-                r.setEmail(ANONYMOUS + hash.hash(r.getEmail()) + ".com");
+                r.setTelephone(ANONYMOUS+ count);
+                r.setEmail(ANONYMOUS + count);
                 allReceivers.add(r);
                 count++;
             }
@@ -188,8 +183,8 @@ void anonymizeData(Long id) {
             int count = 0;
             for (Receiver r : receivers) {
                 r.setName(ANONYMOUS);
-                r.setTelephone("00000000" + count);
-                r.setEmail(ANONYMOUS + hash.hash(r.getEmail()) + ".com");
+                r.setTelephone(ANONYMOUS+ count);
+                r.setEmail(ANONYMOUS+ count);
                 allReceivers.add(r);
                 count++;
             }
@@ -204,21 +199,19 @@ void anonymizeData(Long id) {
         for (DeathCertificate d : deathCertificates) {
             deteleUrls.add(d.getUrl());
             d.setUrl(ANONYMOUS);
-            d.setDni("00000000A");
+            d.setDni(ANONYMOUS);
         }
         List<EmergencyContact> emergencyContacts = emergencyContactRepository.findAllByCustomerEmail(customer.getEmail());
-        int count = 0;
         for (EmergencyContact e : emergencyContacts) {
             e.setName(ANONYMOUS);
-            e.setTelephone("00000000" + count);
-            e.setEmail(ANONYMOUS + hash.hash(e.getEmail()) + ".com");
-            count++;
+            e.setTelephone(ANONYMOUS);
+            e.setEmail(ANONYMOUS);
         }
         customer.setName(ANONYMOUS);
-        customer.setEmail(ANONYMOUS + hash.hash(customer.getEmail()) + ".com");
-        customer.setTelephone("000000000");
-        customer.setPassword(ANONYMOUS + hash.hash(customer.getPassword()));
-        customer.setDni(hash.hash(customer.getDni()));
+        customer.setEmail(ANONYMOUS);
+        customer.setTelephone(ANONYMOUS);
+        customer.setPassword(ANONYMOUS);
+        customer.setDni(ANONYMOUS);
 
         obituaryRepository.saveAll(obituaries);
         messageRepository.saveAll(messages);
@@ -233,20 +226,18 @@ void anonymizeData(Long id) {
     } else if (user instanceof Company company) {
         deteleUrls.add(company.getImageUrl());
         company.setName(ANONYMOUS);
-        company.setEmail(ANONYMOUS + hash.hash(company.getEmail()) + ".com");
-        company.setTelephone("000000000");
-        company.setPassword(ANONYMOUS + hash.hash(company.getPassword()));
+        company.setEmail(ANONYMOUS);
+        company.setTelephone(ANONYMOUS);
+        company.setPassword(ANONYMOUS);
         company.setAddress(ANONYMOUS);
         company.setCity(ANONYMOUS);
-        company.setNif(hash.hash(company.getNif()));
+        company.setNif(ANONYMOUS);
         company.setZipCode("00000");
         company.setDescription(ANONYMOUS);
         company.setImageUrl(ANONYMOUS);
         companyRepository.saveAndFlush(company);
         removeImages(deteleUrls);
 
-    } else {
-        throw new ResourceNotFound("User", "ID", id);
     }
 }
 
