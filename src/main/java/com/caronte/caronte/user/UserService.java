@@ -150,9 +150,8 @@ public class UserService {
         ResponseThrow.checkOrBadRequest(auth.isAdmin(), message);
     }
 
-    private static final String ANONYMOUS = "Anónimo";
-    private static final String ANONYMOUS_PREFIX = "anonimo";
-    
+    private static final String ANONYMOUS = "anonimo";
+
     @Transactional
     void anonymizeData(Long id) {
         Optional<Customer> customerOpt = customerRepository.findById(id);
@@ -174,7 +173,7 @@ public class UserService {
                 for (Receiver r : receivers){
                     r.setName(ANONYMOUS);
                     r.setTelephone("00000000" + count);
-                    r.setEmail(ANONYMOUS_PREFIX + hash.hash(r.getEmail()) + ".com");
+                    r.setEmail(ANONYMOUS + hash.hash(r.getEmail()) + ".com");
                     count++;
                     receiverRepository.saveAndFlush(r);
                 }
@@ -190,7 +189,7 @@ public class UserService {
                 for (Receiver r : receivers){
                     r.setName(ANONYMOUS);
                     r.setTelephone("00000000" + count);
-                    r.setEmail(ANONYMOUS_PREFIX + hash.hash(r.getEmail()) + ".com");
+                    r.setEmail(ANONYMOUS + hash.hash(r.getEmail()) + ".com");
                     count++;
                     receiverRepository.saveAndFlush(r);
                 }
@@ -214,14 +213,14 @@ public class UserService {
             for (EmergencyContact e : emergencyContacts){
                 e.setName(ANONYMOUS);
                 e.setTelephone("00000000" + count);
-                e.setEmail(ANONYMOUS_PREFIX + hash.hash(e.getEmail()) + ".com");
+                e.setEmail(ANONYMOUS + hash.hash(e.getEmail()) + ".com");
                 count++;
                 emergencyContactRepository.saveAndFlush(e);
             }
             customer.setName(ANONYMOUS);
-            customer.setEmail(ANONYMOUS_PREFIX + hash.hash(customer.getEmail()) + ".com");
+            customer.setEmail(ANONYMOUS + hash.hash(customer.getEmail()) + ".com");
             customer.setTelephone("000000000");
-            customer.setPassword(ANONYMOUS_PREFIX + hash.hash(customer.getPassword()));
+            customer.setPassword(ANONYMOUS + hash.hash(customer.getPassword()));
             customer.setDni(hash.hash(customer.getDni()));
             customerRepository.saveAndFlush(customer);
             removeImages(deteleUrls);
@@ -230,9 +229,9 @@ public class UserService {
             Company company = companyOpt.get();
             deteleUrls.add(company.getImageUrl());
             company.setName(ANONYMOUS);
-            company.setEmail(ANONYMOUS_PREFIX + hash.hash(company.getEmail()) + ".com");
+            company.setEmail(ANONYMOUS + hash.hash(company.getEmail()) + ".com");
             company.setTelephone("000000000");
-            company.setPassword(ANONYMOUS_PREFIX + hash.hash(company.getPassword()));
+            company.setPassword(ANONYMOUS + hash.hash(company.getPassword()));
             company.setAddress(ANONYMOUS);
             company.setCity(ANONYMOUS);
             company.setNif(hash.hash(company.getNif()));
