@@ -179,6 +179,7 @@ void anonymizeData(Long id) {
         for (Message m : messages) {
             m.setTitle(ANONYMOUS);
             m.setBody(ANONYMOUS);
+            m.setCode(ANONYMOUS);
             List<Receiver> receivers = receiverRepository.findByMessageId(m.getId());
             int count = 0;
             for (Receiver r : receivers) {
@@ -200,6 +201,7 @@ void anonymizeData(Long id) {
             deteleUrls.add(d.getUrl());
             d.setUrl(ANONYMOUS);
             d.setDni(ANONYMOUS);
+            d.setIsVerified(true);
         }
         List<EmergencyContact> emergencyContacts = emergencyContactRepository.findAllByCustomerEmail(customer.getEmail());
         for (EmergencyContact e : emergencyContacts) {
