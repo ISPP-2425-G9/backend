@@ -164,8 +164,7 @@ public class UserService {
                 o.setFarewellMessage("Anónimo");
                 o.setFarewellPhrase("Anonimo");
                 o.setCustomImageUrl("Anonimo");
-                obituaryRepository.save(o);
-                obituaryRepository.flush();
+                obituaryRepository.saveAndFlush(o);
                 List<Receiver> receivers = receiverRepository.findByObituary(o);
                 Integer count = 0;
                 for (Receiver r : receivers){
@@ -173,8 +172,7 @@ public class UserService {
                     r.setTelephone("00000000"+count);
                     r.setEmail("anonimo"+hash.hash(r.getEmail())+".com");
                     count++;
-                    receiverRepository.save(r);
-                    receiverRepository.flush();
+                    receiverRepository.saveAndFlush(r);
                 }
             }
             List<Message> messages = messageRepository.findAllByCustomerId(id);
@@ -190,15 +188,13 @@ public class UserService {
                     r.setTelephone("00000000"+count);
                     r.setEmail("anonimo"+hash.hash(r.getEmail())+".com");
                     count++;
-                    receiverRepository.save(r);
-                    receiverRepository.flush();
+                    receiverRepository.saveAndFlush(r);
                 }
                 List<Image> images = imageRepository.findAllByMessageId(m.getId());
                 for (Image i : images){
                     deteleUrls.add(i.getImageUrl());
                     i.setImageUrl("Anonimo");
-                    imageRepository.save(i);
-                    imageRepository.flush();
+                    imageRepository.saveAndFlush(i);
                 }
             }
 
@@ -207,8 +203,7 @@ public class UserService {
                 deteleUrls.add(d.getUrl());
                 d.setUrl("Anonimo");
                 d.setDni("00000000A");
-                deathCertificateRepository.save(d);
-                deathCertificateRepository.flush();
+                deathCertificateRepository.saveAndFlush(d);
             }
             List<EmergencyContact> emergencyContacts = emergencyContactRepository.findAllByCustomerEmail(customer.getEmail());
             Integer count = 0;
@@ -217,17 +212,14 @@ public class UserService {
                 e.setTelephone("00000000"+count);
                 e.setEmail("anonimo"+hash.hash(e.getEmail())+".com");
                 count++;
-                emergencyContactRepository.save(e);
-                emergencyContactRepository.flush();
+                emergencyContactRepository.saveAndFlush(e);
             }
             customer.setName("Anónimo");
             customer.setEmail("anonimo"+hash.hash(customer.getEmail())+".com");
             customer.setTelephone("000000000");
             customer.setPassword("anonimo"+hash.hash(customer.getPassword()));
             customer.setDni(hash.hash(customer.getDni()));
-            customerRepository.save(customer);
-            customerRepository.flush();
-            System.out.println(deteleUrls);
+            customerRepository.saveAndFlush(customer);
             removeImages(deteleUrls);
 
         }
@@ -244,8 +236,7 @@ public class UserService {
             company.setZipCode("00000");
             company.setDescription("Anónimo");
             company.setImageUrl("Anonimo");
-            companyRepository.save(company);
-            companyRepository.flush();
+            companyRepository.saveAndFlush(company);
             removeImages(deteleUrls);
             
         }
