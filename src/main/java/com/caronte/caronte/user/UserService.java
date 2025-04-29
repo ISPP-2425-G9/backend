@@ -150,102 +150,106 @@ public class UserService {
         ResponseThrow.checkOrBadRequest(auth.isAdmin(), message);
     }
 
-    @Transactional void anonymizeData(Long id){
+    private static final String ANONYMOUS = "Anónimo";
+    private static final String ANONYMOUS_PREFIX = "anonimo";
+    
+    @Transactional
+    void anonymizeData(Long id) {
         Optional<Customer> customerOpt = customerRepository.findById(id);
         Optional<Company>  companyOpt = companyRepository.findById(id);
         List<String> deteleUrls = new ArrayList<>();
-
+    
         if(customerOpt.isPresent()){
             Customer customer = customerOpt.get();
             List<Obituary> obituaries = obituaryRepository.findByCustomerId(id);
             for (Obituary o : obituaries){
                 deteleUrls.add(o.getCustomImageUrl());
-                o.setName("Anónimo");
-                o.setFarewellMessage("Anónimo");
-                o.setFarewellPhrase("Anonimo");
-                o.setCustomImageUrl("Anonimo");
+                o.setName(ANONYMOUS);
+                o.setFarewellMessage(ANONYMOUS);
+                o.setFarewellPhrase(ANONYMOUS);
+                o.setCustomImageUrl(ANONYMOUS);
                 obituaryRepository.saveAndFlush(o);
                 List<Receiver> receivers = receiverRepository.findByObituary(o);
                 Integer count = 0;
                 for (Receiver r : receivers){
-                    r.setName("Anónimo");
-                    r.setTelephone("00000000"+count);
-                    r.setEmail("anonimo"+hash.hash(r.getEmail())+".com");
+                    r.setName(ANONYMOUS);
+                    r.setTelephone("00000000" + count);
+                    r.setEmail(ANONYMOUS_PREFIX + hash.hash(r.getEmail()) + ".com");
                     count++;
                     receiverRepository.saveAndFlush(r);
                 }
             }
             List<Message> messages = messageRepository.findAllByCustomerId(id);
             for (Message m : messages){
-                m.setTitle("Anónimo");
-                m.setBody("Anónimo");
+                m.setTitle(ANONYMOUS);
+                m.setBody(ANONYMOUS);
                 messageRepository.save(m);
                 messageRepository.flush();
                 List<Receiver> receivers = receiverRepository.findByMessageId(m.getId());
                 Integer count = 0;
                 for (Receiver r : receivers){
-                    r.setName("Anónimo");
-                    r.setTelephone("00000000"+count);
-                    r.setEmail("anonimo"+hash.hash(r.getEmail())+".com");
+                    r.setName(ANONYMOUS);
+                    r.setTelephone("00000000" + count);
+                    r.setEmail(ANONYMOUS_PREFIX + hash.hash(r.getEmail()) + ".com");
                     count++;
                     receiverRepository.saveAndFlush(r);
                 }
                 List<Image> images = imageRepository.findAllByMessageId(m.getId());
                 for (Image i : images){
                     deteleUrls.add(i.getImageUrl());
-                    i.setImageUrl("Anonimo");
+                    i.setImageUrl(ANONYMOUS);
                     imageRepository.saveAndFlush(i);
                 }
             }
-
+    
             List<DeathCertificate> deathCertificate = deathCertificateRepository.findAllByDni(customer.getDni());
-            for(DeathCertificate d : deathCertificate){
+            for (DeathCertificate d : deathCertificate){
                 deteleUrls.add(d.getUrl());
-                d.setUrl("Anonimo");
+                d.setUrl(ANONYMOUS);
                 d.setDni("00000000A");
                 deathCertificateRepository.saveAndFlush(d);
             }
             List<EmergencyContact> emergencyContacts = emergencyContactRepository.findAllByCustomerEmail(customer.getEmail());
             Integer count = 0;
             for (EmergencyContact e : emergencyContacts){
-                e.setName("Anónimo");
-                e.setTelephone("00000000"+count);
-                e.setEmail("anonimo"+hash.hash(e.getEmail())+".com");
+                e.setName(ANONYMOUS);
+                e.setTelephone("00000000" + count);
+                e.setEmail(ANONYMOUS_PREFIX + hash.hash(e.getEmail()) + ".com");
                 count++;
                 emergencyContactRepository.saveAndFlush(e);
             }
-            customer.setName("Anónimo");
-            customer.setEmail("anonimo"+hash.hash(customer.getEmail())+".com");
+            customer.setName(ANONYMOUS);
+            customer.setEmail(ANONYMOUS_PREFIX + hash.hash(customer.getEmail()) + ".com");
             customer.setTelephone("000000000");
-            customer.setPassword("anonimo"+hash.hash(customer.getPassword()));
+            customer.setPassword(ANONYMOUS_PREFIX + hash.hash(customer.getPassword()));
             customer.setDni(hash.hash(customer.getDni()));
             customerRepository.saveAndFlush(customer);
             removeImages(deteleUrls);
-
-        }
-        else if(companyOpt.isPresent()){
+    
+        } else if (companyOpt.isPresent()) {
             Company company = companyOpt.get();
             deteleUrls.add(company.getImageUrl());
-            company.setName("Anónimo");
-            company.setEmail("anonimo"+hash.hash(company.getEmail())+".com");
+            company.setName(ANONYMOUS);
+            company.setEmail(ANONYMOUS_PREFIX + hash.hash(company.getEmail()) + ".com");
             company.setTelephone("000000000");
-            company.setPassword("anonimo"+hash.hash(company.getPassword()));
-            company.setAddress("Anónimo");
-            company.setCity("Anónimo");
+            company.setPassword(ANONYMOUS_PREFIX + hash.hash(company.getPassword()));
+            company.setAddress(ANONYMOUS);
+            company.setCity(ANONYMOUS);
             company.setNif(hash.hash(company.getNif()));
             company.setZipCode("00000");
-            company.setDescription("Anónimo");
-            company.setImageUrl("Anonimo");
+            company.setDescription(ANONYMOUS);
+            company.setImageUrl(ANONYMOUS);
             companyRepository.saveAndFlush(company);
             removeImages(deteleUrls);
-            
-        }
-        else{
+    
+        } else {
             throw new ResourceNotFound("User", "ID", id);
         }
     }
+    
     private void removeImages(List<String> existingImages) {
         existingImages.forEach(mediaHandler::deleteImageFromCloudinary);
     }
+    
 
 }
