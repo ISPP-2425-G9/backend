@@ -98,7 +98,7 @@ public class ReceiverService {
         String code = aesCipher.decrypt(message.getCode());
         String messageBody = "Has recibido un mensaje de Caronte. \n" + 
                 "El codigo para acceder al mensaje es: " + code + "\n" +
-                "Puedes revisarlo aquí: " + domain + "/messages/visualizeMessageWithCode?messageId=" + message.getId();   
+                "Puedes revisarlo aquí: " + domain + "messages/visualizeMessageWithCode?messageId=" + message.getId();   
         for (Receiver receiver : receivers) {
             try {
                 emailService.sendEmail(receiver.getEmail(), "Mensaje de " + message.getCustomer().getName(),
