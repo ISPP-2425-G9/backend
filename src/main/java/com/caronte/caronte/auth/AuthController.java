@@ -195,7 +195,7 @@ public class AuthController {
 
 	@GetMapping("/admin/customers")
 	public ResponseEntity<List<Customer>> getCustomers() {
-		return ResponseEntity.ok().body(customerService.findAll());
+		return ResponseEntity.ok().body(customerService.findAllWithOutAnonymus());
 	}
 
 	@GetMapping("/admin/customers/{customerId}")
@@ -213,7 +213,7 @@ public class AuthController {
 
 	@GetMapping("/admin/companies")
 	public ResponseEntity<List<Company>> getCompanies() {
-		return ResponseEntity.ok().body(companyService.findAll());
+		return ResponseEntity.ok().body(companyService.findAllWithOutAnonymus());
 	}
 
 	@GetMapping("/admin/companies/{companyId}")
