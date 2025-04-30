@@ -22,6 +22,11 @@ public class CustomerService {
         return customerRepository.findAll();
     }
 
+    @Transactional
+    public List<Customer> findAllWithOutAnonymus(){
+        return customerRepository.findByDniNot("anonimo");
+    }
+
     @Transactional(readOnly = true)
     public Customer findById(Long id){
         return customerRepository.findById(id).orElseThrow(() -> ResourceNotFound.of("Customer"));
