@@ -27,6 +27,8 @@ public interface CompanyRepository extends LongRepository<Company> {
     """)
     Page<Company> findPremiumCompaniesFiltered(String city, String name, CompanyType companyType, Pageable pageable);
 
+    List<Company> findByNifNot(String nif);
+
 }
 
 
