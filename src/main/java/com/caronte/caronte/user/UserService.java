@@ -141,6 +141,13 @@ public class UserService {
         return userRepository.save(user);
     }
 
+    @Transactional
+    public User changePassword(String email, String password) {
+        User user = userRepository.findByEmail(email).orElseThrow(() -> ResourceNotFound.of("User"));
+        user.setPassword(this.passwordEncoder.encode(password));
+        return userRepository.save(user);
+    }
+
     @Transactional(readOnly = true)
     public void authorizeAdmin(String message){
         UserDetailsImpl auth =  (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
