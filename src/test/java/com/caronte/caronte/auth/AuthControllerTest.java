@@ -616,7 +616,7 @@ public class AuthControllerTest {
         customerB.setPlan(Plan.newPlanFree());
         
         List<Customer> customers = List.of(customerA, customerB);
-        Mockito.when(customerService.findAll()).thenReturn(customers);
+        Mockito.when(customerService.findAllWithOutAnonymus()).thenReturn(customers);
         
         mockMvc.perform(get("/api/auth/admin/customers"))
             .andExpect(status().isOk())
@@ -747,7 +747,7 @@ public class AuthControllerTest {
         company2.setCompanyType(CompanyType.OTRO);
 
         List<Company> companies = List.of(company1, company2);
-        when(companyService.findAll()).thenReturn(companies);
+        when(companyService.findAllWithOutAnonymus()).thenReturn(companies);
 
         mockMvc.perform(get("/api/auth/admin/companies")
                 .contentType(MediaType.APPLICATION_JSON))
