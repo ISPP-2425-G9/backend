@@ -26,6 +26,11 @@ public class CompanyService {
     }
 
     @Transactional(readOnly = true)
+    public List<Company> findAllWithOutAnonymus() {
+        return companyRepository.findByNifNot("anonimo");
+    }
+
+    @Transactional(readOnly = true)
     public Company findById(Long id) {
         Company company = companyRepository.findById(id).orElseThrow(() -> ResourceNotFound.of("Company"));
         return company;
