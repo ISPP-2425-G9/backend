@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.caronte.caronte.auth.payload.response.CompanyUpdateRequest;
@@ -26,11 +27,13 @@ import com.caronte.caronte.auth.payload.response.JwtResponse;
 import com.caronte.caronte.auth.payload.response.LoginRequest;
 import com.caronte.caronte.auth.payload.response.RegisterRequestCompany;
 import com.caronte.caronte.auth.payload.response.RegisterRequestCustomer;
+import com.caronte.caronte.auth.payload.response.RememberPasswordRequest;
 import com.caronte.caronte.auth.payload.response.UserChangePasswordRequest;
 import com.caronte.caronte.company.Company;
 import com.caronte.caronte.company.CompanyService;
 import com.caronte.caronte.configuration.jwt.JwtUtils;
 import com.caronte.caronte.configuration.services.UserDetailsImpl;
+import com.caronte.caronte.configuration.services.VerificationCodeStore;
 import com.caronte.caronte.customer.Customer;
 import com.caronte.caronte.customer.CustomerService;
 import com.caronte.caronte.user.User;
@@ -39,6 +42,7 @@ import com.caronte.caronte.util.ErrorHandler;
 import com.stripe.exception.StripeException;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Email;
 
 @RestController
 @RequestMapping("api/auth")
@@ -50,15 +54,17 @@ public class AuthController {
 	private final UserService userService;
 	private final CustomerService customerService;
 	private final CompanyService companyService;
+	private final VerificationCodeStore verificationCodeStore;
 
 	public AuthController(AuthenticationManager authenticationManager, AuthService authService, UserService userService,
-			CustomerService customerService, CompanyService companyService, JwtUtils jwtUtils) {
+			CustomerService customerService, CompanyService companyService, JwtUtils jwtUtils, VerificationCodeStore verificationCodeStore) {
 		this.authenticationManager = authenticationManager;
 		this.authService = authService;
 		this.userService = userService;
 		this.customerService = customerService;
 		this.companyService = companyService;
 		this.jwtUtils = jwtUtils;
+		this.verificationCodeStore = verificationCodeStore;
 	}
 
 	@PostMapping("/login")
@@ -108,7 +114,7 @@ public class AuthController {
 	public ResponseEntity<Customer> getCustomer(@PathVariable Long customerId) {
 		userService.authorizeUserOrAdmin(customerId, "You can't access this data");
 		Customer customer = customerService.findById(customerId);
-		return ResponseEntity.ok().body(customer);
+		return ResponseEntity.ok(customer);
 	}
 
 	@PutMapping("/customers/{customerId}")
@@ -126,8 +132,23 @@ public class AuthController {
 		String jwt = jwtUtils.generateJwtToken(userDetails);
 		User user = userService.findCurrentUser();
 		JwtResponse jwtResponse = new JwtResponse(jwt, user);
-		return ResponseEntity.ok().body(jwtResponse);
+		return ResponseEntity.ok(jwtResponse);
 	}
+
+	@PostMapping("/password/remember/verify")
+	public ResponseEntity<String> verifyRememberCode(@RequestBody @Valid RememberPasswordRequest rememberPasswordRequest) throws Exception {
+		verificationCodeStore.verifyCode(rememberPasswordRequest);
+		userService.changePassword(rememberPasswordRequest.email(), rememberPasswordRequest.password());
+		verificationCodeStore.removeCode(rememberPasswordRequest.email());
+		return ResponseEntity.ok("Contraseña cambiada");
+	}
+
+	@PostMapping("/password/remember")
+	public ResponseEntity<String> generateRememberCode(@RequestParam @Email String email) throws Exception {
+		verificationCodeStore.saveCode(email);
+		return ResponseEntity.ok("Mensaje de recuperación de contraseña enviado");
+	}
+	
 
 	@PutMapping("/password/{userId}")
 	public ResponseEntity<JwtResponse> updateCustomer(@PathVariable Long userId,
@@ -139,6 +160,7 @@ public class AuthController {
 		JwtResponse jwtResponse = new JwtResponse(jwt, user);
 		return ResponseEntity.ok().body(jwtResponse);
 	}
+
 
 	@GetMapping("/companies/{companyId}")
 	public ResponseEntity<Company> getCompany(@PathVariable Long companyId) {

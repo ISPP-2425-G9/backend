@@ -66,6 +66,7 @@ public class SecurityConfig {
 				.requestMatchers("/api/auth/customers/**").hasAnyAuthority(CUSTOMER)
 				.requestMatchers("/api/auth/companies/**").hasAnyAuthority(COMPANY)
 				.requestMatchers("/api/auth/login").anonymous()
+				.requestMatchers("/api/auth/password/remember", "/api/auth/password/remember/verify").anonymous()
 				.requestMatchers(HttpMethod.PUT, "/api/auth/password/*").authenticated()
 				// Companies
 				.requestMatchers("/api/companies/companiesTypes").hasAnyAuthority(COMPANY, CUSTOMER)

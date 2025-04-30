@@ -1,7 +1,9 @@
 package com.caronte.caronte.company;
 
-import static org.hamcrest.Matchers.hasItems;
-import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -11,12 +13,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-
-import com.caronte.caronte.company.DTOs.CompanyDTO;
 
 @ExtendWith(MockitoExtension.class)
 public class CompanyControllerTest {
@@ -29,41 +26,12 @@ public class CompanyControllerTest {
     @InjectMocks
     private CompanyController companyController;
 
-    private CompanyDTO company1;
-    private CompanyDTO company2;
-
     @BeforeEach
     public void setup() {
         mockMvc = MockMvcBuilders
                 .standaloneSetup(companyController)
                 .setCustomArgumentResolvers(new PageableHandlerMethodArgumentResolver())
                 .build();
-
-        company1 = new CompanyDTO(
-                "Floristería Bella",
-                "floristeria@bella.com",
-                "600123123",
-                "Calle Flor, 12",
-                "Sevilla",
-                "41001",
-                "https://example.com/image1.jpg",
-                "Una floristería encantadora",
-                "12345678A",
-                CompanyType.FLORISTERIA
-        );
-
-        company2 = new CompanyDTO(
-                "Notaría Central",
-                "notaria@central.com",
-                "600456789",
-                "Avenida Notario, 34",
-                "Madrid",
-                "28001",
-                "https://example.com/image2.jpg",
-                "Tu notaría de confianza",
-                "87654321B",
-                CompanyType.NOTARIA
-        );
     }
 
 

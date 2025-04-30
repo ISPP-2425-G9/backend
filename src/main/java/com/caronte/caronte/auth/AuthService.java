@@ -32,6 +32,14 @@ public class AuthService {
         this.passwordEncoder = passwordEncoder;
 	}
 
+    @Transactional(readOnly = true)
+    public String getNameById(Long userId) {
+        return userRepository.findById(userId)
+                             .map(User::getName)
+                             .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+    }
+
+    @Transactional(readOnly = true)
     public Customer validateAndBuildCustomer(RegisterRequestCustomer registerRequest, ErrorHandler errors) {
         if (Objects.nonNull(registerRequest.getPassword1()) && !Objects.equals(registerRequest.getPassword1(), registerRequest.getPassword2()))
             errors.addError("password", "Las contraseñas no coinciden");
@@ -45,6 +53,7 @@ public class AuthService {
         return registerRequest.parse(passwordEncoder);
     }
 
+    @Transactional(readOnly = true)
     public Company validateAndBuildCompany(RegisterRequestCompany registerRequest, ErrorHandler errors) {        
         if (Objects.nonNull(registerRequest.getPassword1()) && !Objects.equals(registerRequest.getPassword1(), registerRequest.getPassword2()))
             errors.addError("password", "Las contraseñas no coinciden");
@@ -57,15 +66,10 @@ public class AuthService {
 
         return registerRequest.parse(passwordEncoder);
     }
-
+    
     @Transactional
     public void save(User user){
         userRepository.save(user);
     }
 
-    public String getNameById(Long userId) {
-        return userRepository.findById(userId)
-                             .map(User::getName)
-                             .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
-    }
 }

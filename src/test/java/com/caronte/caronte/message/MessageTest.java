@@ -13,7 +13,6 @@ class MessageTest {
 
     @Test
     void testGenerateUniqueRandomCode() throws Exception {
-        // Usar reflexión para acceder al método privado estático generateUniqueRandomCode
         Method generateCodeMethod = Message.class.getDeclaredMethod("generateUniqueRandomCode");
         generateCodeMethod.setAccessible(true);
         String code = (String) generateCodeMethod.invoke(null);
@@ -37,20 +36,16 @@ class MessageTest {
 
     @Test
     void testConstructorWithRequestDto() {
-        // Preparar el DTO de mensaje
         MessageRequestDto dto = new MessageRequestDto();
         dto.setTitle("Hello");
         dto.setBody("Test body");
         dto.setIsLastWill(true);
 
-        // Preparar un Customer
         Customer customer = new Customer();
         customer.setId(1L);
 
-        // Invocar el constructor sobrecargado que recibe un DTO y un Customer
         Message message = new Message(dto, customer);
 
-        // Validaciones:
         assertEquals("Hello", message.getTitle(), "El título debe coincidir con el del DTO");
         assertEquals("Test body", message.getBody(), "El cuerpo debe coincidir con el del DTO");
         assertTrue(message.getIsLastWill(), "El isLastWill debe ser true");

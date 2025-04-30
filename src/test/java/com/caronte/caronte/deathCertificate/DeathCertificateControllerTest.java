@@ -46,14 +46,11 @@ public class DeathCertificateControllerTest {
 
     @Test
     void testUploadDeathCertificate() throws Exception {
-        // Prepare a sample request DTO.
         DeathCertificateRequestDTO requestDTO = new DeathCertificateRequestDTO();
         requestDTO.setFile("data:image/png;base64,validData");
         requestDTO.setDni("12345678A");
         requestDTO.setIsVerificate(false);
 
-        // For this endpoint the service is called with customerId = null.
-        // We simulate that the service returns a DeathCertificate object.
         DeathCertificate dummyCert = new DeathCertificate();
         dummyCert.setUrl("https://example.com/certificate.png");
 
@@ -69,13 +66,12 @@ public class DeathCertificateControllerTest {
 
     @Test
     void testUploadDeathCertificateLogged() throws Exception {
-        // Prepare a sample request DTO.
         DeathCertificateRequestDTO requestDTO = new DeathCertificateRequestDTO();
         requestDTO.setFile("data:image/png;base64,validData");
         requestDTO.setDni("12345678A");
         requestDTO.setIsVerificate(false);
 
-        // Simulate that the user is logged in by returning a valid customer id.
+
         when(userService.findCurrentUserId()).thenReturn(1L);
 
         DeathCertificate dummyCert = new DeathCertificate();
@@ -93,7 +89,7 @@ public class DeathCertificateControllerTest {
 
     @Test
     void testGetAllDeathCertificates() throws Exception {
-        // Create dummy death certificates for the test.
+       
         DeathCertificate cert1 = new DeathCertificate();
         cert1.setUrl("https://example.com/certificate1.png");
         DeathCertificate cert2 = new DeathCertificate();
@@ -112,7 +108,7 @@ public class DeathCertificateControllerTest {
 
     @Test
     void testGetDeathCertificateByObituaryId() throws Exception {
-        // Prepare a dummy DTO with obituary-related data.
+       
         DeathCertificateWithObituaryDniDTO dummyDTO = new DeathCertificateWithObituaryDniDTO();
         dummyDTO.setDni("12345678A");
 

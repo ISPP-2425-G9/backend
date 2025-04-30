@@ -18,7 +18,6 @@ import com.caronte.caronte.imageTemplate.ImageTemplateRepository;
 import com.caronte.caronte.obituary.DTOs.ObituraryRequestDto;
 import com.caronte.caronte.receiver.Receiver;
 import com.caronte.caronte.receiver.ReceiverRepository;
-import com.caronte.caronte.user.UserService;
 import com.caronte.caronte.util.MediaHandler;
 import com.caronte.caronte.util.exceptions.ResourceNotFound;
 import com.caronte.caronte.util.exceptions.ResponseThrow;
@@ -33,13 +32,12 @@ public class ObituaryService {
     private final ReceiverRepository receiverRepository;
     private final DeathCertificateService deathCertificateService;
     private final MediaHandler mediaHandler;
-    private final UserService userService;
     private final StripeService stripeService;
 
     public ObituaryService(ObituaryRepository obituaryRepository, CustomerRepository customerRepository,
             ReceiverRepository receiverRepository, ImageTemplateRepository imageTemplateRepository,
             DeathCertificateService deathCertificateService, MediaHandler mediaHandler,
-            UserService userService, StripeService stripeService) {
+             StripeService stripeService) {
         this.receiverRepository = receiverRepository;
         this.customerRepository = customerRepository;
         this.obituaryRepository = obituaryRepository;
@@ -47,7 +45,6 @@ public class ObituaryService {
         this.deathCertificateService = deathCertificateService;
         this.mediaHandler = mediaHandler;
         this.stripeService = stripeService;
-        this.userService = userService;
     }
 
     @Transactional(readOnly = true)
