@@ -36,9 +36,9 @@ public class VerificationCodeStore {
         ResponseThrow.checkOrBadRequest(userRepository.existsByEmail(email), "No existe usuario con email " + email);
         String code = generateRandomCode();
         saveCode(email, code);
-        String subject = "Recuperación de correo";
+        String subject = "Recuperación de contraseña en CARONTE";
         String body = String.format("""
-            Ha recibido correo de verificación para recuperar contraseña de tu cuenta en %s
+            Este es un correo de verificación para recuperar la contraseña de tu cuenta en %s
             El código de verificación es el siguiente: %s
             """, domain, code);
         emailService.sendEmail(email, subject, body);
