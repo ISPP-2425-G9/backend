@@ -7,10 +7,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.caronte.caronte.configuration.services.EmailService;
-import com.caronte.caronte.message.Message;
 import com.caronte.caronte.message.DTOs.MessageRequestDto.RecipientDto;
-import com.caronte.caronte.obituary.Obituary;
+import com.caronte.caronte.message.Message;
 import com.caronte.caronte.obituary.DTOs.ObituraryRequestDto.ContactDto;
+import com.caronte.caronte.obituary.Obituary;
 import com.caronte.caronte.receiver.DTOs.ReceiverResponseDTO;
 import com.caronte.caronte.util.AESCipher;
 import com.caronte.caronte.util.exceptions.ResourceNotFound;
@@ -98,7 +98,7 @@ public class ReceiverService {
         String code = aesCipher.decrypt(message.getCode());
         String messageBody = "Has recibido un mensaje de Caronte. \n" + 
                 "El codigo para acceder al mensaje es: " + code + "\n" +
-                "Puedes revisarlo aquí: " + domain + "messages/visualizeMessageWithCode?messageId=" + message.getId();   
+                "Puedes revisarlo aquí: " + domain + "messages?messageId=" + message.getId();   
         for (Receiver receiver : receivers) {
             try {
                 emailService.sendEmail(receiver.getEmail(), "Mensaje de " + message.getCustomer().getName(),
