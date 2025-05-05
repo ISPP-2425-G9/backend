@@ -120,8 +120,8 @@ public class SecurityConfig {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowCredentials(true);
-        config.setAllowedOrigins(Arrays.asList("https://ppl.caronte.site", "http://ppl.caronte.site",
-				"https://www.ppl.caronte.site", "http://www.ppl.caronte.site")); // ✅ Permitir solo el frontend
+        config.setAllowedOrigins(Arrays.asList("https://wpl.caronte.site", "http://wpl.caronte.site",
+				"https://www.wpl.caronte.site", "http://www.wpl.caronte.site")); // ✅ Permitir solo el frontend
         config.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type")); // ✅ Importante para el JWT
         config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         source.registerCorsConfiguration("/**", config);
