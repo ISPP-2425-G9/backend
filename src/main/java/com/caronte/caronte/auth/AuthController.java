@@ -1,6 +1,7 @@
 package com.caronte.caronte.auth;
 
 import java.nio.file.AccessDeniedException;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -36,6 +37,7 @@ import com.caronte.caronte.configuration.services.UserDetailsImpl;
 import com.caronte.caronte.configuration.services.VerificationCodeStore;
 import com.caronte.caronte.customer.Customer;
 import com.caronte.caronte.customer.CustomerService;
+import com.caronte.caronte.plan.PlanService;
 import com.caronte.caronte.user.User;
 import com.caronte.caronte.user.UserService;
 import com.caronte.caronte.util.ErrorHandler;
@@ -55,9 +57,11 @@ public class AuthController {
 	private final CustomerService customerService;
 	private final CompanyService companyService;
 	private final VerificationCodeStore verificationCodeStore;
+	private final PlanService planService;
 
 	public AuthController(AuthenticationManager authenticationManager, AuthService authService, UserService userService,
-			CustomerService customerService, CompanyService companyService, JwtUtils jwtUtils, VerificationCodeStore verificationCodeStore) {
+			CustomerService customerService, CompanyService companyService, JwtUtils jwtUtils, VerificationCodeStore verificationCodeStore,
+			PlanService planService) {
 		this.authenticationManager = authenticationManager;
 		this.authService = authService;
 		this.userService = userService;
@@ -65,6 +69,7 @@ public class AuthController {
 		this.companyService = companyService;
 		this.jwtUtils = jwtUtils;
 		this.verificationCodeStore = verificationCodeStore;
+		this.planService = planService;
 	}
 
 	@PostMapping("/login")
@@ -80,7 +85,8 @@ public class AuthController {
 		UserDetailsImpl userDetailsImpl = (UserDetailsImpl) authentication.getPrincipal();
 		String jwt = jwtUtils.generateJwtToken(authentication);
 		User user = userService.findById(userDetailsImpl.getId());
-		JwtResponse jwtResponse = new JwtResponse(jwt, user);
+		LocalDateTime expiredDate = planService.getExpiringDate(user);
+		JwtResponse jwtResponse = new JwtResponse(jwt, user, expiredDate);
 		return ResponseEntity.ok().body(jwtResponse);
 	}
 
@@ -131,7 +137,8 @@ public class AuthController {
 		UserDetailsImpl userDetails = UserDetailsImpl.build(customer);
 		String jwt = jwtUtils.generateJwtToken(userDetails);
 		User user = userService.findCurrentUser();
-		JwtResponse jwtResponse = new JwtResponse(jwt, user);
+		LocalDateTime expiredDate = planService.getExpiringDate(user);
+		JwtResponse jwtResponse = new JwtResponse(jwt, user, expiredDate);
 		return ResponseEntity.ok(jwtResponse);
 	}
 
@@ -157,7 +164,8 @@ public class AuthController {
     User user = userService.changePassword(userId, request);
     UserDetailsImpl userDetails = UserDetailsImpl.build(user);
 		String jwt = jwtUtils.generateJwtToken(userDetails);
-		JwtResponse jwtResponse = new JwtResponse(jwt, user);
+		LocalDateTime expiredDate = planService.getExpiringDate(user);
+		JwtResponse jwtResponse = new JwtResponse(jwt, user, expiredDate);
 		return ResponseEntity.ok().body(jwtResponse);
 	}
 
@@ -182,7 +190,8 @@ public class AuthController {
 		UserDetailsImpl userDetails = UserDetailsImpl.build(company);
 		String jwt = jwtUtils.generateJwtToken(userDetails);
 		User user = userService.findCurrentUser();
-		JwtResponse jwtResponse = new JwtResponse(jwt, user);
+		LocalDateTime expiredDate = planService.getExpiringDate(user);
+		JwtResponse jwtResponse = new JwtResponse(jwt, user, expiredDate);
 		return ResponseEntity.ok().body(jwtResponse);
 	}
 

@@ -44,9 +44,15 @@ public class Plan extends BaseEntity {
     }
 
     @JsonIgnore
-    public void cancel() throws StripeException {
+    public void cancel()  {
         if(isPremium()){
-            Subscription.retrieve(this.getSubscriptionId());
+            try {
+                Subscription.retrieve(this.getSubscriptionId()).cancel();
+            } catch (StripeException e) {
+                e.printStackTrace();
+            }
+            this.planType = PlanType.FREE;
+            this.subscriptionId = null;
         }
     }
 
