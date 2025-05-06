@@ -1,7 +1,6 @@
 package com.caronte.caronte.user;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 
@@ -14,31 +13,25 @@ import org.springframework.transaction.annotation.Transactional;
 import com.caronte.caronte.auth.payload.response.UserChangePasswordRequest;
 import com.caronte.caronte.company.Company;
 import com.caronte.caronte.company.CompanyRepository;
-import com.caronte.caronte.company.CompanyService;
 import com.caronte.caronte.configuration.services.UserDetailsImpl;
 import com.caronte.caronte.customer.Customer;
 import com.caronte.caronte.customer.CustomerRepository;
-import com.caronte.caronte.customer.CustomerService;
 import com.caronte.caronte.deathCertificate.DeathCertificate;
 import com.caronte.caronte.deathCertificate.DeathCertificateRepository;
-import com.caronte.caronte.deathCertificate.DeathCertificateService;
 import com.caronte.caronte.emergencyContact.EmergencyContact;
 import com.caronte.caronte.emergencyContact.EmergencyContactRepository;
 import com.caronte.caronte.image.Image;
 import com.caronte.caronte.image.ImageRepository;
 import com.caronte.caronte.message.Message;
 import com.caronte.caronte.message.MessageRepository;
-import com.caronte.caronte.message.MessageService;
 import com.caronte.caronte.obituary.Obituary;
 import com.caronte.caronte.obituary.ObituaryRepository;
-import com.caronte.caronte.obituary.ObituaryService;
 import com.caronte.caronte.receiver.Receiver;
 import com.caronte.caronte.receiver.ReceiverRepository;
 import com.caronte.caronte.util.MediaHandler;
 import com.caronte.caronte.util.exceptions.ResourceNotFound;
 import com.caronte.caronte.util.exceptions.ResponseThrow;
 import com.stripe.exception.StripeException;
-import com.stripe.model.tax.Registration.CountryOptions.Me;
 
 @Service
 public class UserService {
