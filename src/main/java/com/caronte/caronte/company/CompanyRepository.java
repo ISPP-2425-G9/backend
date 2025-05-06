@@ -21,11 +21,14 @@ public interface CompanyRepository extends LongRepository<Company> {
     @Query("""
     SELECT c FROM Company c
     WHERE c.plan.planType = 'PREMIUM'
+    AND c.nif <> 'anonimo'
     AND (:city IS NULL OR LOWER(c.city) LIKE LOWER(CONCAT('%', :city, '%')))
     AND (:name IS NULL OR LOWER(c.name) LIKE LOWER(CONCAT('%', :name, '%')))
     AND (:companyType IS NULL OR c.companyType = :companyType)
     """)
     Page<Company> findPremiumCompaniesFiltered(String city, String name, CompanyType companyType, Pageable pageable);
+
+    List<Company> findByNifNot(String nif);
 
 }
 
