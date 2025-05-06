@@ -30,7 +30,7 @@ public class Company extends User {
     @Column(length = 1024)
     private String description;
 
-    @Column(unique = true, nullable = false, length = 20)
+    @Column(nullable = false)
     private String nif;
 
     @Column(nullable = false)

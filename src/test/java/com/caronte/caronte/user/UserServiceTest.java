@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -166,16 +167,19 @@ class UserServiceTest {
     
 
     @Test
-    void delete_shouldCallRepositoryDeleteById() throws StripeException {
-        User mockUser = mock(User.class);
+    void delete_shouldCancelPlanAndAnonymizeData() throws StripeException {
         Plan mockPlan = mock(Plan.class);
-        when(mockUser.getPlan()).thenReturn(mockPlan);
-        doNothing().when(mockPlan).cancel();
+        user.setPlan(mockPlan);
 
-        doNothing().when(userRepository).delete(eq(mockUser));
-        when(userRepository.findById(eq(1L))).thenReturn(Optional.of(mockUser));
-        userService.delete(1L);
-        verify(userRepository, times(1)).delete(mockUser);
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+
+        UserService userServiceSpy = Mockito.spy(userService);
+        doNothing().when(userServiceSpy).anonymizeData(1L);
+        userServiceSpy.delete(1L);
+
+
+        verify(mockPlan, times(1)).cancel();
+        verify(userServiceSpy, times(1)).anonymizeData(1L);
     }
 
     @Test
