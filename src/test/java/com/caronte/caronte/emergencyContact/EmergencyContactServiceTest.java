@@ -11,11 +11,11 @@ import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.server.ResponseStatusException;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.caronte.caronte.customer.Customer;
 import com.caronte.caronte.customer.CustomerRepository;
@@ -100,6 +100,7 @@ public class EmergencyContactServiceTest {
         assertEquals("John Doe", result.name());
     }
     
+    @SuppressWarnings("null")
     @Test
     void testSave_duplicateTelephone_shouldThrow() {
         EmergencyContactDTO dto = new EmergencyContactDTO(null, "John Doe", "123456789", "john@example.com");
@@ -111,6 +112,7 @@ public class EmergencyContactServiceTest {
         assertTrue(ex.getReason().contains("El número de teléfono ya está registrado"));
     }
     
+    @SuppressWarnings("null")
     @Test
     void testSave_duplicateEmail_shouldThrow() {
         EmergencyContactDTO dto = new EmergencyContactDTO(null, "John Doe", "123456789", "john@example.com");
@@ -165,6 +167,7 @@ public class EmergencyContactServiceTest {
             emergencyContactService.update(dto, 400L, "customer@example.com"));
     }
     
+    @SuppressWarnings("null")
     @Test
     void testUpdate_duplicateTelephone_shouldThrow() {
         EmergencyContact existing = new EmergencyContact();
@@ -184,6 +187,7 @@ public class EmergencyContactServiceTest {
         assertTrue(ex.getReason().contains("El número de teléfono ya está registrado."));
     }
 
+    @SuppressWarnings("null")
     @Test
     void testUpdate_duplicateEmail_shouldThrow() {
         EmergencyContact existing = new EmergencyContact();

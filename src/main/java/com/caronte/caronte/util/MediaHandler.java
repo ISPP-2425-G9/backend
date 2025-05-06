@@ -64,7 +64,6 @@ public class MediaHandler {
         }
     }
          
-    // TODO: complete functionality to perform deletion
     @SuppressWarnings("rawtypes")
     public String deleteImageFromCloudinary(String imageUrl) {        
         try {

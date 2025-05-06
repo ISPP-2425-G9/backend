@@ -34,18 +34,6 @@ public class CompanyControllerTest {
                 .build();
     }
 
-
-    // TODO
-    @Test
-    public void getPremiumCompanies_withValidParams_returnsCompanies() throws Exception {
-        
-    }
-    // TODO
-    @Test
-    public void getPremiumCompanies_withoutParams_returnsAllCompanies() throws Exception {
-    }
-
-
     @Test
     public void getPremiumCompanies_withInvalidCompanyType_returnsBadRequest() throws Exception {
         mockMvc.perform(get("/api/companies/premium")
