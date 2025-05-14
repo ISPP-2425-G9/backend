@@ -1,6 +1,8 @@
 package com.caronte.caronte.plan;
 
 
+import java.time.LocalDateTime;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.transaction.annotation.Transactional;
@@ -53,7 +55,8 @@ public class PlanController {
         
         String jwt = jwtUtils.generateJwtToken(userDetailsImpl);
         user = userService.findCurrentUser();
-        JwtResponse jwtResponse = new JwtResponse(jwt, user);
+        LocalDateTime expiredDate = planService.getExpiringDate(user);
+        JwtResponse jwtResponse = new JwtResponse(jwt, user, expiredDate);
         return ResponseEntity.ok(jwtResponse);
     }
 

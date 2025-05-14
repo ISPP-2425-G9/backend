@@ -29,7 +29,11 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, String>> handleMethodArgumentNotValidException(MethodArgumentNotValidException ex) {
         Map<String, String> errors = ex.getFieldErrors().stream()
-                .collect(Collectors.toMap(FieldError::getField, FieldError::getDefaultMessage));
+            .collect(Collectors.toMap(
+                FieldError::getField,
+                FieldError::getDefaultMessage,
+                (msg1, msg2) -> msg1 + ", " + msg2
+            ));
         return ResponseEntity.badRequest().body(errors);
     }
 

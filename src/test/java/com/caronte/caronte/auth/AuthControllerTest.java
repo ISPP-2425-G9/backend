@@ -6,6 +6,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import java.nio.file.AccessDeniedException;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -41,6 +42,7 @@ import com.caronte.caronte.configuration.services.UserDetailsImpl;
 import com.caronte.caronte.customer.Customer;
 import com.caronte.caronte.customer.CustomerService;
 import com.caronte.caronte.plan.Plan;
+import com.caronte.caronte.plan.PlanService;
 import com.caronte.caronte.user.User;
 import com.caronte.caronte.user.UserService;
 import com.caronte.caronte.util.exceptions.ErrorHandlerException;
@@ -61,6 +63,9 @@ public class AuthControllerTest {
 
     @Mock
     private UserService userService;
+
+    @Mock
+    private PlanService planService;
 
     @Mock
     private CustomerService customerService;
@@ -107,6 +112,7 @@ public class AuthControllerTest {
         Mockito.when(authenticationManager.authenticate(Mockito.any(UsernamePasswordAuthenticationToken.class)))
                .thenReturn(authentication);
         Mockito.when(userService.findById(1L)).thenReturn(user);
+        Mockito.when(planService.getExpiringDate(user)).thenReturn(LocalDateTime.now());
         Mockito.when(authentication.getPrincipal()).thenReturn(userDetails);
         Mockito.when(jwtUtils.generateJwtToken(Mockito.any(Authentication.class))).thenReturn("dummy-jwt");
         Mockito.when(authService.getNameById(1L)).thenReturn("Test User");
@@ -175,6 +181,7 @@ public class AuthControllerTest {
         Mockito.when(authentication.getPrincipal()).thenReturn(userDetails);
         Mockito.when(jwtUtils.generateJwtToken(Mockito.any(Authentication.class))).thenReturn("dummy-jwt");
         Mockito.when(authService.getNameById(1L)).thenReturn("Customer A");
+        Mockito.when(planService.getExpiringDate(customer)).thenReturn(LocalDateTime.now());
 
         mockMvc.perform(post("/api/auth/customers/signup")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -251,6 +258,7 @@ public class AuthControllerTest {
         Mockito.when(authentication.getPrincipal()).thenReturn(userDetails);
         Mockito.when(jwtUtils.generateJwtToken(Mockito.any(Authentication.class))).thenReturn("dummy-jwt");
         Mockito.when(authService.getNameById(1L)).thenReturn("Company A");
+        Mockito.when(planService.getExpiringDate(company)).thenReturn(LocalDateTime.now());
 
         mockMvc.perform(post("/api/auth/companies/signup")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -363,6 +371,7 @@ public class AuthControllerTest {
         customer.setIsActive(true);
         customer.setDni("12345678X");
         customer.setPlan(Plan.newPlanFree());
+        Mockito.when(planService.getExpiringDate(customer)).thenReturn(LocalDateTime.now());
 
     
         when(userService.findByEmail("new@example.com")).thenReturn(Optional.of(customer));
@@ -426,6 +435,7 @@ public class AuthControllerTest {
 
         when(userService.changePassword(userId, request)).thenReturn(customer);
         when(jwtUtils.generateJwtToken(Mockito.any(UserDetailsImpl.class))).thenReturn("dummy-jwt");
+        Mockito.when(planService.getExpiringDate(customer)).thenReturn(LocalDateTime.now());
 
         mockMvc.perform(put("/api/auth/password/{userId}", userId)
                 .contentType(MediaType.APPLICATION_JSON)

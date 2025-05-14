@@ -1,12 +1,13 @@
 package com.caronte.caronte.util.exceptions;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
+import org.springframework.core.MethodParameter;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.validation.BeanPropertyBindingResult;
@@ -34,7 +35,7 @@ public class GlobalExceptionHandlerTest {
 
         ResponseEntity<ErrorHandler> responseEntity = globalExceptionHandler.handleErrorHandlerException(exception);
         
-        assertEquals(400, responseEntity.getStatusCodeValue());
+        assertEquals(400, responseEntity.getStatusCode().value());
     
         assertEquals(errorHandler, responseEntity.getBody());
     }
@@ -43,7 +44,7 @@ public class GlobalExceptionHandlerTest {
     void testHandleBadCrendential() {
         BadCredentialsException exception = new BadCredentialsException("dummy");
         ResponseEntity<String> responseEntity = globalExceptionHandler.handleBadCrendential(exception);
-        assertEquals(400, responseEntity.getStatusCodeValue());
+        assertEquals(400, responseEntity.getStatusCode().value());
         assertEquals("Credenciales incorrectas", responseEntity.getBody());
     }
 
@@ -54,10 +55,11 @@ public class GlobalExceptionHandlerTest {
         BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(target, "target");
         bindingResult.addError(new FieldError("target", "field1", "must not be blank"));
         
-        MethodArgumentNotValidException exception = new MethodArgumentNotValidException(null, bindingResult);
+        MethodParameter mockParameter = Mockito.mock(MethodParameter.class);
+        MethodArgumentNotValidException exception = new MethodArgumentNotValidException(mockParameter, bindingResult);
         ResponseEntity<Map<String, String>> responseEntity = globalExceptionHandler.handleMethodArgumentNotValidException(exception);
         
-        assertEquals(400, responseEntity.getStatusCodeValue());
+        assertEquals(400, responseEntity.getStatusCode().value());
         Map<String, String> errors = responseEntity.getBody();
         assertNotNull(errors);
 
@@ -68,7 +70,7 @@ public class GlobalExceptionHandlerTest {
     void testHandleException() {
         Exception exception = new Exception("Generic error");
         ResponseEntity<Map<String, String>> responseEntity = globalExceptionHandler.handleException(exception);
-        assertEquals(400, responseEntity.getStatusCodeValue());
+        assertEquals(400, responseEntity.getStatusCode().value());
         Map<String, String> errorMap = responseEntity.getBody();
         assertNotNull(errorMap);
         assertEquals("Generic error", errorMap.get("error"));
@@ -79,7 +81,7 @@ public class GlobalExceptionHandlerTest {
         ResponseStatusException exception = new ResponseStatusException(
                 org.springframework.http.HttpStatus.BAD_REQUEST, "Test reason");
         ResponseEntity<Map<String, String>> responseEntity = globalExceptionHandler.handleResponseStatusException(exception);
-        assertEquals(400, responseEntity.getStatusCodeValue());
+        assertEquals(400, responseEntity.getStatusCode().value());
         Map<String, String> errorMap = responseEntity.getBody();
         assertNotNull(errorMap);
         assertEquals("Test reason", errorMap.get("error"));

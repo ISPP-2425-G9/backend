@@ -33,11 +33,8 @@ public class SecurityConfig {
 
 	private static final String ADMIN = Authorization.ADMIN.name(); 
 	private static final String CUSTOMER = Authorization.CUSTOMER.name();
-	private static final String CUSTOMER_FREE = Authorization.CUSTOMER_FREE.name(); 
 	private static final String CUSTOMER_PREMIUM = Authorization.CUSTOMER_PREMIUM.name(); 
 	private static final String COMPANY = Authorization.COMPANY.name();
-	private static final String COMPANY_FREE = Authorization.COMPANY_FREE.name(); 
-	private static final String COMPANY_PREMIUM = Authorization.COMPANY_PREMIUM.name(); 
 
 	public SecurityConfig(UserDetailsServiceImpl userDetailsService, AuthEntryPointJwt unauthorizedHandler, DataSource dataSource){
 		this.userDetailsService = userDetailsService;

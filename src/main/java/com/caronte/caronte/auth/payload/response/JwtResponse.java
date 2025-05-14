@@ -42,14 +42,14 @@ public class JwtResponse {
 		this.expiredPlanDate = expiredPlanDate;
 	}
 
-	public JwtResponse(String accessToken, User user) throws StripeException {
+	public JwtResponse(String accessToken, User user, LocalDateTime expiredPlanDate) throws StripeException {
 		this.token = accessToken;
 		UserDetailsImpl userDetailsImpl = UserDetailsImpl.build(user);
 		this.id = user.getId();
 		this.username = userDetailsImpl.getUsername();
 		this.roles = userDetailsImpl.getAuthorities().stream().map(GrantedAuthority::getAuthority).toList();
 		this.name = user.getName();
-		this.expiredPlanDate = user.getExpiringDate();
+		this.expiredPlanDate = expiredPlanDate;
 	}
 
 
